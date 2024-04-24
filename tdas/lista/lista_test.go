@@ -1,9 +1,9 @@
 package lista_test
 
 import(
-	"fmt"
+	//"fmt"
 	"testing"
-	TDALista "tdas/lista"
+	//TDALista "tdas/lista"
 )
 
 

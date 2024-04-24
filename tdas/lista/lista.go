@@ -23,7 +23,7 @@ type Lista[T any] interface {
 	//Devuelve la cantidad de elementos alojados en la lista.
 	Largo() int
 
-	//Recorre la lista, aplicandole a cada elemento la función pasada por parámetro hasta encontrar una condición de corte. Si la función devuelve false, significa que se encontro una condición de corte. 
+	//Recorre la lista, aplicandole a cada elemento la función pasada por parámetro hasta encontrar una condición de corte. Si devuelve true, la función itera hasta el final. Si devuelve false, se aplicó una condición de corte.
 	Iterar(visitar func(T) bool)
 
 	//Permite acceder a un iterador externo, asociado a la lista actual.
