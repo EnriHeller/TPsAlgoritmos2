@@ -92,6 +92,13 @@ func (lista *listaEnlazada[T]) Largo() int {
 
 func (lista *listaEnlazada[T]) Iterar(visitar func(T) bool){
 
+	actual := lista.primero
+	iterarHastaFinal := true
+	
+	for actual != nil || !iterarHastaFinal{
+		iterarHastaFinal = visitar(actual.dato)
+		actual = actual.siguiente
+	}
 }
 
 func (lista *listaEnlazada[T]) Iterador() IteradorLista[T]{
