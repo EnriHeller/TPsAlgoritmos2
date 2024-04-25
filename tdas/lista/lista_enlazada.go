@@ -11,6 +11,12 @@ type listaEnlazada[T any] struct {
 	largo   int
 }
 
+type iterListaEnlazada[T any] struct {
+	lista    *listaEnlazada[T]
+	actual   *nodoLista[T]
+	anterior *nodoLista[T]
+}
+
 func CrearListaEnlazada[T any]() Lista[T] {
 	return &listaEnlazada[T]{}
 }
@@ -98,12 +104,6 @@ func (lista *listaEnlazada[T]) Iterar(visitar func(T) bool) {
 	}
 }
 
-type iterListaEnlazada[T any] struct {
-	lista    *listaEnlazada[T]
-	actual   *nodoLista[T]
-	anterior *nodoLista[T]
-}
-
 func (lista *listaEnlazada[T]) Iterador() IteradorLista[T] {
 	return &iterListaEnlazada[T]{lista: lista, actual: lista.primero}
 }
@@ -130,7 +130,6 @@ func (iterador *iterListaEnlazada[T]) Siguiente() {
 func (iterador *iterListaEnlazada[T]) Insertar(dato T) {
 	nuevoNodo := crearNodo(dato)
 
-	//la lista esta vacia
 	if iterador.anterior == nil && iterador.actual == nil {
 		iterador.actual = &nuevoNodo
 	}
@@ -141,6 +140,7 @@ func (iterador *iterListaEnlazada[T]) Insertar(dato T) {
 }
 
 func (iterador *iterListaEnlazada[T]) Borrar() T {
+
 	if iterador.HaySiguiente() {
 		panic("Fin de la iteracion")
 	}
@@ -158,6 +158,5 @@ func (iterador *iterListaEnlazada[T]) Borrar() T {
 		}
 		iterador.lista.largo--
 		return datoBorrado
-
 	}
 }
