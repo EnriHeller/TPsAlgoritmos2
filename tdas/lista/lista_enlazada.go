@@ -102,7 +102,7 @@ func (lista *listaEnlazada[T]) Iterar(visitar func(T) bool){
 }
 
 func (lista *listaEnlazada[T]) Iterador() IteradorLista[T]{
-	iterador := CrearIterador[T]()
+	iterador := CrearIterador[T](lista)
 	return iterador
 }
 

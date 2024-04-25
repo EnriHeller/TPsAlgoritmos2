@@ -6,8 +6,12 @@ type iterListaEnlazada[T any] struct {
 	siguiente *nodoLista[T]
 }
 
-func CrearIterador[T any]() IteradorLista[T]{
-	return new(iterListaEnlazada[T])
+func CrearIterador[T any](lista *listaEnlazada[T]) IteradorLista[T]{
+	nuevoIterador :=  new(iterListaEnlazada[T])
+	nuevoIterador.actual = lista.primero
+	nuevoIterador.siguiente = lista.primero.siguiente
+
+	return nuevoIterador
 }
 
 func (iterador *iterListaEnlazada[T]) VerActual() T{
