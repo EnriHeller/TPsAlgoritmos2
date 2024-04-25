@@ -141,7 +141,7 @@ func (iterador *iterListaEnlazada[T]) Insertar(dato T) {
 
 func (iterador *iterListaEnlazada[T]) Borrar() T {
 
-	if iterador.HaySiguiente() {
+	if !iterador.HaySiguiente() {
 		panic("Fin de la iteracion")
 	}
 	if iterador.anterior == nil {
