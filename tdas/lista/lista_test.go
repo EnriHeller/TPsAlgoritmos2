@@ -200,6 +200,17 @@ func NoExisteMedioAlRemoverlo(t *testing.T) {
 	require.NotEqual(t, elementoABorrar, elementoPostBorrado)
 }
 
+// Valida guardar un elemento (insertando al inicio), y que primero, ultimo y largo sean correctos. Borrar ese único elemento hace que se comporte como lista vacía
+func TestInsertarVerYBorrarPrimero(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	elem := 5
+
+	lista.InsertarPrimero(elem)
+
+	require.Equal(t, lista.Largo(), 1)
+	require.Equal(t, lista.VerPrimero(), lista.VerUltimo())
+}
+
 func TestVolumenLista(t *testing.T) {
 	{
 		t.Log("Prueba de volumen con lista")

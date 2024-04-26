@@ -35,9 +35,9 @@ func (lista *listaEnlazada[T]) InsertarPrimero(dato T) {
 
 	if lista.EstaVacia() {
 		lista.primero = &nuevoNodo
+		lista.ultimo = &nuevoNodo
 	} else {
 		nuevoNodo.siguiente = lista.primero
-
 	}
 	lista.primero = &nuevoNodo
 	lista.largo++
@@ -129,18 +129,33 @@ func (iterador *iterListaEnlazada[T]) Siguiente() {
 func (iterador *iterListaEnlazada[T]) Insertar(dato T) {
 	nuevoNodo := crearNodo(dato)
 
+	//La lista esta vacia
 	if iterador.anterior == nil && iterador.actual == nil {
 		iterador.actual = &nuevoNodo
-
+		iterador.lista.primero = &nuevoNodo
+		iterador.lista.ultimo = &nuevoNodo
 	}
+	//Si tengo un nodo antes, el siguiente de este nodo es el nuevo nodo.
 	if iterador.anterior != nil {
 		iterador.anterior.siguiente = &nuevoNodo
 	}
+	//Actualizo el que estaba antes de insertar como actual al siguiente del que se va a añadir
 	if iterador.actual != nil {
 		nuevoNodo.siguiente = iterador.actual
 	}
+	//Si estoy parado en el ultimo nodo, tengo que actualizar la referencia al ultimo al momento de añadir el nuevo.
+	if iterador.lista.ultimo == iterador.actual {
+		iterador.lista.ultimo.siguiente = &nuevoNodo
+		iterador.lista.ultimo = &nuevoNodo
+	}
+	//Apunto al primero con una lista que no está vacia, por lo que actualizo referencia al primer nodo
+	if iterador.anterior == nil && iterador.HaySiguiente() {
+		nuevoNodo.siguiente = iterador.lista.primero
+		iterador.lista.primero = &nuevoNodo
+	}
 	iterador.actual = &nuevoNodo
 	iterador.lista.largo++
+
 }
 
 func (iterador *iterListaEnlazada[T]) Borrar() T {
