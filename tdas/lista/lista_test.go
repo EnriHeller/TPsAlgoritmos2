@@ -1,7 +1,6 @@
 package lista_test
 
 import (
-	//"fmt"
 	TDALista "tdas/lista"
 	"testing"
 
@@ -21,47 +20,96 @@ func TestListaVacia(t *testing.T) {
 
 	require.PanicsWithValue(t, "La lista esta vacia", func() { lista.BorrarPrimero() }, "Al borrar último en lista vacia no devuelve un panic")
 
-	require.PanicsWithValue(t, "La lista esta vacia", func() { iteradorL.Borrar() }, "Al querer borrar con iterador en lista vacia no devuelve un panic")
+	require.PanicsWithValue(t, "El iterador termino de iterar", func() { iteradorL.Borrar() }, "Al querer borrar con iterador en lista vacia no devuelve un panic")
 
-	require.PanicsWithValue(t, "La lista esta vacia", func() { iteradorL.VerActual() }, "Al querer ver actual con iterador en lista vacia no devuelve un panic")
+	require.PanicsWithValue(t, "El iterador termino de iterar", func() { iteradorL.VerActual() }, "Al querer ver actual con iterador en lista vacia no devuelve un panic")
 }
 
 // Insertar un elemento mediante el iterador en la posición en la que se crea, efectivamente lo añade primero y es equivalente a InsertarPrimero.
 func InsertarAlInicio(t *testing.T) {
-	lista1 := TDALista.CrearListaEnlazada[string]()
-	lista2 := TDALista.CrearListaEnlazada[string]()
-	iteradorL2 := lista2.Iterador()
+	{
+		lista1 := TDALista.CrearListaEnlazada[string]()
+		lista2 := TDALista.CrearListaEnlazada[string]()
+		iteradorL2 := lista2.Iterador()
 
-	elem := "prueba"
+		elem := "prueba"
 
-	lista1.InsertarPrimero(elem)
-	iteradorL2.Insertar(elem)
+		lista1.InsertarPrimero(elem)
+		iteradorL2.Insertar(elem)
 
-	require.Equal(t, lista1.VerPrimero(), lista2.VerPrimero())
+		require.Equal(t, lista1.VerPrimero(), iteradorL2.VerActual())
+	}
+	{
+		lista1 := TDALista.CrearListaEnlazada[int]()
+		lista2 := TDALista.CrearListaEnlazada[int]()
+		iteradorL2 := lista2.Iterador()
+
+		elem := 12
+
+		lista1.InsertarPrimero(elem)
+		iteradorL2.Insertar(elem)
+
+		require.Equal(t, lista1.VerPrimero(), iteradorL2.VerActual())
+	}
+	{
+		lista1 := TDALista.CrearListaEnlazada[bool]()
+		lista2 := TDALista.CrearListaEnlazada[bool]()
+		iteradorL2 := lista2.Iterador()
+
+		elem := false
+
+		lista1.InsertarPrimero(elem)
+		iteradorL2.Insertar(elem)
+
+		require.Equal(t, lista1.VerPrimero(), iteradorL2.VerActual())
+	}
 }
 
 // Insertar un elemento cuando el iterador está al final efectivamente es equivalente a insertar al final.
 func InsertarAlFinal(t *testing.T) {
-	lista1 := TDALista.CrearListaEnlazada[string]()
-	lista2 := TDALista.CrearListaEnlazada[string]()
-	iteradorL2 := lista2.Iterador()
+	{
+		lista1 := TDALista.CrearListaEnlazada[string]()
+		lista2 := TDALista.CrearListaEnlazada[string]()
+		iteradorL2 := lista2.Iterador()
 
-	elementosBase := [5]string{"hola", "como", "estas", "todo", "bien"}
-	elementoNuevo := "Messi"
+		elementosBase := [5]string{"hola", "como", "estas", "todo", "bien"}
+		elementoNuevo := "Messi"
 
-	for i := range elementosBase {
-		lista1.InsertarUltimo(elementosBase[i])
-		lista2.InsertarUltimo(elementosBase[i])
+		for i := range elementosBase {
+			lista1.InsertarUltimo(elementosBase[i])
+			lista2.InsertarUltimo(elementosBase[i])
+		}
+
+		for iteradorL2.HaySiguiente() {
+			iteradorL2.Siguiente()
+		}
+
+		iteradorL2.Insertar(elementoNuevo)
+		lista1.InsertarUltimo(elementoNuevo)
+
+		require.Equal(t, lista1.VerUltimo(), iteradorL2.VerActual())
 	}
+	{
+		lista1 := TDALista.CrearListaEnlazada[int]()
+		lista2 := TDALista.CrearListaEnlazada[int]()
+		iteradorL2 := lista2.Iterador()
 
-	for iteradorL2.HaySiguiente() {
-		iteradorL2.Siguiente()
+		elementoNuevo := 11
+
+		for i := range(11) {
+			lista1.InsertarUltimo(i)
+			lista2.InsertarUltimo(i)
+		}
+
+		for iteradorL2.HaySiguiente() {
+			iteradorL2.Siguiente()
+		}
+
+		iteradorL2.Insertar(elementoNuevo)
+		lista1.InsertarUltimo(elementoNuevo)
+
+		require.Equal(t, lista1.VerUltimo(), iteradorL2.VerActual())
 	}
-
-	iteradorL2.Insertar(elementoNuevo)
-	lista1.InsertarUltimo(elementoNuevo)
-
-	require.Equal(t, lista1.VerUltimo(), lista2.VerUltimo())
 }
 
 // Insertar un elemento en el medio se hace en la posición correcta. Por definición, el elemento que se encontraba en el medio antes debe ser el siguiente del nuevo que se inserta.
@@ -91,15 +139,14 @@ func InsertarEnMedio(t *testing.T) {
 func BorrarUltimoElemento(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 	iteradorL := lista.Iterador()
-	elementosBase := [10]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 
-	for i := range elementosBase {
-		lista.InsertarUltimo(elementosBase[i])
+	for i := range(11) {
+		lista.InsertarUltimo(i)
 	}
 
-	primerElementoAntes := lista.VerPrimero()
+	primerElementoAntes := iteradorL.VerActual()
 	iteradorL.Borrar()
-	primerElementoDespues := lista.VerPrimero()
+	primerElementoDespues := iteradorL.VerActual()
 
 	require.NotEqual(t, primerElementoAntes, primerElementoDespues)
 }
@@ -108,19 +155,18 @@ func BorrarUltimoElemento(t *testing.T) {
 func CambiaUltimoElementoAlRemover(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 	iteradorL := lista.Iterador()
-	elementosBase := [10]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
-
-	for i := range elementosBase {
-		lista.InsertarUltimo(elementosBase[i])
+	
+	for i := range(11) {
+		lista.InsertarUltimo(i)
 	}
 
 	for iteradorL.HaySiguiente() {
 		iteradorL.Siguiente()
 	}
 
-	ultimoElementoAntes := lista.VerUltimo()
+	ultimoElementoAntes := iteradorL.VerActual()
 	iteradorL.Borrar()
-	ultimoElementoDespues := lista.VerUltimo()
+	ultimoElementoDespues := iteradorL.VerActual()
 
 	require.NotEqual(t, ultimoElementoAntes, ultimoElementoDespues)
 }
@@ -129,10 +175,9 @@ func CambiaUltimoElementoAlRemover(t *testing.T) {
 func NoExisteMedioAlRemoverlo(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 	iteradorL := lista.Iterador()
-	elementosBase := [10]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 
-	for i := range elementosBase {
-		lista.InsertarUltimo(elementosBase[i])
+	for i := range 11 {
+		lista.InsertarUltimo(i)
 	}
 
 	medio := (lista.Largo() / 2)
