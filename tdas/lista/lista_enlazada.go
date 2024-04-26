@@ -110,7 +110,7 @@ func (lista *listaEnlazada[T]) Iterador() IteradorLista[T] {
 
 func (iterador *iterListaEnlazada[T]) VerActual() T {
 	if !iterador.HaySiguiente() {
-		panic("Fin de la iteracion")
+		panic("El iterador termino de iterar")
 	}
 	return iterador.actual.dato
 }
@@ -121,7 +121,7 @@ func (iterador *iterListaEnlazada[T]) HaySiguiente() bool {
 
 func (iterador *iterListaEnlazada[T]) Siguiente() {
 	if !iterador.HaySiguiente() {
-		panic("Fin de la iteracion")
+		panic("El iterador termino de iterar")
 	}
 	iterador.anterior = iterador.actual
 	iterador.actual = iterador.actual.siguiente
@@ -142,7 +142,7 @@ func (iterador *iterListaEnlazada[T]) Insertar(dato T) {
 func (iterador *iterListaEnlazada[T]) Borrar() T {
 
 	if !iterador.HaySiguiente() {
-		panic("Fin de la iteracion")
+		panic("El iterador termino de iterar")
 	}
 	if iterador.anterior == nil {
 		datoBorrado := iterador.actual.dato
