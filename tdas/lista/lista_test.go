@@ -202,6 +202,7 @@ func NoExisteMedioAlRemoverlo(t *testing.T) {
 
 // Valida guardar un elemento (insertando al inicio), y que primero, ultimo y largo sean correctos. Borrar ese único elemento hace que se comporte como lista vacía
 func TestInsertarVerYBorrarPrimero(t *testing.T) {
+	t.Log("Prueba guardar un elemento en lista vacia y que se actualice primero y último.")
 	lista := TDALista.CrearListaEnlazada[int]()
 	elem := 5
 
@@ -236,5 +237,22 @@ func TestVolumenLista(t *testing.T) {
 			require.Equal(t, i, iter.VerActual())
 		}
 	}
+}
 
+//Borra el ultimo de una lista (con mas de un elemento). La lista queda en un estado valido. Probamos ver último, y también borrar todos hasta llegar al último
+func TestIteradorBorraAlFinal(t *testing.T){
+	lista := TDALista.CrearListaEnlazada[int]()
+	iter := lista.Iterador()
+
+	for i:= range(11){
+		lista.InsertarUltimo(i)
+	}
+
+	for iter.HaySiguiente(){
+		iter.Siguiente()
+	}
+
+	ultimoAnterior := iter.Borrar()
+
+	require.NotEqual(t, ultimoAnterior, iter.VerActual())
 }

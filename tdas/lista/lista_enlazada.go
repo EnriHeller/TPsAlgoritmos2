@@ -115,6 +115,7 @@ func (iterador *iterListaEnlazada[T]) VerActual() T {
 }
 
 func (iterador *iterListaEnlazada[T]) HaySiguiente() bool {
+
 	return iterador.actual != nil
 }
 
@@ -160,22 +161,31 @@ func (iterador *iterListaEnlazada[T]) Insertar(dato T) {
 
 func (iterador *iterListaEnlazada[T]) Borrar() T {
 
-	if !iterador.HaySiguiente() {
-		panic("El iterador termino de iterar")
-	}
-	if iterador.anterior == nil {
-		datoBorrado := iterador.actual.dato
-		iterador.actual = nil
-		iterador.lista.largo--
-		return datoBorrado
-	} else {
-		datoBorrado := iterador.actual.dato
-		iterador.anterior.siguiente = iterador.actual.siguiente
-		iterador.actual = iterador.actual.siguiente
-		if iterador.actual.siguiente == nil {
-			iterador.lista.ultimo = nil
-		}
-		iterador.lista.largo--
-		return datoBorrado
-	}
+    if !iterador.HaySiguiente() {
+        panic("El iterador termino de iterar")
+    }
+    datoBorrado := iterador.actual.dato
+
+	//Estoy parado en el primer elemento
+    if iterador.anterior == nil {
+        if iterador.actual.siguiente == nil {
+            iterador.lista.primero = nil
+            iterador.lista.ultimo = nil
+            iterador.actual = nil
+        } else {
+            iterador.actual = iterador.lista.primero.siguiente
+			iterador.lista.primero = iterador.lista.primero.siguiente
+        }
+    }else{
+        iterador.anterior.siguiente = iterador.actual.siguiente
+		// Si el siguiente es nil (el iterador apunta al ultimo elemento), hacemos referencia al anterior
+        if iterador.actual.siguiente == nil {
+            iterador.actual = iterador.anterior 
+            iterador.lista.ultimo = iterador.anterior
+        } else {
+            iterador.actual = iterador.actual.siguiente
+        }
+    }
+    iterador.lista.largo--
+    return datoBorrado
 }
