@@ -21,9 +21,9 @@ func CrearListaEnlazada[T any]() Lista[T] {
 	return &listaEnlazada[T]{}
 }
 
-func crearNodo[T any](dato T) nodoLista[T] {
+func crearNodo[T any](dato T) *nodoLista[T] {
 
-	return nodoLista[T]{dato: dato}
+	return &nodoLista[T]{dato: dato}
 }
 
 func (lista listaEnlazada[T]) EstaVacia() bool {
@@ -34,12 +34,11 @@ func (lista *listaEnlazada[T]) InsertarPrimero(dato T) {
 	nuevoNodo := crearNodo(dato)
 
 	if lista.EstaVacia() {
-		lista.primero = &nuevoNodo
-		lista.ultimo = &nuevoNodo
+		lista.ultimo = nuevoNodo
 	} else {
 		nuevoNodo.siguiente = lista.primero
 	}
-	lista.primero = &nuevoNodo
+	lista.primero = nuevoNodo
 	lista.largo++
 }
 
@@ -47,12 +46,13 @@ func (lista *listaEnlazada[T]) InsertarUltimo(dato T) {
 	nuevoNodo := crearNodo(dato)
 
 	if lista.EstaVacia() {
-		lista.primero = &nuevoNodo
+		lista.primero = nuevoNodo
+
 	} else {
-		lista.ultimo.siguiente = &nuevoNodo
+		lista.ultimo.siguiente = nuevoNodo
 
 	}
-	lista.ultimo = &nuevoNodo
+	lista.ultimo = nuevoNodo
 	lista.largo++
 }
 
@@ -95,11 +95,15 @@ func (lista *listaEnlazada[T]) Largo() int {
 func (lista *listaEnlazada[T]) Iterar(visitar func(T) bool) {
 
 	actual := lista.primero
-	iterarHastaFinal := true
 
-	for actual != nil || !iterarHastaFinal {
-		iterarHastaFinal = visitar(actual.dato)
-		actual = actual.siguiente
+	for actual != nil {
+
+		if visitar(actual.dato){
+			actual = actual.siguiente
+		}else{
+			break
+		}
+		
 	}
 }
 
@@ -123,6 +127,7 @@ func (iterador *iterListaEnlazada[T]) Siguiente() {
 	if !iterador.HaySiguiente() {
 		panic("El iterador termino de iterar")
 	}
+
 	iterador.anterior = iterador.actual
 	iterador.actual = iterador.actual.siguiente
 }
@@ -130,62 +135,41 @@ func (iterador *iterListaEnlazada[T]) Siguiente() {
 func (iterador *iterListaEnlazada[T]) Insertar(dato T) {
 	nuevoNodo := crearNodo(dato)
 
-	//La lista esta vacia
-	if iterador.anterior == nil && iterador.actual == nil {
-		iterador.actual = &nuevoNodo
-		iterador.lista.primero = &nuevoNodo
-		iterador.lista.ultimo = &nuevoNodo
-	}
-	//Si tengo un nodo antes, el siguiente de este nodo es el nuevo nodo.
-	if iterador.anterior != nil {
-		iterador.anterior.siguiente = &nuevoNodo
-	}
-	//Actualizo el que estaba antes de insertar como actual al siguiente del que se va a añadir
-	if iterador.actual != nil {
+	if iterador.anterior == nil {
 		nuevoNodo.siguiente = iterador.actual
+		iterador.lista.primero = nuevoNodo
+		if iterador.actual == nil { //La lista esta vacia
+			iterador.lista.ultimo = nuevoNodo
+		}
+	} else {
+		iterador.anterior.siguiente = nuevoNodo
+		nuevoNodo.siguiente = iterador.actual
+		if iterador.actual == nil {
+			iterador.lista.ultimo = nuevoNodo
+		}
 	}
-	//Si estoy parado en el ultimo nodo, tengo que actualizar la referencia al ultimo al momento de añadir el nuevo.
-	if iterador.lista.ultimo == iterador.actual {
-		iterador.lista.ultimo.siguiente = &nuevoNodo
-		iterador.lista.ultimo = &nuevoNodo
-	}
-	//Apunto al primero con una lista que no está vacia, por lo que actualizo referencia al primer nodo
-	if iterador.anterior == nil && iterador.HaySiguiente() {
-		nuevoNodo.siguiente = iterador.lista.primero
-		iterador.lista.primero = &nuevoNodo
-	}
-	iterador.actual = &nuevoNodo
+	iterador.actual = nuevoNodo
 	iterador.lista.largo++
-
 }
 
 func (iterador *iterListaEnlazada[T]) Borrar() T {
 
-    if !iterador.HaySiguiente() {
-        panic("El iterador termino de iterar")
-    }
-    datoBorrado := iterador.actual.dato
-
-	//Estoy parado en el primer elemento
-    if iterador.anterior == nil {
-        if iterador.actual.siguiente == nil {
-            iterador.lista.primero = nil
-            iterador.lista.ultimo = nil
-            iterador.actual = nil
-        } else {
-            iterador.actual = iterador.lista.primero.siguiente
-			iterador.lista.primero = iterador.lista.primero.siguiente
-        }
-    }else{
-        iterador.anterior.siguiente = iterador.actual.siguiente
-		// Si el siguiente es nil (el iterador apunta al ultimo elemento), hacemos referencia al anterior
-        if iterador.actual.siguiente == nil {
-            iterador.actual = iterador.anterior 
-            iterador.lista.ultimo = iterador.anterior
-        } else {
-            iterador.actual = iterador.actual.siguiente
-        }
-    }
-    iterador.lista.largo--
-    return datoBorrado
+	if !iterador.HaySiguiente() {
+		panic("El iterador termino de iterar")
+	}
+	datoBorrado := iterador.actual.dato
+	if iterador.anterior == nil {
+		iterador.lista.primero = iterador.actual.siguiente
+		if iterador.lista.primero == nil {
+			iterador.lista.ultimo = nil
+		}
+	} else {
+		iterador.anterior.siguiente = iterador.actual.siguiente
+		if iterador.actual.siguiente == nil {
+			iterador.lista.ultimo = iterador.anterior
+		}
+	}
+	iterador.actual = iterador.actual.siguiente
+	iterador.lista.largo--
+	return datoBorrado
 }

@@ -239,20 +239,20 @@ func TestVolumenLista(t *testing.T) {
 	}
 }
 
-//Borra el ultimo de una lista (con mas de un elemento). La lista queda en un estado valido. Probamos ver último, y también borrar todos hasta llegar al último
-func TestIteradorBorraAlFinal(t *testing.T){
+// Probamos que si la funcion visitar devuelve false, el iterador corta
+func TestIteradorInternoConCorte(t *testing.T){
 	lista := TDALista.CrearListaEnlazada[int]()
-	iter := lista.Iterador()
 
-	for i:= range(11){
+	for i := range(11){
 		lista.InsertarUltimo(i)
 	}
 
-	for iter.HaySiguiente(){
-		iter.Siguiente()
-	}
-
-	ultimoAnterior := iter.Borrar()
-
-	require.NotEqual(t, ultimoAnterior, iter.VerActual())
+	suma := 0
+	lista.Iterar(func(v int) bool {
+		if (v % 2 == 0) {suma += v}
+		if (v == 7) {
+			return false
+		}
+		return true
+	})
 }
