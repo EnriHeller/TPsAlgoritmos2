@@ -98,12 +98,12 @@ func (lista *listaEnlazada[T]) Iterar(visitar func(T) bool) {
 
 	for actual != nil {
 
-		if visitar(actual.dato){
+		if visitar(actual.dato) {
 			actual = actual.siguiente
-		}else{
+		} else {
 			break
 		}
-		
+
 	}
 }
 

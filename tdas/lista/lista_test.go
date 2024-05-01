@@ -240,17 +240,19 @@ func TestVolumenLista(t *testing.T) {
 }
 
 // Probamos que si la funcion visitar devuelve false, el iterador corta
-func TestIteradorInternoConCorte(t *testing.T){
+func TestIteradorInternoConCorte(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	for i := range(11){
+	for i := range 11 {
 		lista.InsertarUltimo(i)
 	}
 
 	suma := 0
 	lista.Iterar(func(v int) bool {
-		if (v % 2 == 0) {suma += v}
-		if (v == 7) {
+		if v%2 == 0 {
+			suma += v
+		}
+		if v == 7 {
 			return false
 		}
 		return true
