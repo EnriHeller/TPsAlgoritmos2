@@ -122,7 +122,7 @@ func (hash *hashCerrado[K, V]) buscar(clave K) int {
 		}
 	}
 
-	return posicion
+	panic("La clave no pertenece al diccionario")
 }
 
 func (hash *hashCerrado[K, V]) hashear(clave K) int {
