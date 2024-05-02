@@ -21,9 +21,8 @@ func CrearListaEnlazada[T any]() Lista[T] {
 	return &listaEnlazada[T]{}
 }
 
-func crearNodo[T any](dato T) *nodoLista[T] {
-
-	return &nodoLista[T]{dato: dato}
+func crearNodo[T any](dato T, siguiente *nodoLista[T]) *nodoLista[T] {
+	return &nodoLista[T]{dato: dato, siguiente: siguiente}
 }
 
 func (lista listaEnlazada[T]) EstaVacia() bool {
@@ -31,19 +30,17 @@ func (lista listaEnlazada[T]) EstaVacia() bool {
 }
 
 func (lista *listaEnlazada[T]) InsertarPrimero(dato T) {
-	nuevoNodo := crearNodo(dato)
+	nuevoNodo := crearNodo(dato, lista.primero)
 
 	if lista.EstaVacia() {
 		lista.ultimo = nuevoNodo
-	} else {
-		nuevoNodo.siguiente = lista.primero
 	}
 	lista.primero = nuevoNodo
 	lista.largo++
 }
 
 func (lista *listaEnlazada[T]) InsertarUltimo(dato T) {
-	nuevoNodo := crearNodo(dato)
+	nuevoNodo := crearNodo(dato, nil)
 
 	if lista.EstaVacia() {
 		lista.primero = nuevoNodo
@@ -73,19 +70,16 @@ func (lista *listaEnlazada[T]) BorrarPrimero() T {
 func (lista *listaEnlazada[T]) VerPrimero() T {
 	if lista.EstaVacia() {
 		panic("La lista esta vacia")
-	} else {
-		return lista.primero.dato
 	}
-
+	return lista.primero.dato
 }
 
 func (lista *listaEnlazada[T]) VerUltimo() T {
 
 	if lista.EstaVacia() {
 		panic("La lista esta vacia")
-	} else {
-		return lista.ultimo.dato
 	}
+	return lista.ultimo.dato
 }
 
 func (lista *listaEnlazada[T]) Largo() int {
@@ -95,20 +89,16 @@ func (lista *listaEnlazada[T]) Largo() int {
 func (lista *listaEnlazada[T]) Iterar(visitar func(T) bool) {
 
 	actual := lista.primero
-
 	for actual != nil {
-
-		if visitar(actual.dato) {
-			actual = actual.siguiente
-		} else {
+		if !visitar(actual.dato) {
 			break
 		}
-
+		actual = actual.siguiente
 	}
 }
 
 func (lista *listaEnlazada[T]) Iterador() IteradorLista[T] {
-	return &iterListaEnlazada[T]{lista: lista, actual: lista.primero}
+	return &iterListaEnlazada[T]{lista: lista, actual: lista.primero, anterior: nil}
 }
 
 func (iterador *iterListaEnlazada[T]) VerActual() T {
@@ -133,17 +123,15 @@ func (iterador *iterListaEnlazada[T]) Siguiente() {
 }
 
 func (iterador *iterListaEnlazada[T]) Insertar(dato T) {
-	nuevoNodo := crearNodo(dato)
+	nuevoNodo := crearNodo(dato, iterador.actual)
 
 	if iterador.anterior == nil {
-		nuevoNodo.siguiente = iterador.actual
 		iterador.lista.primero = nuevoNodo
 		if iterador.actual == nil { //La lista esta vacia
 			iterador.lista.ultimo = nuevoNodo
 		}
 	} else {
 		iterador.anterior.siguiente = nuevoNodo
-		nuevoNodo.siguiente = iterador.actual
 		if iterador.actual == nil {
 			iterador.lista.ultimo = nuevoNodo
 		}
@@ -165,9 +153,9 @@ func (iterador *iterListaEnlazada[T]) Borrar() T {
 		}
 	} else {
 		iterador.anterior.siguiente = iterador.actual.siguiente
-		if iterador.actual.siguiente == nil {
-			iterador.lista.ultimo = iterador.anterior
-		}
+	}
+	if iterador.actual.siguiente == nil {
+		iterador.lista.ultimo = iterador.anterior
 	}
 	iterador.actual = iterador.actual.siguiente
 	iterador.lista.largo--
