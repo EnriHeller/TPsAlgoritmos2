@@ -45,21 +45,18 @@ func CrearHash[K comparable, V any]() Diccionario[K, V] {
 	nuevoHash.cantidad = 0
 	nuevoHash.borrados = 0
 
-	nuevaTabla := make([]celdaHash[K, V], nuevoHash.tam)
-
-	for i := 0; i < nuevoHash.tam; i++ {
-		nuevaCelda := crearCeldaHash[K, V]()
-		nuevaTabla = append(nuevaTabla, nuevaCelda)
-	}
-
-	nuevoHash.tabla = nuevaTabla
+	nuevoHash.tabla = crearTabla[K, V](nuevoHash.tam)
 
 	return nuevoHash
 }
 
 func crearTabla[K comparable, V any](capacidad int) []celdaHash[K, V] {
-	return make([]celdaHash[K, V], capacidad)
-
+	nuevaTabla := make([]celdaHash[K, V], capacidad)
+	for i := 0; i < capacidad; i++ {
+		nuevaCelda := crearCeldaHash[K, V]()
+		nuevaTabla = append(nuevaTabla, nuevaCelda)
+	}
+	return nuevaTabla
 }
 
 func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
@@ -82,10 +79,7 @@ func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
 }
 
 func (hash *hashCerrado[K, V]) Pertenece(clave K) bool {
-	if hash.buscar(clave) == -1 {
-		return false
-	}
-	return true
+	return hash.buscar(clave) != -1
 }
 
 func (hash *hashCerrado[K, V]) Obtener(clave K) V {
@@ -93,66 +87,37 @@ func (hash *hashCerrado[K, V]) Obtener(clave K) V {
 	return hash.tabla[pos].dato
 }
 
-func (hash *hashCerrado[K, V]) Borrar(clave K) V {
-	var dato V
-	return dato
-}
-
 func (hash *hashCerrado[K, V]) Cantidad() int {
 	return hash.cantidad
 }
 
+func (hash *hashCerrado[K, V]) Borrar(clave K) V {
+	posicion := hash.buscar(clave)
+
+	if posicion == -1{
+		panic("La clave no pertenece al diccionario")
+	}else{
+		elemento := hash.tabla[posicion]
+		elemento.estado = BORRADO
+		hash.cantidad --
+		hash.borrados ++
+		return elemento.dato
+	}
+}
+
 func (hash *hashCerrado[K, V]) Iterar(visitar func(clave K, valor V) bool) {
 
-}
+	for _,elem := range(hash.tabla){
 
-func convertirABytes[K comparable](clave K) []byte {
-
-	return []byte(fmt.Sprintf("%v", clave))
-}
-
-func sdbmHash(data []byte) uint64 {
-	var hash uint64
-
-	for _, b := range data {
-		hash = uint64(b) + (hash << 6) + (hash << 16) - hash
-	}
-
-	return hash
-}
-
-func (hash *hashCerrado[K, V]) buscar(clave K) int {
-	posicion := hash.hashear(clave)
-	primeraPorcion := hash.tabla[posicion:hash.tam]
-	porcionAuxiliar := hash.tabla[:posicion]
-
-	for i := posicion; i < hash.tam; i++ {
-		celdaActual := primeraPorcion[i]
-		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
-			return posicion
-		} else if celdaActual == nil {
-			return -1
-		} else {
+		if elem.estado != OCUPADO{
 			continue
-		}
-	}
-
-	for _, celdaActual := range porcionAuxiliar {
-		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
-			return posicion
-		} else if celdaActual.estado == VACIO {
-			return -1
-		} else {
+		}else if elem.estado == OCUPADO && visitar(elem.clave, elem.dato){
 			continue
+		}else{
+			break
 		}
-	}
-	return -1
-}
 
-func (hash *hashCerrado[K, V]) hashear(clave K) int {
-	claveByte := convertirABytes(clave)
-	hashing := sdbmHash(claveByte)
-	return int(hashing) % hash.tam
+	}
 }
 
 func (hash *hashCerrado[K, V]) Iterador() IterDiccionario[K, V] {
@@ -176,14 +141,10 @@ func (iter *iterDiccionario[K, V]) Siguiente() {
 
 func (hash *hashCerrado[K, V]) redimensionar(nuevaCapacidad int) {
 
-	nuevaTabla := make([]celdaHash[K, V], nuevaCapacidad)
 	tablaAnterior := hash.tabla
-	hash.tabla = nuevaTabla
+	hash.tabla = crearTabla[K, V](nuevaCapacidad)
 	hash.tam = nuevaCapacidad
-
-	for i := 0; i < nuevaCapacidad; i++ {
-		hash.tabla[i].estado = VACIO
-	}
+	hash.borrados = 0
 
 	for _, elem := range tablaAnterior {
 		if elem.estado == OCUPADO {
@@ -191,5 +152,55 @@ func (hash *hashCerrado[K, V]) redimensionar(nuevaCapacidad int) {
 			hash.Guardar(K, V)
 		}
 	}
-
 }
+
+func convertirABytes[K comparable](clave K) []byte {
+
+	return []byte(fmt.Sprintf("%v", clave))
+}
+
+func sdbmHash(data []byte) uint64 {
+	var hash uint64
+
+	for _, b := range data {
+		hash = uint64(b) + (hash << 6) + (hash << 16) - hash
+	}
+
+	return hash
+}
+
+func (hash *hashCerrado[K, V]) hashear(clave K) int {
+	claveByte := convertirABytes(clave)
+	hashing := sdbmHash(claveByte)
+	return int(hashing) % hash.tam
+}
+
+func (hash *hashCerrado[K, V]) buscar(clave K) int {
+	posicion := hash.hashear(clave)
+	primeraPorcion := hash.tabla[posicion:hash.tam]
+	porcionAuxiliar := hash.tabla[:posicion]
+
+	for i := posicion; i < hash.tam; i++ {
+		celdaActual := primeraPorcion[i]
+		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
+			return posicion
+		} else if celdaActual.estado == VACIO {
+			return -1
+		} else {
+			continue
+		}
+	}
+
+	for _, celdaActual := range porcionAuxiliar {
+		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
+			return posicion
+		} else if celdaActual.estado == VACIO {
+			return -1
+		} else {
+			continue
+		}
+	}
+
+	return -1
+}
+
