@@ -5,9 +5,11 @@ import (
 )
 
 const (
-	VACIO   int = 0
-	OCUPADO int = 1
-	BORRADO int = 2
+	COEFICIENTE_REDIMENSION float64 = 0.7
+	FACTOR_REDIMENSION      int     = 2
+	VACIO                   int     = 0
+	OCUPADO                 int     = 1
+	BORRADO                 int     = 2
 
 	TAMANO int = 6
 )
@@ -20,7 +22,7 @@ type celdaHash[K comparable, V any] struct {
 
 type hashCerrado[K comparable, V any] struct {
 	tabla    []celdaHash[K, V]
-	cantidad int
+	cantidad int // Solo hace referencia a ocupados
 	tam      int
 	borrados int
 }
@@ -55,11 +57,34 @@ func CrearHash[K comparable, V any]() Diccionario[K, V] {
 	return nuevoHash
 }
 
+func crearTabla[K comparable, V any](capacidad int) []celdaHash[K, V] {
+	return make([]celdaHash[K, V], capacidad)
+
+}
+
 func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
+
+	factorCarga := float64((hash.cantidad + hash.borrados)) / float64(hash.tam)
+	if factorCarga >= COEFICIENTE_REDIMENSION {
+		hash.redimensionar(FACTOR_REDIMENSION * hash.tam)
+	}
+
+	posicion := hash.buscar(clave)
+	if hash.Pertenece(clave) {
+		hash.tabla[posicion].dato = dato
+	} else {
+		hash.tabla[posicion].clave = clave
+		hash.tabla[posicion].dato = dato
+		hash.tabla[posicion].estado = OCUPADO
+	}
+	hash.cantidad++
 
 }
 
 func (hash *hashCerrado[K, V]) Pertenece(clave K) bool {
+	if hash.buscar(clave) == -1 {
+		return false
+	}
 	return true
 }
 
@@ -98,31 +123,30 @@ func sdbmHash(data []byte) uint64 {
 
 func (hash *hashCerrado[K, V]) buscar(clave K) int {
 	posicion := hash.hashear(clave)
-	primeraPorcion := hash.tabla[posicion: hash.tam]
+	primeraPorcion := hash.tabla[posicion:hash.tam]
 	porcionAuxiliar := hash.tabla[:posicion]
 
-	for i:= posicion; i < hash.tam; i++{
+	for i := posicion; i < hash.tam; i++ {
 		celdaActual := primeraPorcion[i]
-		if celdaActual.estado == OCUPADO && celdaActual.clave == clave{
+		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
 			return posicion
-		}else if celdaActual.estado == VACIO{
-			panic("La clave no pertenece al diccionario")
-		}else{
+		} else if celdaActual == nil {
+			return -1
+		} else {
 			continue
 		}
 	}
 
-	for _ , celdaActual := range(porcionAuxiliar){
-		if celdaActual.estado == OCUPADO && celdaActual.clave == clave{
+	for _, celdaActual := range porcionAuxiliar {
+		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
 			return posicion
-		}else if celdaActual.estado == VACIO{
-			panic("La clave no pertenece al diccionario")
-		}else{
+		} else if celdaActual.estado == VACIO {
+			return -1
+		} else {
 			continue
 		}
 	}
-
-	panic("La clave no pertenece al diccionario")
+	return -1
 }
 
 func (hash *hashCerrado[K, V]) hashear(clave K) int {
@@ -147,5 +171,25 @@ func (iter *iterDiccionario[K, V]) VerActual() (K, V) {
 }
 
 func (iter *iterDiccionario[K, V]) Siguiente() {
+
+}
+
+func (hash *hashCerrado[K, V]) redimensionar(nuevaCapacidad int) {
+
+	nuevaTabla := make([]celdaHash[K, V], nuevaCapacidad)
+	tablaAnterior := hash.tabla
+	hash.tabla = nuevaTabla
+	hash.tam = nuevaCapacidad
+
+	for i := 0; i < nuevaCapacidad; i++ {
+		hash.tabla[i].estado = VACIO
+	}
+
+	for _, elem := range tablaAnterior {
+		if elem.estado == OCUPADO {
+			K, V := elem.clave, elem.dato
+			hash.Guardar(K, V)
+		}
+	}
 
 }
