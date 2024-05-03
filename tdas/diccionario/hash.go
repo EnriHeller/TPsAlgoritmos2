@@ -68,23 +68,25 @@ func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
 
 	posicion, err := hash.buscar(clave)
 
-	if err == nil {
+	if err != nil {
 		hash.tabla[posicion].clave = clave
 		hash.tabla[posicion].estado = OCUPADO
 		hash.cantidad++
 	}
+	
+
 	hash.tabla[posicion].dato = dato
 }
 
 func (hash *hashCerrado[K, V]) Pertenece(clave K) bool {
 	_, err := hash.buscar(clave)
-	return err != nil
+	return err == nil
 }
 
 func (hash *hashCerrado[K, V]) Obtener(clave K) V {
 	pos, err := hash.buscar(clave)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 	return hash.tabla[pos].dato
 
@@ -98,7 +100,7 @@ func (hash *hashCerrado[K, V]) Borrar(clave K) V {
 	posicion, err := hash.buscar(clave)
 
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	elemento := hash.tabla[posicion]
@@ -201,14 +203,13 @@ func (hash *hashCerrado[K, V]) buscar(clave K) (int, error) {
 	primeraPorcion := hash.tabla[posicion:hash.tam]
 	porcionAuxiliar := hash.tabla[:posicion]
 
-	for posicion, celdaActual := range primeraPorcion {
+	for _, celdaActual := range primeraPorcion {
 
 		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
 			return posicion, nil
 		} else if celdaActual.estado == VACIO {
 			return posicion, fmt.Errorf("La clave no pertenece al diccionario")
 		}
-		continue
 	}
 
 	for _, celdaActual := range porcionAuxiliar {
@@ -217,7 +218,6 @@ func (hash *hashCerrado[K, V]) buscar(clave K) (int, error) {
 		} else if celdaActual.estado == VACIO {
 			return posicion, fmt.Errorf("La clave no pertenece al diccionario")
 		}
-		continue
 	}
 
 	return posicion, nil
