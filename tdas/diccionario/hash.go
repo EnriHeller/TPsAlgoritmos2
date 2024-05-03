@@ -207,4 +207,4 @@ func (hash *hashCerrado[K, V]) buscar(clave K) (int, error) {
 
 	return posicion, nil
 }
-
+// borrame
