@@ -89,18 +89,17 @@ func (lista *listaEnlazada[T]) Largo() int {
 func (lista *listaEnlazada[T]) Iterar(visitar func(T) bool) {
 
 	for actual := lista.primero; actual != nil; actual = actual.siguiente {
-		if visitar(actual.dato) {
-			continue
+		if !visitar(actual.dato) {
+			break
 		}
-		break
 	}
 
 }
 
 func (lista *listaEnlazada[T]) Iterador() IteradorLista[T] {
 	return &iterListaEnlazada[T]{
-		lista: lista, 
-		actual: lista.primero,
+		lista:    lista,
+		actual:   lista.primero,
 		anterior: nil,
 	}
 }
@@ -130,7 +129,7 @@ func (iterador *iterListaEnlazada[T]) Insertar(dato T) {
 	nuevoNodo := crearNodo(dato, iterador.actual)
 
 	if iterador.anterior == nil {
-		iterador.lista.primero = nuevoNodo	
+		iterador.lista.primero = nuevoNodo
 	} else {
 		iterador.anterior.siguiente = nuevoNodo
 	}
