@@ -28,7 +28,7 @@ type hashCerrado[K comparable, V any] struct {
 }
 
 type iterDiccionario[K comparable, V any] struct {
-	hash hashCerrado[K, V]
+	hash *hashCerrado[K, V]
 	pos  int
 }
 
@@ -66,13 +66,14 @@ func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
 		hash.redimensionar(FACTOR_REDIMENSION * hash.tam)
 	}
 
-	posicion, _ := hash.buscar(clave)
+	posicion, err := hash.buscar(clave)
 
-	hash.tabla[posicion].clave = clave
+	if err == nil {
+		hash.tabla[posicion].clave = clave
+		hash.tabla[posicion].estado = OCUPADO
+		hash.cantidad++
+	}
 	hash.tabla[posicion].dato = dato
-	hash.tabla[posicion].estado = OCUPADO
-	hash.cantidad++
-
 }
 
 func (hash *hashCerrado[K, V]) Pertenece(clave K) bool {
@@ -86,7 +87,7 @@ func (hash *hashCerrado[K, V]) Obtener(clave K) V {
 		panic(err)
 	}
 	return hash.tabla[pos].dato
-	
+
 }
 
 func (hash *hashCerrado[K, V]) Cantidad() int {
@@ -96,25 +97,25 @@ func (hash *hashCerrado[K, V]) Cantidad() int {
 func (hash *hashCerrado[K, V]) Borrar(clave K) V {
 	posicion, err := hash.buscar(clave)
 
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
 
 	elemento := hash.tabla[posicion]
 	elemento.estado = BORRADO
-	hash.cantidad --
-	hash.borrados ++
+	hash.cantidad--
+	hash.borrados++
 	return elemento.dato
 }
 
 func (hash *hashCerrado[K, V]) Iterar(visitar func(clave K, valor V) bool) {
 
-	for _,elem := range(hash.tabla){
+	for _, elem := range hash.tabla {
 
-		if elem.estado == VACIO || elem.estado == BORRADO{
+		if elem.estado == VACIO || elem.estado == BORRADO {
 			continue
 		}
-		if !visitar(elem.clave,elem.dato){
+		if !visitar(elem.clave, elem.dato) {
 			break
 		}
 
@@ -123,21 +124,40 @@ func (hash *hashCerrado[K, V]) Iterar(visitar func(clave K, valor V) bool) {
 
 func (hash *hashCerrado[K, V]) Iterador() IterDiccionario[K, V] {
 
-	return &iterDiccionario[K, V]{}
+	for ind, elemento := range hash.tabla {
+		if elemento.estado != OCUPADO {
+			continue
+		}
+		return &iterDiccionario[K, V]{hash: hash, pos: ind}
+	}
+	return &iterDiccionario[K, V]{hash: hash, pos: hash.tam - 1}
 }
 
 func (iter *iterDiccionario[K, V]) HaySiguiente() bool {
-	return true
+
+	return iter.pos != iter.hash.tam
 }
 
 func (iter *iterDiccionario[K, V]) VerActual() (K, V) {
-	var clave K
-	var valor V
-	return clave, valor
+	if !iter.HaySiguiente() {
+		panic("El iterador termino de iterar")
+	}
+	clave := iter.hash.tabla[iter.pos].clave
+	dato := iter.hash.tabla[iter.pos].dato
+	return clave, dato
 }
 
 func (iter *iterDiccionario[K, V]) Siguiente() {
 
+	if !iter.HaySiguiente() {
+		panic("El iterador termino de iterar")
+	}
+	for ind, elemento := range iter.hash.tabla {
+		if elemento.estado != OCUPADO {
+			continue
+		}
+		iter.pos = ind
+	}
 }
 
 func (hash *hashCerrado[K, V]) redimensionar(nuevaCapacidad int) {
@@ -181,14 +201,13 @@ func (hash *hashCerrado[K, V]) buscar(clave K) (int, error) {
 	primeraPorcion := hash.tabla[posicion:hash.tam]
 	porcionAuxiliar := hash.tabla[:posicion]
 
-	for posicion, celdaActual := range(primeraPorcion) {
+	for posicion, celdaActual := range primeraPorcion {
 
 		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
-			return  posicion, nil
+			return posicion, nil
 		} else if celdaActual.estado == VACIO {
 			return posicion, fmt.Errorf("La clave no pertenece al diccionario")
-		} 
-
+		}
 		continue
 	}
 
