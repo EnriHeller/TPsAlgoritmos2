@@ -203,22 +203,24 @@ func (hash *hashCerrado[K, V]) buscar(clave K) (int, error) {
 	primeraPorcion := hash.tabla[posicion:hash.tam]
 	porcionAuxiliar := hash.tabla[:posicion]
 
-	for _, celdaActual := range primeraPorcion {
-
+	// Buscar en la primera porción
+	for mov, celdaActual := range primeraPorcion {
 		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
-			return posicion, nil
+			return posicion + mov, nil
 		} else if celdaActual.estado == VACIO {
-			return posicion, fmt.Errorf("La clave no pertenece al diccionario")
+			return posicion + mov, fmt.Errorf("La clave no pertenece al diccionario")
 		}
 	}
 
-	for _, celdaActual := range porcionAuxiliar {
+	// Buscar en la porción auxiliar
+	for mov, celdaActual := range porcionAuxiliar {
 		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
-			return posicion, nil
+			return mov, nil
 		} else if celdaActual.estado == VACIO {
-			return posicion, fmt.Errorf("La clave no pertenece al diccionario")
+			return mov, fmt.Errorf("La clave no pertenece al diccionario")
 		}
 	}
 
-	return posicion, nil
+	// Si la clave no se encuentra en ninguna celda ocupada
+	return posicion, fmt.Errorf("La clave no pertenece al diccionario")
 }
