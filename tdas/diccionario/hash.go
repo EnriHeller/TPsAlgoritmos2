@@ -66,11 +66,7 @@ func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
 		hash.redimensionar(FACTOR_REDIMENSION * hash.tam)
 	}
 
-	posicion, err := hash.buscar(clave)
-
-	if err != nil { // el elemento no está
-		hash.tabla[posicion].dato = dato
-	} 
+	posicion, _ := hash.buscar(clave)
 
 	hash.tabla[posicion].clave = clave
 	hash.tabla[posicion].dato = dato
@@ -190,7 +186,7 @@ func (hash *hashCerrado[K, V]) buscar(clave K) (int, error) {
 		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
 			return  posicion, nil
 		} else if celdaActual.estado == VACIO {
-			return -1, fmt.Errorf("La clave no pertenece al diccionario")
+			return posicion, fmt.Errorf("La clave no pertenece al diccionario")
 		} 
 
 		continue
@@ -200,11 +196,10 @@ func (hash *hashCerrado[K, V]) buscar(clave K) (int, error) {
 		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
 			return posicion, nil
 		} else if celdaActual.estado == VACIO {
-			return -1, fmt.Errorf("La clave no pertenece al diccionario")
+			return posicion, fmt.Errorf("La clave no pertenece al diccionario")
 		}
 		continue
 	}
 
 	return posicion, nil
 }
-// borrame
