@@ -2,6 +2,7 @@ package diccionario
 
 import (
 	"fmt"
+	"math"
 )
 
 const (
@@ -68,6 +69,7 @@ func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
 
 	posicion, err := hash.buscar(clave)
 
+
 	if err != nil {
 		hash.tabla[posicion].clave = clave
 		hash.tabla[posicion].estado = OCUPADO
@@ -98,12 +100,10 @@ func (hash *hashCerrado[K, V]) Cantidad() int {
 
 func (hash *hashCerrado[K, V]) Borrar(clave K) V {
 	posicion, err := hash.buscar(clave)
-
 	if err != nil {
 		panic(err.Error())
 	}
-
-	elemento := hash.tabla[posicion]
+	elemento := &hash.tabla[posicion]
 	elemento.estado = BORRADO
 	hash.cantidad--
 	hash.borrados++
@@ -195,7 +195,7 @@ func sdbmHash(data []byte) uint64 {
 func (hash *hashCerrado[K, V]) hashear(clave K) int {
 	claveByte := convertirABytes(clave)
 	hashing := sdbmHash(claveByte)
-	return int(hashing) % hash.tam
+	return int(math.Abs(float64(hashing%uint64(hash.tam))))
 }
 
 func (hash *hashCerrado[K, V]) buscar(clave K) (int, error) {
@@ -224,3 +224,5 @@ func (hash *hashCerrado[K, V]) buscar(clave K) (int, error) {
 	// Si la clave no se encuentra en ninguna celda ocupada
 	return posicion, fmt.Errorf("La clave no pertenece al diccionario")
 }
+
+
