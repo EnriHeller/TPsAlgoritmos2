@@ -66,25 +66,31 @@ func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
 		hash.redimensionar(FACTOR_REDIMENSION * hash.tam)
 	}
 
-	posicion := hash.buscar(clave)
-	if hash.Pertenece(clave) {
+	posicion, err := hash.buscar(clave)
+
+	if err != nil { // el elemento no está
 		hash.tabla[posicion].dato = dato
-	} else {
-		hash.tabla[posicion].clave = clave
-		hash.tabla[posicion].dato = dato
-		hash.tabla[posicion].estado = OCUPADO
-	}
+	} 
+
+	hash.tabla[posicion].clave = clave
+	hash.tabla[posicion].dato = dato
+	hash.tabla[posicion].estado = OCUPADO
 	hash.cantidad++
 
 }
 
 func (hash *hashCerrado[K, V]) Pertenece(clave K) bool {
-	return hash.buscar(clave) != -1
+	_, err := hash.buscar(clave)
+	return err != nil
 }
 
 func (hash *hashCerrado[K, V]) Obtener(clave K) V {
-	pos := hash.buscar(clave)
+	pos, err := hash.buscar(clave)
+	if err != nil {
+		panic(err)
+	}
 	return hash.tabla[pos].dato
+	
 }
 
 func (hash *hashCerrado[K, V]) Cantidad() int {
@@ -92,28 +98,27 @@ func (hash *hashCerrado[K, V]) Cantidad() int {
 }
 
 func (hash *hashCerrado[K, V]) Borrar(clave K) V {
-	posicion := hash.buscar(clave)
+	posicion, err := hash.buscar(clave)
 
-	if posicion == -1{
-		panic("La clave no pertenece al diccionario")
-	}else{
-		elemento := hash.tabla[posicion]
-		elemento.estado = BORRADO
-		hash.cantidad --
-		hash.borrados ++
-		return elemento.dato
+	if err != nil{
+		panic(err)
 	}
+
+	elemento := hash.tabla[posicion]
+	elemento.estado = BORRADO
+	hash.cantidad --
+	hash.borrados ++
+	return elemento.dato
 }
 
 func (hash *hashCerrado[K, V]) Iterar(visitar func(clave K, valor V) bool) {
 
 	for _,elem := range(hash.tabla){
 
-		if elem.estado != OCUPADO{
+		if elem.estado == VACIO || elem.estado == BORRADO{
 			continue
-		}else if elem.estado == OCUPADO && visitar(elem.clave, elem.dato){
-			continue
-		}else{
+		}
+		if !visitar(elem.clave,elem.dato){
 			break
 		}
 
@@ -175,32 +180,31 @@ func (hash *hashCerrado[K, V]) hashear(clave K) int {
 	return int(hashing) % hash.tam
 }
 
-func (hash *hashCerrado[K, V]) buscar(clave K) int {
+func (hash *hashCerrado[K, V]) buscar(clave K) (int, error) {
 	posicion := hash.hashear(clave)
 	primeraPorcion := hash.tabla[posicion:hash.tam]
 	porcionAuxiliar := hash.tabla[:posicion]
 
-	for i := posicion; i < hash.tam; i++ {
-		celdaActual := primeraPorcion[i]
+	for posicion, celdaActual := range(primeraPorcion) {
+
 		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
-			return posicion
+			return  posicion, nil
 		} else if celdaActual.estado == VACIO {
-			return -1
-		} else {
-			continue
-		}
+			return -1, fmt.Errorf("La clave no pertenece al diccionario")
+		} 
+
+		continue
 	}
 
 	for _, celdaActual := range porcionAuxiliar {
 		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
-			return posicion
+			return posicion, nil
 		} else if celdaActual.estado == VACIO {
-			return -1
-		} else {
-			continue
+			return -1, fmt.Errorf("La clave no pertenece al diccionario")
 		}
+		continue
 	}
 
-	return -1
+	return posicion, nil
 }
 
