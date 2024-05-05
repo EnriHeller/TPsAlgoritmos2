@@ -126,13 +126,13 @@ func (hash *hashCerrado[K, V]) Iterar(visitar func(clave K, valor V) bool) {
 
 func (hash *hashCerrado[K, V]) Iterador() IterDiccionario[K, V] {
 
-	for ind, elemento := range hash.tabla {
-		if elemento.estado != OCUPADO {
-			continue
-		}
-		return &iterDiccionario[K, V]{hash: hash, pos: ind}
-	}
-	return &iterDiccionario[K, V]{hash: hash, pos: hash.tam - 1}
+    for ind, elemento := range hash.tabla {
+        if elemento.estado == OCUPADO {
+            return &iterDiccionario[K, V]{hash: hash, pos: ind}
+        }
+    }
+
+    return &iterDiccionario[K, V]{hash: hash, pos: hash.tam}
 }
 
 func (iter *iterDiccionario[K, V]) HaySiguiente() bool {
@@ -150,16 +150,16 @@ func (iter *iterDiccionario[K, V]) VerActual() (K, V) {
 }
 
 func (iter *iterDiccionario[K, V]) Siguiente() {
+    iter.pos++
+	
+    for iter.pos < iter.hash.tam {
+        if iter.hash.tabla[iter.pos].estado == OCUPADO {
+            return
+        }
+        iter.pos++
+    }
 
-	if !iter.HaySiguiente() {
-		panic("El iterador termino de iterar")
-	}
-	for ind, elemento := range iter.hash.tabla {
-		if elemento.estado != OCUPADO {
-			continue
-		}
-		iter.pos = ind
-	}
+    iter.pos = iter.hash.tam
 }
 
 func (hash *hashCerrado[K, V]) redimensionar(nuevaCapacidad int) {
