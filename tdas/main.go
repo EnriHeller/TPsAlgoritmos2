@@ -1,39 +1,75 @@
 package main
 
 import (
+	//"fmt"
 	"fmt"
 	TDADiccionario "tdas/diccionario"
 )
 
-func MasDeLaMitad(arr []int) bool {
-    dic := TDADiccionario.CrearHash[int, int]()
+/*
 
-    for _, clave := range arr {
-        if !dic.Pertenece(clave) {
-            dic.Guardar(clave, 1)
-        } else {
-            cantGuardada := dic.Obtener(clave)
-            dic.Guardar(clave, cantGuardada+1)
-        }
-    }
+func TestDiccionarioGuardar(t *testing.T) {
+	t.Log("Guarda algunos pocos elementos en el diccionario, y se comprueba que en todo momento funciona acorde")
+	clave1 := "Gato"
+	clave2 := "Perro"
+	clave3 := "Vaca"
+	valor1 := "miau"
+	valor2 := "guau"
+	valor3 := "moo"
+	claves := []string{clave1, clave2, clave3}
+	valores := []string{valor1, valor2, valor3}
 
-    iter := dic.Iterador()
+	dic := TDADiccionario.CrearHash[string, string]()
+	require.False(t, dic.Pertenece(claves[0]))
+	require.False(t, dic.Pertenece(claves[0]))
+	dic.Guardar(claves[0], valores[0])
+	require.EqualValues(t, 1, dic.Cantidad())
+	require.True(t, dic.Pertenece(claves[0]))
+	require.True(t, dic.Pertenece(claves[0]))
+	require.EqualValues(t, valores[0], dic.Obtener(claves[0]))
+	require.EqualValues(t, valores[0], dic.Obtener(claves[0]))
 
-    for iter.HaySiguiente() {
-        _, valor := iter.VerActual()
-        if valor >= len(arr)/2 {
-            return true
-        }
-        iter.Siguiente()
-    }
+	require.False(t, dic.Pertenece(claves[1]))
+	require.False(t, dic.Pertenece(claves[2]))
+	dic.Guardar(claves[1], valores[1])
+	require.True(t, dic.Pertenece(claves[0]))
+	require.True(t, dic.Pertenece(claves[1]))
+	require.EqualValues(t, 2, dic.Cantidad())
+	require.EqualValues(t, valores[0], dic.Obtener(claves[0]))
+	require.EqualValues(t, valores[1], dic.Obtener(claves[1]))
 
-    return false
+	require.False(t, dic.Pertenece(claves[2]))
+	dic.Guardar(claves[2], valores[2])
+	require.True(t, dic.Pertenece(claves[0]))
+	require.True(t, dic.Pertenece(claves[1]))
+	require.True(t, dic.Pertenece(claves[2]))
+	require.EqualValues(t, 3, dic.Cantidad())
+	require.EqualValues(t, valores[0], dic.Obtener(claves[0]))
+	require.EqualValues(t, valores[1], dic.Obtener(claves[1]))
+	require.EqualValues(t, valores[2], dic.Obtener(claves[2]))
 }
+
+
+*/
 
 func main() {
-    arr := []int{1, 2,2,2, 5, 6,7,8,9,10}
+    dic := TDADiccionario.CrearHash[int, int]()
+	for i := 0; i < 500; i++ {
+		dic.Guardar(i, i)
+	}
 
-    resultado := MasDeLaMitad(arr)
+    fmt.Println("Pertenece?", dic.Pertenece(478))
 
-    fmt.Println(resultado)
-}
+    for i := 0; i < 500; i++ {
+		dic.Guardar(i, 2*i)
+	}
+
+    fmt.Println("Pertenece?", dic.Pertenece(478))
+    //ok := true
+	/*for i := 0; i < 500 && ok; i++ {
+        fmt.Println("la clave es", i)
+        fmt.Println("Pertenece?", dic.Pertenece(i))
+		ok = dic.Obtener(i) == 2*i
+	}*/
+
+}   
