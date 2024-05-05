@@ -82,6 +82,7 @@ func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
 }
 
 func (hash *hashCerrado[K, V]) Pertenece(clave K) bool {
+	
 	_, err := hash.buscar(clave)
 	return err == nil
 }
@@ -151,6 +152,11 @@ func (iter *iterDiccionario[K, V]) VerActual() (K, V) {
 }
 
 func (iter *iterDiccionario[K, V]) Siguiente() {
+
+	if !iter.HaySiguiente(){
+		panic("El iterador termino de iterar")
+	}
+
     iter.pos++
 	
     for iter.pos < iter.hash.tam {
@@ -201,6 +207,7 @@ func (hash *hashCerrado[K, V]) hashear(clave K) int {
 
 func (hash hashCerrado[K, V]) buscar(clave K) (int, error) {
 	posicion := hash.hashear(clave)
+
 	pos, err := hash.buscarEnPorcion(posicion, hash.tam, clave)
 	if err == nil {
 		return pos, nil
@@ -213,42 +220,13 @@ func (hash hashCerrado[K, V]) buscar(clave K) (int, error) {
 }
 
 func (hash *hashCerrado[K, V]) buscarEnPorcion(inicio, fin int, clave K) (int, error) {
-	for mov, celdaActual := range hash.tabla[inicio:fin] {
-		posicionActual := inicio + mov
+	for i := inicio; i< fin ; i++{
+		celdaActual := hash.tabla[i]
 		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
-			return posicionActual, nil
+			return i, nil
 		} else if celdaActual.estado == VACIO {
-			return posicionActual, fmt.Errorf("La clave no pertenece al diccionario")
+			return i, fmt.Errorf("La clave no pertenece al diccionario")
 		}
 	}
 	return fin, fmt.Errorf("La clave no pertenece al diccionario")
 }
-
-/*
-func (hash *hashCerrado[K, V]) buscar(clave K) (int, error) {
-	posicion := hash.hashear(clave)
-	primeraPorcion := hash.tabla[posicion:hash.tam]
-	porcionAuxiliar := hash.tabla[:posicion]
-
-	// Buscar en la primera porción
-	for mov, celdaActual := range primeraPorcion {
-		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
-			return posicion + mov, nil
-		} else if celdaActual.estado == VACIO {
-			return posicion + mov, fmt.Errorf("La clave no pertenece al diccionario")
-		}
-	}
-
-	// Buscar en la porción auxiliar
-	for mov, celdaActual := range porcionAuxiliar {
-		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
-			return mov, nil
-		} else if celdaActual.estado == VACIO {
-			return mov, fmt.Errorf("La clave no pertenece al diccionario")
-		}
-	}
-
-	// Si la clave no se encuentra en ninguna celda ocupada
-	return posicion, fmt.Errorf("La clave no pertenece al diccionario")
-}
-*/
