@@ -55,7 +55,7 @@ func crearTabla[K comparable, V any](capacidad int) []celdaHash[K, V] {
 	nuevaTabla := make([]celdaHash[K, V], capacidad)
 	for i := 0; i < capacidad; i++ {
 		nuevaCelda := crearCeldaHash[K, V]()
-		nuevaTabla = append(nuevaTabla, nuevaCelda)
+		nuevaTabla[i] = nuevaCelda
 	}
 	return nuevaTabla
 }
@@ -69,15 +69,16 @@ func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
 
 	posicion, err := hash.buscar(clave)
 
-
-	if err != nil {
+	if err != nil { // La llave no esta presente, guarda una llave nueva
 		hash.tabla[posicion].clave = clave
 		hash.tabla[posicion].estado = OCUPADO
 		hash.cantidad++
+	} else if hash.tabla[posicion].estado == BORRADO { // La llave esta borrada y la guardamos nuevamente
+		hash.tabla[posicion].estado = OCUPADO
+		hash.cantidad++
+		hash.borrados--
 	}
-	
-
-	hash.tabla[posicion].dato = dato
+	hash.tabla[posicion].dato = dato // Guardamos el dato para cualquiera de los casos
 }
 
 func (hash *hashCerrado[K, V]) Pertenece(clave K) bool {
@@ -195,9 +196,35 @@ func sdbmHash(data []byte) uint64 {
 func (hash *hashCerrado[K, V]) hashear(clave K) int {
 	claveByte := convertirABytes(clave)
 	hashing := sdbmHash(claveByte)
-	return int(math.Abs(float64(hashing%uint64(hash.tam))))
+	return int(math.Abs(float64(hashing % uint64(hash.tam))))
 }
 
+func (hash hashCerrado[K, V]) buscar(clave K) (int, error) {
+	posicion := hash.hashear(clave)
+	pos, err := hash.buscarEnPorcion(posicion, hash.tam, clave)
+	if err == nil {
+		return pos, nil
+	}
+	pos, err = hash.buscarEnPorcion(0, posicion, clave)
+	if err == nil {
+		return pos, nil
+	}
+	return pos, fmt.Errorf("La clave no pertenece al diccionario")
+}
+
+func (hash *hashCerrado[K, V]) buscarEnPorcion(inicio, fin int, clave K) (int, error) {
+	for mov, celdaActual := range hash.tabla[inicio:fin] {
+		posicionActual := inicio + mov
+		if celdaActual.estado == OCUPADO && celdaActual.clave == clave {
+			return posicionActual, nil
+		} else if celdaActual.estado == VACIO {
+			return posicionActual, fmt.Errorf("La clave no pertenece al diccionario")
+		}
+	}
+	return fin, fmt.Errorf("La clave no pertenece al diccionario")
+}
+
+/*
 func (hash *hashCerrado[K, V]) buscar(clave K) (int, error) {
 	posicion := hash.hashear(clave)
 	primeraPorcion := hash.tabla[posicion:hash.tam]
@@ -224,5 +251,4 @@ func (hash *hashCerrado[K, V]) buscar(clave K) (int, error) {
 	// Si la clave no se encuentra en ninguna celda ocupada
 	return posicion, fmt.Errorf("La clave no pertenece al diccionario")
 }
-
-
+*/
