@@ -81,13 +81,13 @@ func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
 func (hash *hashCerrado[K, V]) Pertenece(clave K) bool {
 
 	posicion := hash.buscar(clave)
-	return hash.tabla[posicion].clave == clave
+	return hash.tabla[posicion].estado != VACIO
 }
 
 func (hash *hashCerrado[K, V]) Obtener(clave K) V {
 	posicion := hash.buscar(clave)
 	celdaActual := hash.tabla[posicion]
-	if celdaActual.clave != clave {
+	if celdaActual.estado == VACIO {
 		panic("La clave no pertenece al diccionario")
 	} else {
 		return celdaActual.dato
@@ -211,12 +211,19 @@ func (hash hashCerrado[K, V]) buscar(clave K) int {
 
 	posicion := hash.hashear(clave)
 
-	for hash.tabla[posicion].estado != VACIO || hash.tabla[posicion].clave == clave {
+	for {
+		celdaActual := hash.tabla[posicion]
+
+		if celdaActual.estado == VACIO ||
+			(celdaActual.clave == clave && celdaActual.estado == OCUPADO) {
+			return posicion
+		}
 
 		if posicion == hash.tam-1 {
-			posicion = 0
+			posicion = -1
 		}
+
 		posicion++
 	}
-	return posicion
+
 }
