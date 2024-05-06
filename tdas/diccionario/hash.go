@@ -2,6 +2,7 @@ package diccionario
 
 import (
 	"fmt"
+	"math"
 )
 
 const (
@@ -11,7 +12,7 @@ const (
 	OCUPADO                 int     = 1
 	BORRADO                 int     = 2
 
-	TAMANO int = 6
+	TAMANO int = 7
 )
 
 type celdaHash[K comparable, V any] struct {
@@ -202,7 +203,9 @@ func sdbmHash(data []byte) uint64 {
 func (hash *hashCerrado[K, V]) hashear(clave K) int {
 	claveByte := convertirABytes(clave)
 	hashing := sdbmHash(claveByte)
-	return int(hashing % uint64(hash.tam))
+	resultado := int(math.Mod(float64(hashing), float64(hash.tam)))
+	return resultado
+
 }
 
 func (hash hashCerrado[K, V]) buscar(clave K) (int, error) {
