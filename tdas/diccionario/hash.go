@@ -62,10 +62,7 @@ func crearTabla[K comparable, V any](capacidad int) []celdaHash[K, V] {
 
 func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
 
-	factorCarga := float64((hash.cantidad + hash.borrados)) / float64(hash.tam)
-	if factorCarga >= COEFICIENTE_REDIMENSION {
-		hash.redimensionar(FACTOR_REDIMENSION * hash.tam)
-	}
+	hash.redimensionar(FACTOR_REDIMENSION * hash.tam)
 
 	posicion := hash.buscar(clave)
 	celdaActual := &hash.tabla[posicion]
@@ -100,11 +97,14 @@ func (hash *hashCerrado[K, V]) Cantidad() int {
 
 func (hash *hashCerrado[K, V]) Borrar(clave K) V {
 
-	if !hash.Pertenece(clave) {
-		panic("La clave no pertenece al diccionario")
-	}
+	hash.redimensionar(FACTOR_REDIMENSION * hash.tam)
+
 	posicion := hash.buscar(clave)
 	celdaActual := &hash.tabla[posicion]
+
+	if celdaActual.estado == VACIO {
+		panic("La clave no pertenece al diccionario")
+	}
 	celdaActual.estado = BORRADO
 	hash.cantidad--
 	hash.borrados++
@@ -170,16 +170,20 @@ func (iter *iterDiccionario[K, V]) Siguiente() {
 
 func (hash *hashCerrado[K, V]) redimensionar(nuevaCapacidad int) {
 
-	tablaAnterior := hash.tabla
-	hash.tabla = crearTabla[K, V](nuevaCapacidad)
-	hash.tam = nuevaCapacidad
-	hash.borrados = 0
-	hash.cantidad = 0
+	factorCarga := float64((hash.cantidad + hash.borrados)) / float64(hash.tam)
 
-	for _, elem := range tablaAnterior {
-		if elem.estado == OCUPADO {
-			K, V := elem.clave, elem.dato
-			hash.Guardar(K, V)
+	if factorCarga >= COEFICIENTE_REDIMENSION {
+		tablaAnterior := hash.tabla
+		hash.tabla = crearTabla[K, V](nuevaCapacidad)
+		hash.tam = nuevaCapacidad
+		hash.borrados = 0
+		hash.cantidad = 0
+
+		for _, elem := range tablaAnterior {
+			if elem.estado == OCUPADO {
+				K, V := elem.clave, elem.dato
+				hash.Guardar(K, V)
+			}
 		}
 	}
 }
