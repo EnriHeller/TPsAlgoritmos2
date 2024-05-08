@@ -215,19 +215,9 @@ func (hash hashCerrado[K, V]) buscar(clave K) int {
 
 	posicion := hash.hashear(clave)
 
-	for {
-		celdaActual := hash.tabla[posicion]
-
-		if celdaActual.estado == VACIO ||
-			(celdaActual.clave == clave && celdaActual.estado == OCUPADO) {
-			return posicion
-		}
-
-		if posicion == hash.tam-1 {
-			posicion = -1
-		}
-
-		posicion++
+	for (hash.tabla[posicion].estado != VACIO) && !(hash.tabla[posicion].estado == OCUPADO && hash.tabla[posicion].clave == clave) {
+		posicion = (posicion + 1) % hash.tam
 	}
+	return posicion
 
 }
