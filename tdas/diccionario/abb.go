@@ -22,7 +22,9 @@ type iterABB[K comparable, V any] struct {
 
 func CrearABB[K comparable, V any](funcion_cmp func(K, K) int) DiccionarioOrdenado[K, V] {
 
-	return &abb[K, V]{raiz: nil, cantidad: 0, cmp: funcion_cmp}
+	nuevoArbol := new(abb[K,V])
+
+	return nuevoArbol
 }
 
 func crearNodo[K comparable, V any](clave K, valor V) *nodoAbb[K, V] {
@@ -78,9 +80,10 @@ func (iter *iterABB[K, V]) VerActual() (K, V) {
 
 func (arbol *abb[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, dato V) bool) {
 
-	return
+	
 }
 
-func (iter *iterABB[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] {
-	return iter
+func (arbol *abb[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] {
+	iterador := new(iterABB[K,V])
+	return iterador
 }
