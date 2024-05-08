@@ -13,8 +13,8 @@ type abb[K comparable, V any] struct {
 	cmp      func(K, K) int
 }
 
-type IterABB[K comparable, V any] struct {
-	arbol *abb
+type iterABB[K comparable, V any] struct {
+	arbol *abb[K, V]
 	desde *K
 	hasta *K
 	pos   int
@@ -51,27 +51,36 @@ func (arbol *abb[K, V]) Obtener(clave K) V {
 	return chauchis
 }
 
-func (arbol *abb[K, V]) Iterador() IterABB[K, V] {
-	iter := new(IterABB[K, V])
-
-	return *iter
+func (arbol *abb[K, V]) Iterar(visitar func(clave K, valor V) bool) {
 
 }
 
-func (iter *IterABB[K, V]) HaySiguiente() bool {
+func (arbol *abb[K, V]) Iterador() IterDiccionario[K, V] {
+	iter := new(iterABB[K, V])
+
+	return iter
+
+}
+
+func (iter *iterABB[K, V]) HaySiguiente() bool {
 	return true
 }
 
-func (iter *IterABB[K, V]) Siguiente() {
+func (iter *iterABB[K, V]) Siguiente() {
 
 }
 
-func IterarRango[K comparable, V any](desde *K, hasta *K, visitar func(clave K, dato V) bool) {
+func (iter *iterABB[K, V]) VerActual() (K, V) {
+	var clave K
+	var valor V
+	return clave, valor
+}
+
+func (arbol *abb[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, dato V) bool) {
 
 	return
 }
 
-/*func IteradorRango[K comparable, V any](desde *K, hasta *K) IterDiccionario[K, V] {
-	iter := new(iterABB[K,V])
-	return *iter
-}*/
+func (iter *iterABB[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] {
+	return iter
+}
