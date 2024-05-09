@@ -103,6 +103,11 @@ func (arbol *abb[K, V]) Borrar(clave K) V {
 	if busqueda.izquierdo != nil && busqueda.derecho == nil {
 		busqueda = busqueda.izquierdo
 	}
+	if busqueda.izquierdo != nil && busqueda.derecho != nil {
+		padre, reemplazante := buscarMasDerecho[K, V](busqueda.izquierdo)
+		busqueda.clave, busqueda.dato = reemplazante.clave, reemplazante.dato
+		padre.derecho = nil
+	}
 
 	arbol.cantidad--
 	return busqueda.dato
@@ -151,4 +156,12 @@ func (arbol *abb[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, da
 func (arbol *abb[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] {
 	iterador := new(iterABB[K, V])
 	return iterador
+}
+
+func buscarMasDerecho[K comparable, V any](padre *nodoAbb[K, V]) (*nodoAbb[K, V], *nodoAbb[K, V]) {
+
+	if padre.derecho != nil && padre.derecho.derecho == nil {
+		return padre, padre.derecho
+	}
+	return buscarMasDerecho(padre.derecho)
 }
