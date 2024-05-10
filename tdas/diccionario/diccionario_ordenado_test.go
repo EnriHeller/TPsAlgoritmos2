@@ -16,18 +16,16 @@ func compararCadenas(cad1, cad2 string) int {
 	return 0
 }
 
-func comparaEnteros(a, b int) int {
+func compararEnteros(a, b int) int {
 	if a < b {
 		return -1
 	} else if a > b {
 		return 1
 	}
 	return 0
-
 }
 
 func TestDiccAbbVacio(t *testing.T) {
-
 	t.Log("Prueba que el ABB esta vacio")
 	dic := TDADiccionario.CrearABB[string, string](compararCadenas)
 	require.EqualValues(t, 0, dic.Cantidad())
@@ -45,4 +43,44 @@ func TestUnElementoABB(t *testing.T) {
 	require.EqualValues(t, dic.Pertenece("A"), true)
 	require.EqualValues(t, 10, dic.Obtener("A"))
 	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Obtener("B") })
+}
+
+func TestDiccionarioGuardarABB(t *testing.T) {
+	t.Log("Guarda algunos pocos elementos en el diccionario, y se comprueba que en todo momento funciona acorde")
+	clave1 := "Gato"
+	clave2 := "Perro"
+	clave3 := "Vaca"
+	valor1 := "miau"
+	valor2 := "guau"
+	valor3 := "moo"
+	claves := []string{clave1, clave2, clave3}
+	valores := []string{valor1, valor2, valor3}
+
+	dic := TDADiccionario.CrearABB[string, string](compararCadenas)
+	require.False(t, dic.Pertenece(claves[0]))
+
+	dic.Guardar(claves[0], valores[0])
+	require.EqualValues(t, 1, dic.Cantidad())
+	require.True(t, dic.Pertenece(claves[0]))
+	require.EqualValues(t, valores[0], dic.Obtener(claves[0]))
+
+	require.False(t, dic.Pertenece(claves[1]))
+	dic.Guardar(claves[1], valores[1])
+
+	require.True(t, dic.Pertenece(claves[0]))
+	require.True(t, dic.Pertenece(claves[1]))
+
+	require.EqualValues(t, 2, dic.Cantidad())
+	require.EqualValues(t, valores[0], dic.Obtener(claves[0]))
+	require.EqualValues(t, valores[1], dic.Obtener(claves[1]))
+
+	require.False(t, dic.Pertenece(claves[2]))
+	dic.Guardar(claves[2], valores[2])
+	require.True(t, dic.Pertenece(claves[0]))
+	require.True(t, dic.Pertenece(claves[1]))
+	require.True(t, dic.Pertenece(claves[2]))
+	require.EqualValues(t, 3, dic.Cantidad())
+	require.EqualValues(t, valores[0], dic.Obtener(claves[0]))
+	require.EqualValues(t, valores[1], dic.Obtener(claves[1]))
+	require.EqualValues(t, valores[2], dic.Obtener(claves[2]))
 }
