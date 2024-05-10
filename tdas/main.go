@@ -7,7 +7,6 @@ import (
 )
 
 /*
-
 func TestDiccionarioGuardar(t *testing.T) {
 	t.Log("Guarda algunos pocos elementos en el diccionario, y se comprueba que en todo momento funciona acorde")
 	clave1 := "Gato"
