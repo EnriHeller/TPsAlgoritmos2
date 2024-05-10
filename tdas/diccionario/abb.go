@@ -93,7 +93,7 @@ func (arbol *abb[K, V]) Borrar(clave K) V {
 	busqueda := arbol.buscar(arbol.raiz, clave)
 
 	if busqueda == nil {
-		panic("La clave no pertenece al diccionario.")
+		panic("La clave no pertenece al diccionario")
 	}
 
 	if busqueda.izquierdo == nil && busqueda.derecho == nil {
