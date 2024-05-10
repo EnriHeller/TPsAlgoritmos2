@@ -39,11 +39,10 @@ func TestDiccAbbVacio(t *testing.T) {
 
 func TestUnElementoABB(t *testing.T) {
 	t.Log("Comprueba que Diccionario con un elemento tiene esa Clave, unicamente")
-	dic := TDADiccionario.CrearABB[string, string](compararCadenas)
-	dic.Guardar("A", "10")
+	dic := TDADiccionario.CrearABB[string, int](compararCadenas)
+	dic.Guardar("A", 10)
 	require.EqualValues(t, 1, dic.Cantidad())
-	require.True(t, dic.Pertenece("A"))
-	require.False(t, dic.Pertenece("B"))
-	require.EqualValues(t, "10", dic.Obtener("A"))
+	require.EqualValues(t, dic.Pertenece("A"), true)
+	require.EqualValues(t, 10, dic.Obtener("A"))
 	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Obtener("B") })
 }
