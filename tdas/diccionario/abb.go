@@ -23,6 +23,7 @@ type iterABB[K comparable, V any] struct {
 	desde *K
 	hasta *K
 	pila  TDAPila.Pila[*nodoAbb[K, V]]
+	arbol *abb[K, V]
 }
 
 func CrearABB[K comparable, V any](funcion_cmp func(K, K) int) DiccionarioOrdenado[K, V] {
@@ -144,22 +145,34 @@ func (arbol *abb[K, V]) iteradorInterno(nodoActual *nodoAbb[K, V], visitar func(
 }
 
 func (arbol *abb[K, V]) Iterador() IterDiccionario[K, V] {
+
 	iter := new(iterABB[K, V])
+	_, minimo := buscarMasIzquierdo[K, V](arbol.raiz)
+	_, maximo := buscarMasDerecho[K, V](arbol.raiz)
+	iter.desde = &minimo.clave
+	iter.hasta = &maximo.clave
 	iter.apilarSiguientes(arbol.raiz)
 
 	return iter
 }
 
 func (iter *iterABB[K, V]) apilarSiguientes(primerNodo *nodoAbb[K, V]) {
+
 	if primerNodo == nil {
 		return
 	}
-
-	iter.pila.Apilar(primerNodo)
-	iter.apilarSiguientes(primerNodo.izquierdo)
+	if iter.arbol.cmp(primerNodo.clave, *iter.desde) >= 0 && iter.arbol.cmp(primerNodo.clave, *iter.hasta) <= 0 {
+		iter.pila.Apilar(primerNodo)
+		iter.apilarSiguientes(primerNodo.izquierdo)
+	} else if iter.arbol.cmp(primerNodo.clave, *iter.desde) < 0 {
+		iter.apilarSiguientes(primerNodo.derecho)
+	} else if iter.arbol.cmp(primerNodo.clave, *iter.hasta) > 0 {
+		iter.apilarSiguientes(primerNodo.izquierdo)
+	}
 }
 
 func (iter *iterABB[K, V]) HaySiguiente() bool {
+
 	return !iter.pila.EstaVacia()
 }
 
@@ -174,6 +187,7 @@ func (iter *iterABB[K, V]) Siguiente() {
 }
 
 func (iter *iterABB[K, V]) VerActual() (K, V) {
+
 	if !iter.HaySiguiente() {
 		panic("El iterador termino de iterar")
 	}
@@ -209,11 +223,11 @@ func (arbol *abb[K, V]) _iterarRango(nodoActual *nodoAbb[K, V], desde *K, hasta 
 
 func (arbol *abb[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] {
 	iterador := new(iterABB[K, V])
-
-
+	iterador.desde = desde
+	iterador.hasta = hasta
+	iterador.apilarSiguientes(arbol.raiz)
 	return iterador
 }
-
 
 func buscarMasDerecho[K comparable, V any](padre *nodoAbb[K, V]) (*nodoAbb[K, V], *nodoAbb[K, V]) {
 
@@ -224,4 +238,10 @@ func buscarMasDerecho[K comparable, V any](padre *nodoAbb[K, V]) (*nodoAbb[K, V]
 	return buscarMasDerecho(padre.derecho)
 }
 
+func buscarMasIzquierdo[K comparable, V any](padre *nodoAbb[K, V]) (*nodoAbb[K, V], *nodoAbb[K, V]) {
 
+	if padre.izquierdo != nil && padre.izquierdo.izquierdo == nil {
+		return padre, padre.izquierdo
+	}
+	return buscarMasIzquierdo(padre.izquierdo)
+}
