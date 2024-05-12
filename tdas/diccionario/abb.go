@@ -2,6 +2,7 @@ package diccionario
 
 import (
 	//"fmt"
+	"fmt"
 	TDAPila "tdas/pila"
 )
 
@@ -55,9 +56,9 @@ func (arbol *abb[K, V]) buscar(padre *nodoAbb[K, V], clave K) *nodoAbb[K, V] {
 	if arbol.cmp(padre.clave, clave) > 0 {
 		// Va a la izquierda
 		return arbol.buscar(padre.izquierdo, clave)
-	} 
-	
-	if arbol.cmp(padre.clave, clave) < 0 { 
+	}
+
+	if arbol.cmp(padre.clave, clave) < 0 {
 		// Va a la derecha
 		return arbol.buscar(padre.derecho, clave)
 	}
@@ -66,24 +67,29 @@ func (arbol *abb[K, V]) buscar(padre *nodoAbb[K, V], clave K) *nodoAbb[K, V] {
 }
 
 func (arbol *abb[K, V]) Guardar(clave K, valor V) {
-
-	if arbol.raiz == nil {
-		arbol.raiz = crearNodo(clave, valor)
-		arbol.cantidad++
-		return
-	}
-
-	nuevoNodo := crearNodo(clave, valor)
-	busqueda := arbol.buscar(arbol.raiz, clave)
-
-	//No existe nodo con dicha clave
-	if busqueda == nil {
-		busqueda = nuevoNodo
-		arbol.cantidad++
-	}
-
-	busqueda.dato = nuevoNodo.dato
+	arbol._guardar(&arbol.raiz, clave, valor)
 }
+
+func (arbol *abb[K, V]) _guardar(nodoActual **nodoAbb[K, V], clave K, valor V) {
+
+	if *nodoActual == nil{
+		fmt.Println("entro aca")
+		*nodoActual = crearNodo(clave, valor) // si hace una referencia a nil, lo creo
+		arbol.cantidad ++
+		return
+	}else{
+		claveActual := (*nodoActual).clave
+		if arbol.cmp(clave, claveActual) < 0{
+			arbol._guardar(&(*nodoActual).izquierdo, clave, valor)
+		}else if arbol.cmp(clave, claveActual) > 0{
+			arbol._guardar(&(*nodoActual).derecho, clave, valor)
+		}else{
+			(*nodoActual).dato = valor
+		}
+	}
+
+}
+
 
 func (arbol *abb[K, V]) Pertenece(clave K) bool {
 

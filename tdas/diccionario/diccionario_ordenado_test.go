@@ -69,6 +69,7 @@ func TestDiccionarioGuardarABB(t *testing.T) {
 
 	require.True(t, dic.Pertenece(claves[0]))
 	require.True(t, dic.Pertenece(claves[1]))
+	require.True(t, dic.Pertenece(claves[1]))
 
 	require.EqualValues(t, 2, dic.Cantidad())
 	require.EqualValues(t, valores[0], dic.Obtener(claves[0]))
