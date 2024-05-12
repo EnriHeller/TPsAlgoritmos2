@@ -1,6 +1,7 @@
 package diccionario_test
 
 import (
+	"fmt"
 	TDADiccionario "tdas/diccionario"
 	"testing"
 
@@ -148,4 +149,132 @@ func TestDiccionarioBorrarABB(t *testing.T) {
 	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Obtener(claves[1]) })
 }
 
+func TestReutlizacionDeBorradosABB(t *testing.T) {
+	t.Log("Prueba de caja blanca: revisa, para el caso que fuere un HashCerrado, que no haya problema " +
+		"reinsertando un elemento borrado")
+	dic := TDADiccionario.CrearABB[string, string](compararCadenas)
+	clave := "hola"
+	dic.Guardar(clave, "mundo!")
+	dic.Borrar(clave)
+	require.EqualValues(t, 0, dic.Cantidad())
+	require.False(t, dic.Pertenece(clave))
+	dic.Guardar(clave, "mundooo!")
+	require.True(t, dic.Pertenece(clave))
+	require.EqualValues(t, 1, dic.Cantidad())
+	require.EqualValues(t, "mundooo!", dic.Obtener(clave))
+}
 
+func TestConClavesNumericasABB(t *testing.T) {
+	t.Log("Valida que no solo funcione con strings")
+	dic := TDADiccionario.CrearABB[int, string](compararEnteros)
+	clave := 10
+	valor := "Gatito"
+
+	dic.Guardar(clave, valor)
+	require.EqualValues(t, 1, dic.Cantidad())
+	require.True(t, dic.Pertenece(clave))
+	require.EqualValues(t, valor, dic.Obtener(clave))
+	require.EqualValues(t, valor, dic.Borrar(clave))
+	require.False(t, dic.Pertenece(clave))
+}
+
+func TestCadenaLargaParticularABB(t *testing.T) {
+	t.Log("Se han visto casos problematicos al utilizar la funcion de hashing de K&R, por lo que " +
+		"se agrega una prueba con dicha funcion de hashing y una cadena muy larga")
+	// El caracter '~' es el de mayor valor en ASCII (126).
+	claves := make([]string, 10)
+	cadena := "%d~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" +
+		"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	dic := TDADiccionario.CrearABB[string, string](compararCadenas)
+	valores := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J"}
+	for i := 0; i < 10; i++ {
+		claves[i] = fmt.Sprintf(cadena, i)
+		dic.Guardar(claves[i], valores[i])
+	}
+	require.EqualValues(t, 10, dic.Cantidad())
+
+	ok := true
+	for i := 0; i < 10 && ok; i++ {
+		ok = dic.Obtener(claves[i]) == valores[i]
+	}
+
+	require.True(t, ok, "Obtener clave larga funciona")
+}
+
+func TestGuardarYBorrarRepetidasVecesABB(t *testing.T) {
+	t.Log("Esta prueba guarda y borra repetidas veces. Esto lo hacemos porque un error comun es no considerar " +
+		"los borrados para agrandar en un Hash Cerrado. Si no se agranda, muy probablemente se quede en un ciclo " +
+		"infinito")
+
+	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
+	for i := 0; i < 1000; i++ {
+		dic.Guardar(i, i)
+		require.True(t, dic.Pertenece(i))
+		dic.Borrar(i)
+		require.False(t, dic.Pertenece(i))
+	}
+}
+
+func buscarABB(clave string, claves []string) int {
+	for i, c := range claves {
+		if c == clave {
+			return i
+		}
+	}
+	return -1
+}
+
+func TestIteradorInternoClavesABB(t *testing.T) {
+	t.Log("Valida que todas las claves sean recorridas (y una única vez) con el iterador interno")
+	clave1 := "Gato"
+	clave2 := "Perro"
+	clave3 := "Vaca"
+	claves := []string{clave1, clave2, clave3}
+	dic := TDADiccionario.CrearABB[string, *int](compararCadenas)
+	dic.Guardar(claves[0], nil)
+	dic.Guardar(claves[1], nil)
+	dic.Guardar(claves[2], nil)
+
+	cs := []string{"", "", ""}
+	cantidad := 0
+	cantPtr := &cantidad
+
+	dic.Iterar(func(clave string, dato *int) bool {
+		cs[cantidad] = clave
+		*cantPtr = *cantPtr + 1
+		return true
+	})
+
+	require.EqualValues(t, 3, cantidad)
+	require.NotEqualValues(t, -1, buscarABB(cs[0], claves))
+	require.NotEqualValues(t, -1, buscarABB(cs[1], claves))
+	require.NotEqualValues(t, -1, buscarABB(cs[2], claves))
+	require.NotEqualValues(t, cs[0], cs[1])
+	require.NotEqualValues(t, cs[0], cs[2])
+	require.NotEqualValues(t, cs[2], cs[1])
+}
+
+func TestIteradorInternoValoresABB(t *testing.T) {
+	t.Log("Valida que los datos sean recorridas correctamente (y una única vez) con el iterador interno")
+	clave1 := "Gato"
+	clave2 := "Perro"
+	clave3 := "Vaca"
+	clave4 := "Burrito"
+	clave5 := "Hamster"
+
+	dic := TDADiccionario.CrearABB[string, int](compararCadenas)
+	dic.Guardar(clave1, 6)
+	dic.Guardar(clave2, 2)
+	dic.Guardar(clave3, 3)
+	dic.Guardar(clave4, 4)
+	dic.Guardar(clave5, 5)
+
+	factorial := 1
+	ptrFactorial := &factorial
+	dic.Iterar(func(_ string, dato int) bool {
+		*ptrFactorial *= dato
+		return true
+	})
+
+	require.EqualValues(t, 720, factorial)
+}
