@@ -1,8 +1,6 @@
 package diccionario
 
 import (
-	//"fmt"
-	"fmt"
 	TDAPila "tdas/pila"
 )
 
@@ -48,53 +46,40 @@ func crearNodo[K comparable, V any](clave K, valor V) *nodoAbb[K, V] {
 	}
 }
 
-func (arbol *abb[K, V]) buscar(padre *nodoAbb[K, V], clave K) *nodoAbb[K, V] {
-	if padre == nil {
+func (arbol *abb[K, V]) buscar(padre **nodoAbb[K, V], clave K) **nodoAbb[K, V] {
+
+	if *padre == nil {
 		return padre
-	}
-
-	if arbol.cmp(padre.clave, clave) > 0 {
-		// Va a la izquierda
-		return arbol.buscar(padre.izquierdo, clave)
-	}
-
-	if arbol.cmp(padre.clave, clave) < 0 {
-		// Va a la derecha
-		return arbol.buscar(padre.derecho, clave)
-	}
-
-	return padre
-}
-
-func (arbol *abb[K, V]) Guardar(clave K, valor V) {
-	arbol._guardar(&arbol.raiz, clave, valor)
-}
-
-func (arbol *abb[K, V]) _guardar(nodoActual **nodoAbb[K, V], clave K, valor V) {
-
-	if *nodoActual == nil{
-		fmt.Println("entro aca")
-		*nodoActual = crearNodo(clave, valor) // si hace una referencia a nil, lo creo
-		arbol.cantidad ++
-		return
 	}else{
-		claveActual := (*nodoActual).clave
+		claveActual := (*padre).clave
+
 		if arbol.cmp(clave, claveActual) < 0{
-			arbol._guardar(&(*nodoActual).izquierdo, clave, valor)
+			return arbol.buscar(&(*padre).izquierdo, clave)
 		}else if arbol.cmp(clave, claveActual) > 0{
-			arbol._guardar(&(*nodoActual).derecho, clave, valor)
+			return arbol.buscar(&(*padre).izquierdo, clave)
 		}else{
-			(*nodoActual).dato = valor
+			return padre
 		}
 	}
 
 }
 
+func (arbol *abb[K, V]) Guardar(clave K, valor V) {
+	busqueda := arbol.buscar(&arbol.raiz,clave)
+
+	if *busqueda == nil{
+		*busqueda = crearNodo(clave, valor) 
+		arbol.cantidad ++
+	}else{
+		(*busqueda).dato = valor
+	}
+
+}
 
 func (arbol *abb[K, V]) Pertenece(clave K) bool {
 
-	busqueda := arbol.buscar(arbol.raiz, clave)
-	return busqueda != nil
+	busqueda := arbol.buscar(&arbol.raiz, clave)
+	return *busqueda != nil
 }
 
 func (arbol *abb[K, V]) Cantidad() int {
@@ -103,42 +88,44 @@ func (arbol *abb[K, V]) Cantidad() int {
 
 func (arbol *abb[K, V]) Borrar(clave K) V {
 
-	busqueda := arbol.buscar(arbol.raiz, clave)
+	busqueda := arbol.buscar(&arbol.raiz, clave)
 
-	if busqueda == nil {
+	if *busqueda == nil {
 		panic("La clave no pertenece al diccionario")
 	}
 
-	if busqueda.izquierdo == nil && busqueda.derecho == nil {
-		busqueda = nil
+	refeActual := *busqueda
+
+	if refeActual.izquierdo == nil && refeActual.derecho == nil {
+		*busqueda = nil
 	}
 
-	if busqueda.izquierdo == nil && busqueda.derecho != nil {
-		busqueda = busqueda.derecho
+	if refeActual.izquierdo == nil && refeActual.derecho != nil {
+		*busqueda = refeActual.derecho
 	}
 
-	if busqueda.izquierdo != nil && busqueda.derecho == nil {
-		busqueda = busqueda.izquierdo
+	if refeActual.izquierdo != nil && refeActual.derecho == nil {
+		*busqueda = refeActual.izquierdo
 	}
-	if busqueda.izquierdo != nil && busqueda.derecho != nil {
-		padre, reemplazante := buscarMasDerecho[K, V](busqueda.izquierdo)
-		busqueda.clave, busqueda.dato = reemplazante.clave, reemplazante.dato
+	if refeActual.izquierdo != nil && refeActual.derecho != nil {
+		padre, reemplazante := buscarMasDerecho[K, V](refeActual.izquierdo)
+		refeActual.clave, refeActual.dato = reemplazante.clave, reemplazante.dato
 		padre.derecho = nil
 	}
 
 	arbol.cantidad--
-	return busqueda.dato
+	return refeActual.dato
 }
 
 func (arbol *abb[K, V]) Obtener(clave K) V {
 
-	busqueda := arbol.buscar(arbol.raiz, clave)
+	busqueda := arbol.buscar(&arbol.raiz, clave)
 
-	if busqueda == nil {
+	if *busqueda == nil {
 		panic("La clave no pertenece al diccionario")
 	}
 
-	return busqueda.dato
+	return (*busqueda).dato
 }
 
 func (arbol *abb[K, V]) Iterar(visitar func(clave K, valor V) bool) {
