@@ -4,10 +4,10 @@ import (
 	"fmt"
 )
 
-type Estado int
+type estado int
 
 const (
-	VACIO Estado = iota
+	VACIO estado = iota
 	OCUPADO
 	BORRADO
 )
@@ -20,7 +20,7 @@ const (
 type celdaHash[K comparable, V any] struct {
 	clave  K
 	dato   V
-	estado Estado
+	estado estado
 }
 
 type hashCerrado[K comparable, V any] struct {
@@ -171,7 +171,6 @@ func (iter *iterDiccionario[K, V]) Siguiente() {
 		}
 		iter.pos++
 	}
-	//iter.pos = iter.hash.tam
 }
 
 func (hash *hashCerrado[K, V]) redimensionar(nuevaCapacidad int) {

@@ -152,8 +152,7 @@ func TestDiccionarioBorrarABB(t *testing.T) {
 }
 
 func TestReutlizacionDeBorradosABB(t *testing.T) {
-	t.Log("Prueba de caja blanca: revisa, para el caso que fuere un HashCerrado, que no haya problema " +
-		"reinsertando un elemento borrado")
+	t.Log("Prueba que no haya problema reinsertando un elemento borrado")
 	dic := TDADiccionario.CrearABB[string, string](compararCadenas)
 	clave := "hola"
 	dic.Guardar(clave, "mundo!")
@@ -178,29 +177,6 @@ func TestConClavesNumericasABB(t *testing.T) {
 	require.EqualValues(t, valor, dic.Obtener(clave))
 	require.EqualValues(t, valor, dic.Borrar(clave))
 	require.False(t, dic.Pertenece(clave))
-}
-
-func TestCadenaLargaParticularABB(t *testing.T) {
-	t.Log("Se han visto casos problematicos al utilizar la funcion de hashing de K&R, por lo que " +
-		"se agrega una prueba con dicha funcion de hashing y una cadena muy larga")
-	// El caracter '~' es el de mayor valor en ASCII (126).
-	claves := make([]string, 10)
-	cadena := "%d~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" +
-		"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-	dic := TDADiccionario.CrearABB[string, string](compararCadenas)
-	valores := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J"}
-	for i := 0; i < 10; i++ {
-		claves[i] = fmt.Sprintf(cadena, i)
-		dic.Guardar(claves[i], valores[i])
-	}
-	require.EqualValues(t, 10, dic.Cantidad())
-
-	ok := true
-	for i := 0; i < 10 && ok; i++ {
-		ok = dic.Obtener(claves[i]) == valores[i]
-	}
-
-	require.True(t, ok, "Obtener clave larga funciona")
 }
 
 func TestGuardarYBorrarRepetidasVecesABB(t *testing.T) {
@@ -287,7 +263,6 @@ func ejecutarPruebaVolumenABB(b *testing.B, n int) {
 	claves := make([]string, n)
 	valores := make([]int, n)
 
-	/* Inserta 'n' parejas en el hash */
 	for i := 0; i < n; i++ {
 		valores[i] = i
 		claves[i] = fmt.Sprintf("%08d", i)
@@ -296,7 +271,6 @@ func ejecutarPruebaVolumenABB(b *testing.B, n int) {
 
 	require.EqualValues(b, n, dic.Cantidad(), "La cantidad de elementos es incorrecta")
 
-	/* Verifica que devuelva los valores correctos */
 	ok := true
 	for i := 0; i < n; i++ {
 		ok = dic.Pertenece(claves[i])
@@ -312,7 +286,6 @@ func ejecutarPruebaVolumenABB(b *testing.B, n int) {
 	require.True(b, ok, "Pertenece y Obtener con muchos elementos no funciona correctamente")
 	require.EqualValues(b, n, dic.Cantidad(), "La cantidad de elementos es incorrecta")
 
-	/* Verifica que borre y devuelva los valores correctos */
 	for i := 0; i < n; i++ {
 		ok = dic.Borrar(claves[i]) == valores[i]
 		if !ok {
