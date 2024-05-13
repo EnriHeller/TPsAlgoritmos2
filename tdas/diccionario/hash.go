@@ -2,23 +2,25 @@ package diccionario
 
 import (
 	"fmt"
-	"math"
 )
 
+type Estado int
+
+const (
+	VACIO Estado = iota
+	OCUPADO
+	BORRADO
+)
 const (
 	COEFICIENTE_REDIMENSION float64 = 0.7
 	FACTOR_REDIMENSION      int     = 2
-	VACIO                   int     = 0
-	OCUPADO                 int     = 1
-	BORRADO                 int     = 2
-
-	TAMANO int = 7
+	TAMANO                  int     = 7
 )
 
 type celdaHash[K comparable, V any] struct {
 	clave  K
 	dato   V
-	estado int
+	estado Estado
 }
 
 type hashCerrado[K comparable, V any] struct {
@@ -34,8 +36,9 @@ type iterDiccionario[K comparable, V any] struct {
 }
 
 func crearCeldaHash[K comparable, V any]() celdaHash[K, V] {
+
 	nuevaCelda := new(celdaHash[K, V])
-	nuevaCelda.estado = 0
+	nuevaCelda.estado = VACIO
 	return *nuevaCelda
 }
 
@@ -52,6 +55,7 @@ func CrearHash[K comparable, V any]() Diccionario[K, V] {
 }
 
 func crearTabla[K comparable, V any](capacidad int) []celdaHash[K, V] {
+
 	nuevaTabla := make([]celdaHash[K, V], capacidad)
 	for i := 0; i < capacidad; i++ {
 		nuevaCelda := crearCeldaHash[K, V]()
@@ -62,8 +66,6 @@ func crearTabla[K comparable, V any](capacidad int) []celdaHash[K, V] {
 
 func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
 
-	hash.redimensionar(FACTOR_REDIMENSION * hash.tam)
-
 	posicion := hash.buscar(clave)
 	celdaActual := &hash.tabla[posicion]
 
@@ -73,6 +75,11 @@ func (hash *hashCerrado[K, V]) Guardar(clave K, dato V) {
 		hash.cantidad++
 	}
 	celdaActual.dato = dato
+
+	factorCarga := float64(hash.cantidad+hash.borrados) / float64(hash.tam)
+	if factorCarga >= COEFICIENTE_REDIMENSION {
+		hash.redimensionar(FACTOR_REDIMENSION * hash.tam)
+	}
 }
 
 func (hash *hashCerrado[K, V]) Pertenece(clave K) bool {
@@ -86,9 +93,8 @@ func (hash *hashCerrado[K, V]) Obtener(clave K) V {
 	celdaActual := hash.tabla[posicion]
 	if celdaActual.estado == VACIO {
 		panic("La clave no pertenece al diccionario")
-	} else {
-		return celdaActual.dato
 	}
+	return celdaActual.dato
 }
 
 func (hash *hashCerrado[K, V]) Cantidad() int {
@@ -96,8 +102,6 @@ func (hash *hashCerrado[K, V]) Cantidad() int {
 }
 
 func (hash *hashCerrado[K, V]) Borrar(clave K) V {
-
-	hash.redimensionar(FACTOR_REDIMENSION * hash.tam)
 
 	posicion := hash.buscar(clave)
 	celdaActual := &hash.tabla[posicion]
@@ -108,6 +112,10 @@ func (hash *hashCerrado[K, V]) Borrar(clave K) V {
 	celdaActual.estado = BORRADO
 	hash.cantidad--
 	hash.borrados++
+	factorDeCarga := float64(hash.cantidad+hash.borrados) / float64(hash.tam)
+	if factorDeCarga >= COEFICIENTE_REDIMENSION && hash.borrados > hash.cantidad {
+		hash.redimensionar(hash.tam / FACTOR_REDIMENSION)
+	}
 	return celdaActual.dato
 }
 
@@ -121,7 +129,6 @@ func (hash *hashCerrado[K, V]) Iterar(visitar func(clave K, valor V) bool) {
 		if !visitar(elem.clave, elem.dato) {
 			break
 		}
-
 	}
 }
 
@@ -132,7 +139,6 @@ func (hash *hashCerrado[K, V]) Iterador() IterDiccionario[K, V] {
 			return &iterDiccionario[K, V]{hash: hash, pos: ind}
 		}
 	}
-
 	return &iterDiccionario[K, V]{hash: hash, pos: hash.tam}
 }
 
@@ -142,6 +148,7 @@ func (iter *iterDiccionario[K, V]) HaySiguiente() bool {
 }
 
 func (iter *iterDiccionario[K, V]) VerActual() (K, V) {
+
 	if !iter.HaySiguiente() {
 		panic("El iterador termino de iterar")
 	}
@@ -160,30 +167,25 @@ func (iter *iterDiccionario[K, V]) Siguiente() {
 
 	for iter.pos < iter.hash.tam {
 		if iter.hash.tabla[iter.pos].estado == OCUPADO {
-			return
+			break
 		}
 		iter.pos++
 	}
-
-	iter.pos = iter.hash.tam
+	//iter.pos = iter.hash.tam
 }
 
 func (hash *hashCerrado[K, V]) redimensionar(nuevaCapacidad int) {
 
-	factorCarga := float64((hash.cantidad + hash.borrados)) / float64(hash.tam)
+	tablaAnterior := hash.tabla
+	hash.tabla = crearTabla[K, V](nuevaCapacidad)
+	hash.tam = nuevaCapacidad
+	hash.borrados = 0
+	hash.cantidad = 0
 
-	if factorCarga >= COEFICIENTE_REDIMENSION {
-		tablaAnterior := hash.tabla
-		hash.tabla = crearTabla[K, V](nuevaCapacidad)
-		hash.tam = nuevaCapacidad
-		hash.borrados = 0
-		hash.cantidad = 0
-
-		for _, elem := range tablaAnterior {
-			if elem.estado == OCUPADO {
-				K, V := elem.clave, elem.dato
-				hash.Guardar(K, V)
-			}
+	for _, elem := range tablaAnterior {
+		if elem.estado == OCUPADO {
+			K, V := elem.clave, elem.dato
+			hash.Guardar(K, V)
 		}
 	}
 }
@@ -194,20 +196,19 @@ func convertirABytes[K comparable](clave K) []byte {
 }
 
 func sdbmHash(data []byte) uint64 {
-	var hash uint64
 
+	var hash uint64
 	for _, b := range data {
 		hash = uint64(b) + (hash << 6) + (hash << 16) - hash
 	}
-
 	return hash
 }
 
 func (hash *hashCerrado[K, V]) hashear(clave K) int {
 	claveByte := convertirABytes(clave)
 	hashing := sdbmHash(claveByte)
-	resultado := int(math.Mod(float64(hashing), float64(hash.tam)))
-	return resultado
+	resultado := hashing % uint64(hash.tam)
+	return int(resultado)
 
 }
 

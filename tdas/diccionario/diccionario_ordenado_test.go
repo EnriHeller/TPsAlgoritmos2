@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var TAMS_VOLUMEN_ABB = []int{12500, 25000, 50000}
+
 func compararCadenas(cad1, cad2 string) int {
 	if cad1 < cad2 {
 		return -1
@@ -277,4 +279,142 @@ func TestIteradorInternoValoresABB(t *testing.T) {
 	})
 
 	require.EqualValues(t, 720, factorial)
+}
+
+func ejecutarPruebaVolumenABB(b *testing.B, n int) {
+	dic := TDADiccionario.CrearABB[string, int](compararCadenas)
+
+	claves := make([]string, n)
+	valores := make([]int, n)
+
+	/* Inserta 'n' parejas en el hash */
+	for i := 0; i < n; i++ {
+		valores[i] = i
+		claves[i] = fmt.Sprintf("%08d", i)
+		dic.Guardar(claves[i], valores[i])
+	}
+
+	require.EqualValues(b, n, dic.Cantidad(), "La cantidad de elementos es incorrecta")
+
+	/* Verifica que devuelva los valores correctos */
+	ok := true
+	for i := 0; i < n; i++ {
+		ok = dic.Pertenece(claves[i])
+		if !ok {
+			break
+		}
+		ok = dic.Obtener(claves[i]) == valores[i]
+		if !ok {
+			break
+		}
+	}
+
+	require.True(b, ok, "Pertenece y Obtener con muchos elementos no funciona correctamente")
+	require.EqualValues(b, n, dic.Cantidad(), "La cantidad de elementos es incorrecta")
+
+	/* Verifica que borre y devuelva los valores correctos */
+	for i := 0; i < n; i++ {
+		ok = dic.Borrar(claves[i]) == valores[i]
+		if !ok {
+			break
+		}
+		ok = !dic.Pertenece(claves[i])
+		if !ok {
+			break
+		}
+	}
+
+	require.True(b, ok, "Borrar muchos elementos no funciona correctamente")
+	require.EqualValues(b, 0, dic.Cantidad())
+}
+
+func BenchmarkDiccionarioABB(b *testing.B) {
+	b.Log("Prueba de stress del Diccionario. Prueba guardando distinta cantidad de elementos (muy grandes), " +
+		"ejecutando muchas veces las pruebas para generar un benchmark. Valida que la cantidad " +
+		"sea la adecuada. Luego validamos que podemos obtener y ver si pertenece cada una de las claves geeneradas, " +
+		"y que luego podemos borrar sin problemas")
+	for _, n := range TAMS_VOLUMEN_ABB {
+		b.Run(fmt.Sprintf("Prueba %d elementos", n), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				ejecutarPruebaVolumenABB(b, n)
+			}
+		})
+	}
+}
+
+func TestIterarAbbVacio(t *testing.T) {
+	t.Log("Iterar sobre diccionario vacio es simplemente tenerlo al final")
+	dic := TDADiccionario.CrearABB[string, int](compararCadenas)
+	iter := dic.Iterador()
+	require.False(t, iter.HaySiguiente())
+	require.PanicsWithValue(t, "El iterador termino de iterar", func() { iter.VerActual() })
+	require.PanicsWithValue(t, "El iterador termino de iterar", func() { iter.Siguiente() })
+}
+
+func TestAbbIterar(t *testing.T) {
+	t.Log("Guardamos 3 valores en un Diccionario, e iteramos validando que las claves sean todas diferentes " +
+		"pero pertenecientes al diccionario. Además los valores de VerActual y Siguiente van siendo correctos entre sí")
+	clave1 := "Gato"
+	clave2 := "Perro"
+	clave3 := "Vaca"
+	valor1 := "miau"
+	valor2 := "guau"
+	valor3 := "moo"
+	claves := []string{clave1, clave2, clave3}
+	valores := []string{valor1, valor2, valor3}
+	dic := TDADiccionario.CrearABB[string, string](compararCadenas)
+	dic.Guardar(claves[0], valores[0])
+	dic.Guardar(claves[1], valores[1])
+	dic.Guardar(claves[2], valores[2])
+	iter := dic.Iterador()
+
+	require.True(t, iter.HaySiguiente())
+	primero, _ := iter.VerActual()
+	require.NotEqualValues(t, -1, buscarABB(primero, claves))
+
+	iter.Siguiente()
+	segundo, segundo_valor := iter.VerActual()
+	require.NotEqualValues(t, -1, buscarABB(segundo, claves))
+	require.EqualValues(t, valores[buscarABB(segundo, claves)], segundo_valor)
+	require.NotEqualValues(t, primero, segundo)
+	require.True(t, iter.HaySiguiente())
+
+	iter.Siguiente()
+	require.True(t, iter.HaySiguiente())
+	tercero, _ := iter.VerActual()
+	require.NotEqualValues(t, -1, buscarABB(tercero, claves))
+	require.NotEqualValues(t, primero, tercero)
+	require.NotEqualValues(t, segundo, tercero)
+	iter.Siguiente()
+
+	require.False(t, iter.HaySiguiente())
+	require.PanicsWithValue(t, "El iterador termino de iterar", func() { iter.VerActual() })
+	require.PanicsWithValue(t, "El iterador termino de iterar", func() { iter.Siguiente() })
+}
+
+func TestIteradorNoLlegaAlFinalABB(t *testing.T) {
+	t.Log("Crea un iterador y no lo avanza. Luego crea otro iterador y lo avanza.")
+	dic := TDADiccionario.CrearABB[string, string](compararCadenas)
+	claves := []string{"A", "B", "C"}
+	dic.Guardar(claves[0], "")
+	dic.Guardar(claves[1], "")
+	dic.Guardar(claves[2], "")
+
+	dic.Iterador()
+	iter2 := dic.Iterador()
+	iter2.Siguiente()
+	iter3 := dic.Iterador()
+	primero, _ := iter3.VerActual()
+	iter3.Siguiente()
+	segundo, _ := iter3.VerActual()
+	iter3.Siguiente()
+	tercero, _ := iter3.VerActual()
+	iter3.Siguiente()
+	require.False(t, iter3.HaySiguiente())
+	require.NotEqualValues(t, primero, segundo)
+	require.NotEqualValues(t, tercero, segundo)
+	require.NotEqualValues(t, primero, tercero)
+	require.NotEqualValues(t, -1, buscarABB(primero, claves))
+	require.NotEqualValues(t, -1, buscarABB(segundo, claves))
+	require.NotEqualValues(t, -1, buscarABB(tercero, claves))
 }
