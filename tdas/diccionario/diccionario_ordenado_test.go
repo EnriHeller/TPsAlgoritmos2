@@ -463,7 +463,9 @@ func TestVolumenIteradorCorteABB(t *testing.T) {
 
 	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
 
-	for _, i := range rand.Perm(TAMS_VOLUMEN[0]) {
+	arr := rand.Perm(TAMS_VOLUMEN_ABB[0])
+
+	for _, i := range arr {
 		dic.Guardar(i, i)
 	}
 
