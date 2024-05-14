@@ -2,6 +2,7 @@ package diccionario_test
 
 import (
 	"fmt"
+	"math/rand"
 	TDADiccionario "tdas/diccionario"
 	"testing"
 
@@ -301,6 +302,7 @@ func BenchmarkDiccionarioABB(b *testing.B) {
 		"ejecutando muchas veces las pruebas para generar un benchmark. Valida que la cantidad " +
 		"sea la adecuada. Luego validamos que podemos obtener y ver si pertenece cada una de las claves geeneradas, " +
 		"y que luego podemos borrar sin problemas")
+
 	for _, n := range TAMS_VOLUMEN_ABB {
 		b.Run(fmt.Sprintf("Prueba %d elementos", n), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
@@ -393,25 +395,7 @@ func ejecutarPruebasVolumenIteradorABB(b *testing.B, n int) {
 	claves := make([]string, n)
 	valores := make([]int, n)
 
-	for i := (n / 2); i < (3 * n / 4); i++ {
-		claves[i] = fmt.Sprintf("%08d", i)
-		valores[i] = i
-		dic.Guardar(claves[i], &valores[i])
-	}
-
-	for i := 0; i < (n / 4); i++ {
-		claves[i] = fmt.Sprintf("%08d", i)
-		valores[i] = i
-		dic.Guardar(claves[i], &valores[i])
-	}
-
-	for i := (3 * n / 4); i < n; i++ {
-		claves[i] = fmt.Sprintf("%08d", i)
-		valores[i] = i
-		dic.Guardar(claves[i], &valores[i])
-	}
-
-	for i := (n / 4); i < (n / 2); i++ {
+	for _, i := range rand.Perm(n) {
 		claves[i] = fmt.Sprintf("%08d", i)
 		valores[i] = i
 		dic.Guardar(claves[i], &valores[i])
@@ -445,6 +429,7 @@ func ejecutarPruebasVolumenIteradorABB(b *testing.B, n int) {
 		*valor = n
 		iter.Siguiente()
 	}
+
 	require.True(b, ok, "Iteracion en volumen no funciona correctamente")
 	require.EqualValues(b, n, i, "No se recorrió todo el largo")
 	require.False(b, iter.HaySiguiente(), "El iterador debe estar al final luego de recorrer")
@@ -478,7 +463,7 @@ func TestVolumenIteradorCorteABB(t *testing.T) {
 
 	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
 
-	for i := 0; i < TAMS_VOLUMEN_ABB[0]; i++ {
+	for _, i := range rand.Perm(TAMS_VOLUMEN[0]) {
 		dic.Guardar(i, i)
 	}
 
@@ -506,10 +491,11 @@ func TestVolumenIteradorCorteABB(t *testing.T) {
 func TestIterarRangoABB(t *testing.T) {
 	dic := TDADiccionario.CrearABB[float64, float64](func(f1, f2 float64) int { return int(f1 - f2) })
 
-	n := float64(TAMS_VOLUMEN_ABB[0])
+	n := TAMS_VOLUMEN_ABB[0]
 
-	for i := 0.0; i < n; i++ {
-		dic.Guardar(i, i)
+	for _, i := range rand.Perm(n) {
+		numero := float64(i)
+		dic.Guardar(numero, numero)
 	}
 
 	desde := 200.0
@@ -531,10 +517,11 @@ func TestIterarRangoABB(t *testing.T) {
 func TestIterarRangoCorteABB(t *testing.T) {
 	dic := TDADiccionario.CrearABB[float64, float64](func(f1, f2 float64) int { return int(f1 - f2) })
 
-	n := float64(TAMS_VOLUMEN_ABB[1])
+	n := TAMS_VOLUMEN_ABB[0]
 
-	for i := 0.0; i < n; i++ {
-		dic.Guardar(i, i)
+	for _, i := range rand.Perm(n) {
+		numero := float64(i)
+		dic.Guardar(numero, numero)
 	}
 
 	desde := 200.0
