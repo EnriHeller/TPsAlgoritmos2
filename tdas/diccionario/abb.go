@@ -140,7 +140,9 @@ func (arbol *abb[K, V]) iteradorInterno(nodoActual *nodoAbb[K, V], visitar func(
 	}
 
 	arbol.iteradorInterno(nodoActual.izquierdo, visitar)
-	visitar(nodoActual.clave, nodoActual.dato)
+	if !visitar(nodoActual.clave, nodoActual.dato) {
+		return
+	}
 	arbol.iteradorInterno(nodoActual.derecho, visitar)
 }
 
@@ -220,7 +222,9 @@ func (arbol *abb[K, V]) _iterarRango(nodoActual *nodoAbb[K, V], desde *K, hasta 
 	}
 
 	if arbol.cmp(nodoActual.clave, *desde) >= 0 && arbol.cmp(nodoActual.clave, *hasta) <= 0 {
-		visitar(nodoActual.clave, nodoActual.dato)
+		if !visitar(nodoActual.clave, nodoActual.dato) {
+			return
+		}
 	}
 
 	if arbol.cmp(nodoActual.clave, *hasta) <= 0 {

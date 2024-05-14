@@ -460,8 +460,7 @@ func TestVolumenIteradorCorteABB(t *testing.T) {
 
 	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
 
-	/* Inserta 'n' parejas en el hash */
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < TAMS_VOLUMEN[0]; i++ {
 		dic.Guardar(i, i)
 	}
 
@@ -469,6 +468,7 @@ func TestVolumenIteradorCorteABB(t *testing.T) {
 	siguioEjecutandoCuandoNoDebia := false
 
 	dic.Iterar(func(c int, v int) bool {
+
 		if !seguirEjecutando {
 			siguioEjecutandoCuandoNoDebia = true
 			return false
@@ -485,3 +485,59 @@ func TestVolumenIteradorCorteABB(t *testing.T) {
 		"No debería haber seguido ejecutando si encontramos un elemento que hizo que la iteración corte")
 }
 
+func TestIterarRangoABB(t *testing.T) {
+	dic := TDADiccionario.CrearABB[float64, float64](func(f1, f2 float64) int { return int(f1 - f2) })
+
+	n := float64(TAMS_VOLUMEN_ABB[0])
+
+	for i := 0.0; i < n; i++ {
+		dic.Guardar(i, i)
+	}
+
+	desde := 200.0
+	hasta := 1000.0
+
+	//Por serie aritmetica
+	resultado := ((hasta - desde + 1) / 2) * (desde + hasta)
+
+	var suma float64
+
+	dic.IterarRango(&desde, &hasta, func(clave float64, valor float64) bool {
+		suma += valor
+		return true
+	})
+
+	require.EqualValues(t, suma, resultado)
+}
+
+func TestIterarRangoCorteABB(t *testing.T) {
+	dic := TDADiccionario.CrearABB[float64, float64](func(f1, f2 float64) int { return int(f1 - f2) })
+
+	n := float64(TAMS_VOLUMEN_ABB[1])
+
+	for i := 0.0; i < n; i++ {
+		dic.Guardar(i, i)
+	}
+
+	desde := 200.0
+	hasta := 1000.0
+	primerosN := 20.0
+
+	//Por serie aritmetica
+	resultado := ((primerosN + 1) / 2) * (2*desde + primerosN)
+
+	var suma float64
+
+	dic.IterarRango(&desde, &hasta, func(clave float64, valor float64) bool {
+
+		//Cortamos tras sumar los primeros N numeros
+		if suma == resultado {
+			return false
+		}
+
+		suma += valor
+		return true
+	})
+
+	require.EqualValues(t, suma, resultado)
+}
