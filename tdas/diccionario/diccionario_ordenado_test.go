@@ -393,7 +393,25 @@ func ejecutarPruebasVolumenIteradorABB(b *testing.B, n int) {
 	claves := make([]string, n)
 	valores := make([]int, n)
 
-	for i := 0; i < n; i++ {
+	for i := (n / 2); i < (3 * n / 4); i++ {
+		claves[i] = fmt.Sprintf("%08d", i)
+		valores[i] = i
+		dic.Guardar(claves[i], &valores[i])
+	}
+
+	for i := 0; i < (n / 4); i++ {
+		claves[i] = fmt.Sprintf("%08d", i)
+		valores[i] = i
+		dic.Guardar(claves[i], &valores[i])
+	}
+
+	for i := (3 * n / 4); i < n; i++ {
+		claves[i] = fmt.Sprintf("%08d", i)
+		valores[i] = i
+		dic.Guardar(claves[i], &valores[i])
+	}
+
+	for i := (n / 4); i < (n / 2); i++ {
 		claves[i] = fmt.Sprintf("%08d", i)
 		valores[i] = i
 		dic.Guardar(claves[i], &valores[i])

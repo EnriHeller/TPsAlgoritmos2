@@ -53,10 +53,11 @@ func (arbol *abb[K, V]) buscar(padre **nodoAbb[K, V], clave K) **nodoAbb[K, V] {
 	}
 
 	claveActual := (*padre).clave
+	comparacion := arbol.cmp(clave, claveActual)
 
-	if arbol.cmp(clave, claveActual) < 0 {
+	if comparacion < 0 {
 		return arbol.buscar(&(*padre).izquierdo, clave)
-	} else if arbol.cmp(clave, claveActual) > 0 {
+	} else if comparacion > 0 {
 		return arbol.buscar(&(*padre).derecho, clave)
 	}
 
@@ -107,6 +108,7 @@ func (arbol *abb[K, V]) Borrar(clave K) V {
 	if refeActual.izquierdo != nil && refeActual.derecho == nil {
 		*busqueda = refeActual.izquierdo
 	}
+
 	if refeActual.izquierdo != nil && refeActual.derecho != nil {
 		reemplazante := buscarMasDerecho[K, V](refeActual.izquierdo)
 		refeActual.clave, refeActual.dato = reemplazante.clave, reemplazante.dato
@@ -140,9 +142,11 @@ func (arbol *abb[K, V]) iteradorInterno(nodoActual *nodoAbb[K, V], visitar func(
 	}
 
 	arbol.iteradorInterno(nodoActual.izquierdo, visitar)
+
 	if !visitar(nodoActual.clave, nodoActual.dato) {
 		return
 	}
+
 	arbol.iteradorInterno(nodoActual.derecho, visitar)
 }
 
@@ -167,16 +171,17 @@ func (iter *iterABB[K, V]) apilarSiguientes(primerNodo *nodoAbb[K, V], pila TDAP
 		return
 	}
 
-	if iter.arbol.cmp(primerNodo.clave, *iter.desde) >= 0 && iter.arbol.cmp(primerNodo.clave, *iter.hasta) <= 0 {
+	comparacionDesde := iter.arbol.cmp(*iter.desde, primerNodo.clave)
+	comparacionHasta := iter.arbol.cmp(*iter.hasta, primerNodo.clave)
+
+	if comparacionDesde <= 0 && comparacionHasta >= 0 {
 		iter.pila.Apilar(primerNodo)
 		iter.apilarSiguientes(primerNodo.izquierdo, pila)
 
-	} else if iter.arbol.cmp(primerNodo.clave, *iter.desde) < 0 {
+	} else if comparacionDesde > 0 {
 		iter.apilarSiguientes(primerNodo.derecho, pila)
-
-	} else if iter.arbol.cmp(primerNodo.clave, *iter.hasta) > 0 {
+	} else if comparacionHasta < 0 {
 		iter.apilarSiguientes(primerNodo.izquierdo, pila)
-
 	}
 }
 
