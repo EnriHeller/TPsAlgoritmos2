@@ -445,7 +445,7 @@ func BenchmarkIteradorABB(b *testing.B) {
 	b.Log("Prueba de stress del Iterador del Diccionario. Prueba guardando distinta cantidad de elementos " +
 		"(muy grandes) b.N elementos, iterarlos todos sin problemas. Se ejecuta cada prueba b.N veces para generar " +
 		"un benchmark")
-	for _, n := range TAMS_VOLUMEN {
+	for _, n := range TAMS_VOLUMEN_ABB {
 		b.Run(fmt.Sprintf("Prueba %d elementos", n), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				ejecutarPruebasVolumenIteradorABB(b, n)
@@ -460,7 +460,7 @@ func TestVolumenIteradorCorteABB(t *testing.T) {
 
 	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
 
-	for i := 0; i < TAMS_VOLUMEN[0]; i++ {
+	for i := 0; i < TAMS_VOLUMEN_ABB[0]; i++ {
 		dic.Guardar(i, i)
 	}
 
