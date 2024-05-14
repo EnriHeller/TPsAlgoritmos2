@@ -56,7 +56,7 @@ func (arbol *abb[K, V]) buscar(padre **nodoAbb[K, V], clave K) **nodoAbb[K, V] {
 		if arbol.cmp(clave, claveActual) < 0 {
 			return arbol.buscar(&(*padre).izquierdo, clave)
 		} else if arbol.cmp(clave, claveActual) > 0 {
-			return arbol.buscar(&(*padre).izquierdo, clave)
+			return arbol.buscar(&(*padre).derecho, clave)
 		} else {
 			return padre
 		}
@@ -147,11 +147,13 @@ func (arbol *abb[K, V]) iteradorInterno(nodoActual *nodoAbb[K, V], visitar func(
 func (arbol *abb[K, V]) Iterador() IterDiccionario[K, V] {
 	iter := new(iterABB[K, V])
 	iter.pila = TDAPila.CrearPilaDinamica[*nodoAbb[K, V]]()
+	iter.arbol = arbol
 	if arbol.raiz != nil {
 		minimo := buscarMasIzquierdo[K, V](arbol.raiz)
 		maximo := buscarMasDerecho[K, V](arbol.raiz)
 		iter.desde = &minimo.clave
 		iter.hasta = &maximo.clave
+
 		iter.apilarSiguientes(arbol.raiz, iter.pila)
 	}
 	return iter
@@ -162,13 +164,17 @@ func (iter *iterABB[K, V]) apilarSiguientes(primerNodo *nodoAbb[K, V], pila TDAP
 	if primerNodo == nil {
 		return
 	}
+
 	if iter.arbol.cmp(primerNodo.clave, *iter.desde) >= 0 && iter.arbol.cmp(primerNodo.clave, *iter.hasta) <= 0 {
 		iter.pila.Apilar(primerNodo)
 		iter.apilarSiguientes(primerNodo.izquierdo, pila)
+
 	} else if iter.arbol.cmp(primerNodo.clave, *iter.desde) < 0 {
 		iter.apilarSiguientes(primerNodo.derecho, pila)
+
 	} else if iter.arbol.cmp(primerNodo.clave, *iter.hasta) > 0 {
 		iter.apilarSiguientes(primerNodo.izquierdo, pila)
+
 	}
 }
 

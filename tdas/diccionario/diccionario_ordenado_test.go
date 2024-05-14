@@ -20,12 +20,7 @@ func compararCadenas(cad1, cad2 string) int {
 }
 
 func compararEnteros(a, b int) int {
-	if a < b {
-		return -1
-	} else if a > b {
-		return 1
-	}
-	return 0
+	return a - b
 }
 
 func TestDiccAbbVacio(t *testing.T) {
@@ -391,3 +386,102 @@ func TestIteradorNoLlegaAlFinalABB(t *testing.T) {
 	require.NotEqualValues(t, -1, buscarABB(segundo, claves))
 	require.NotEqualValues(t, -1, buscarABB(tercero, claves))
 }
+
+func ejecutarPruebasVolumenIteradorABB(b *testing.B, n int) {
+	dic := TDADiccionario.CrearABB[string, *int](compararCadenas)
+
+	claves := make([]string, n)
+	valores := make([]int, n)
+
+	for i := 0; i < n; i++ {
+		claves[i] = fmt.Sprintf("%08d", i)
+		valores[i] = i
+		dic.Guardar(claves[i], &valores[i])
+	}
+
+	// Prueba de iteración sobre las claves almacenadas.
+	iter := dic.Iterador()
+	require.True(b, iter.HaySiguiente())
+
+	ok := true
+	var i int
+	var clave string
+	var valor *int
+
+	for i = 0; i < n; i++ {
+		if !iter.HaySiguiente() {
+			ok = false
+			break
+		}
+		c1, v1 := iter.VerActual()
+		clave = c1
+		if clave == "" {
+			ok = false
+			break
+		}
+		valor = v1
+		if valor == nil {
+			ok = false
+			break
+		}
+		*valor = n
+		iter.Siguiente()
+	}
+	require.True(b, ok, "Iteracion en volumen no funciona correctamente")
+	require.EqualValues(b, n, i, "No se recorrió todo el largo")
+	require.False(b, iter.HaySiguiente(), "El iterador debe estar al final luego de recorrer")
+
+	ok = true
+	for i = 0; i < n; i++ {
+		if valores[i] != n {
+			ok = false
+			break
+		}
+	}
+	require.True(b, ok, "No se cambiaron todos los elementos")
+}
+
+func BenchmarkIteradorABB(b *testing.B) {
+	b.Log("Prueba de stress del Iterador del Diccionario. Prueba guardando distinta cantidad de elementos " +
+		"(muy grandes) b.N elementos, iterarlos todos sin problemas. Se ejecuta cada prueba b.N veces para generar " +
+		"un benchmark")
+	for _, n := range TAMS_VOLUMEN {
+		b.Run(fmt.Sprintf("Prueba %d elementos", n), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				ejecutarPruebasVolumenIteradorABB(b, n)
+			}
+		})
+	}
+}
+
+func TestVolumenIteradorCorteABB(t *testing.T) {
+	t.Log("Prueba de volumen de iterador interno, para validar que siempre que se indique que se corte" +
+		" la iteración con la función visitar, se corte")
+
+	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
+
+	/* Inserta 'n' parejas en el hash */
+	for i := 0; i < 10000; i++ {
+		dic.Guardar(i, i)
+	}
+
+	seguirEjecutando := true
+	siguioEjecutandoCuandoNoDebia := false
+
+	dic.Iterar(func(c int, v int) bool {
+		if !seguirEjecutando {
+			siguioEjecutandoCuandoNoDebia = true
+			return false
+		}
+		if c%100 == 0 {
+			seguirEjecutando = false
+			return false
+		}
+		return true
+	})
+
+	require.False(t, seguirEjecutando, "Se tendría que haber encontrado un elemento que genere el corte")
+	require.False(t, siguioEjecutandoCuandoNoDebia,
+		"No debería haber seguido ejecutando si encontramos un elemento que hizo que la iteración corte")
+}
+
