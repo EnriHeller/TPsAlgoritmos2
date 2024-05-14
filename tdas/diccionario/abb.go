@@ -50,7 +50,7 @@ func (arbol *abb[K, V]) buscar(padre **nodoAbb[K, V], clave K) **nodoAbb[K, V] {
 
 	if *padre == nil || (*padre).clave == clave {
 		return padre
-	} 
+	}
 
 	claveActual := (*padre).clave
 
@@ -58,7 +58,7 @@ func (arbol *abb[K, V]) buscar(padre **nodoAbb[K, V], clave K) **nodoAbb[K, V] {
 		return arbol.buscar(&(*padre).izquierdo, clave)
 	} else if arbol.cmp(clave, claveActual) > 0 {
 		return arbol.buscar(&(*padre).derecho, clave)
-	} 
+	}
 
 	return padre
 
