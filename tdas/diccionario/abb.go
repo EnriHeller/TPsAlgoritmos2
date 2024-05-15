@@ -1,7 +1,6 @@
 package diccionario
 
 import (
-	"fmt"
 	TDAPila "tdas/pila"
 )
 
@@ -74,7 +73,6 @@ func (arbol *abb[K, V]) Guardar(clave K, valor V) {
 func (arbol *abb[K, V]) Pertenece(clave K) bool {
 
 	busqueda := arbol.buscar(&arbol.raiz, clave)
-	
 	return *busqueda != nil
 }
 
@@ -93,7 +91,6 @@ func (arbol *abb[K, V]) Borrar(clave K) V {
 	}
 
 	if *busqueda == nil {
-		fmt.Println("fallo la clave", clave)
 		panic("La clave no pertenece al diccionario")
 
 	} else if (*busqueda).izquierdo == nil && (*busqueda).derecho == nil { //No tiene hijos
