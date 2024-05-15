@@ -80,8 +80,7 @@ func main() {
 
 	dic.Guardar(claves[0], valores[0])
 	dic.Guardar(claves[1], valores[1])
-	dic.Guardar(claves[2], valores[2])
-
+	
 	dic.Borrar(claves[2])
 
 }

@@ -90,7 +90,11 @@ func (arbol *abb[K, V]) Cantidad() int {
 func (arbol *abb[K, V]) Borrar(clave K) V {
 
 	busqueda := arbol.buscar(&arbol.raiz, clave)
-	dato := (*busqueda).dato
+	var dato V
+
+	if (*busqueda != nil){
+		dato = (*busqueda).dato
+	}
 
 	if *busqueda == nil {
 		panic("La clave no pertenece al diccionario")
