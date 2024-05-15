@@ -395,7 +395,7 @@ func ejecutarPruebasVolumenIteradorABB(b *testing.B, n int) {
 	claves := make([]string, n)
 	valores := make([]int, n)
 
-	for _, i := range rand.Perm(n) {
+	for i := range rand.Perm(n) {
 		claves[i] = fmt.Sprintf("%08d", i)
 		valores[i] = i
 		dic.Guardar(claves[i], &valores[i])
@@ -463,9 +463,7 @@ func TestVolumenIteradorCorteABB(t *testing.T) {
 
 	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
 
-	arr := rand.Perm(TAMS_VOLUMEN_ABB[0])
-
-	for _, i := range arr {
+	for i := range rand.Perm(TAMS_VOLUMEN_ABB[0]) {
 		dic.Guardar(i, i)
 	}
 
@@ -495,7 +493,7 @@ func TestIterarRangoABB(t *testing.T) {
 
 	n := TAMS_VOLUMEN_ABB[0]
 
-	for _, i := range rand.Perm(n) {
+	for i := range rand.Perm(n) {
 		numero := float64(i)
 		dic.Guardar(numero, numero)
 	}
@@ -521,7 +519,7 @@ func TestIterarRangoCorteABB(t *testing.T) {
 
 	n := TAMS_VOLUMEN_ABB[0]
 
-	for _, i := range rand.Perm(n) {
+	for i := range rand.Perm(n) {
 		numero := float64(i)
 		dic.Guardar(numero, numero)
 	}
