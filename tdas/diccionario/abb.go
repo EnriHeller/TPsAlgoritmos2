@@ -92,25 +92,25 @@ func (arbol *abb[K, V]) Borrar(clave K) V {
 	busqueda := arbol.buscar(&arbol.raiz, clave)
 	var dato V
 
-	if (*busqueda != nil){
+	if *busqueda != nil {
 		dato = (*busqueda).dato
 	}
 
 	if *busqueda == nil {
 		panic("La clave no pertenece al diccionario")
 
-	}else if (*busqueda).izquierdo == nil && (*busqueda).derecho == nil { //No tiene hijos
-		
+	} else if (*busqueda).izquierdo == nil && (*busqueda).derecho == nil { //No tiene hijos
 		*busqueda = nil
 
-	}else if (*busqueda).izquierdo == nil && (*busqueda).derecho != nil { //Tiene solo hijo derecho
-
+	} else if (*busqueda).izquierdo == nil && (*busqueda).derecho != nil { //Tiene solo hijo derecho
 		*busqueda = (*busqueda).derecho
+		(*busqueda).derecho = nil
 
-	}else if (*busqueda).izquierdo != nil && (*busqueda).derecho == nil { //Tiene solo hijo izquierdo
+	} else if (*busqueda).izquierdo != nil && (*busqueda).derecho == nil { //Tiene solo hijo izquierdo
 		*busqueda = (*busqueda).izquierdo
+		(*busqueda).izquierdo = nil
 
-	}else{ //Tiene los dos hijos
+	} else { //Tiene los dos hijos
 
 		reemplazante := buscarMasDerecho[K, V]((*busqueda).izquierdo)
 		(*busqueda).clave, (*busqueda).dato = (*reemplazante).clave, (*reemplazante).dato
@@ -221,6 +221,7 @@ func (iter *iterABB[K, V]) VerActual() (K, V) {
 }
 
 func (arbol *abb[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, dato V) bool) {
+
 	arbol._iterarRango(arbol.raiz, desde, hasta, visitar)
 }
 
