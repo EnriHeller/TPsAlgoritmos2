@@ -259,7 +259,7 @@ func ejecutarPruebaVolumenABB(b *testing.B, n int) {
 	claves := make([]string, n)
 	valores := make([]int, n)
 
-	for i := 0; i < n; i++ {
+	for _, i := range rand.Perm(n) {
 		valores[i] = i
 		claves[i] = fmt.Sprintf("%08d", i)
 		dic.Guardar(claves[i], valores[i])
@@ -268,7 +268,7 @@ func ejecutarPruebaVolumenABB(b *testing.B, n int) {
 	require.EqualValues(b, n, dic.Cantidad(), "La cantidad de elementos es incorrecta")
 
 	ok := true
-	for i := 0; i < n; i++ {
+	for _, i := range rand.Perm(n) {
 		ok = dic.Pertenece(claves[i])
 		if !ok {
 			break
@@ -282,7 +282,7 @@ func ejecutarPruebaVolumenABB(b *testing.B, n int) {
 	require.True(b, ok, "Pertenece y Obtener con muchos elementos no funciona correctamente")
 	require.EqualValues(b, n, dic.Cantidad(), "La cantidad de elementos es incorrecta")
 
-	for i := 0; i < n; i++ {
+	for i := 0 ; i < n ; i++ {
 		ok = dic.Borrar(claves[i]) == valores[i]
 		if !ok {
 			break
@@ -395,7 +395,7 @@ func ejecutarPruebasVolumenIteradorABB(b *testing.B, n int) {
 	claves := make([]string, n)
 	valores := make([]int, n)
 
-	for i := range rand.Perm(n) {
+	for _, i := range rand.Perm(n) {
 		claves[i] = fmt.Sprintf("%08d", i)
 		valores[i] = i
 		dic.Guardar(claves[i], &valores[i])
@@ -463,7 +463,7 @@ func TestVolumenIteradorCorteABB(t *testing.T) {
 
 	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
 
-	for i := range rand.Perm(TAMS_VOLUMEN_ABB[0]) {
+	for _, i := range rand.Perm(TAMS_VOLUMEN_ABB[0]) {
 		dic.Guardar(i, i)
 	}
 
@@ -471,15 +471,16 @@ func TestVolumenIteradorCorteABB(t *testing.T) {
 	siguioEjecutandoCuandoNoDebia := false
 
 	dic.Iterar(func(c int, v int) bool {
-
-		if !seguirEjecutando {
-			siguioEjecutandoCuandoNoDebia = true
-			return false
-		}
-		if c%100 == 0 {
+		
+		if c % 100 == 0{
 			seguirEjecutando = false
 			return false
 		}
+
+		if !seguirEjecutando{
+			siguioEjecutandoCuandoNoDebia = true
+		}
+
 		return true
 	})
 
@@ -493,7 +494,7 @@ func TestIterarRangoABB(t *testing.T) {
 
 	n := TAMS_VOLUMEN_ABB[0]
 
-	for i := range rand.Perm(n) {
+	for _, i := range rand.Perm(n) {
 		numero := float64(i)
 		dic.Guardar(numero, numero)
 	}
@@ -519,7 +520,7 @@ func TestIterarRangoCorteABB(t *testing.T) {
 
 	n := TAMS_VOLUMEN_ABB[0]
 
-	for i := range rand.Perm(n) {
+	for _, i := range rand.Perm(n) {
 		numero := float64(i)
 		dic.Guardar(numero, numero)
 	}

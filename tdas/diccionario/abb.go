@@ -1,6 +1,7 @@
 package diccionario
 
 import (
+	//"fmt"
 	TDAPila "tdas/pila"
 )
 
@@ -135,19 +136,24 @@ func (arbol *abb[K, V]) Iterar(visitar func(clave K, valor V) bool) {
 	arbol.iteradorInterno(arbol.raiz, visitar)
 }
 
-func (arbol *abb[K, V]) iteradorInterno(nodoActual *nodoAbb[K, V], visitar func(clave K, valor V) bool) {
+func (arbol *abb[K, V]) iteradorInterno(nodoActual *nodoAbb[K, V], visitar func(clave K, valor V) bool) bool{
 
-	if nodoActual == nil {
-		return
+	if nodoActual != nil {
+		if !arbol.iteradorInterno(nodoActual.izquierdo, visitar){
+			return false
+		}
+
+		if !visitar(nodoActual.clave, nodoActual.dato){
+			return false
+		}
+	
+		if !arbol.iteradorInterno(nodoActual.derecho, visitar){
+			return false
+		}
 	}
 
-	arbol.iteradorInterno(nodoActual.izquierdo, visitar)
+	return true
 
-	if !visitar(nodoActual.clave, nodoActual.dato) {
-		return
-	}
-
-	arbol.iteradorInterno(nodoActual.derecho, visitar)
 }
 
 func (arbol *abb[K, V]) Iterador() IterDiccionario[K, V] {

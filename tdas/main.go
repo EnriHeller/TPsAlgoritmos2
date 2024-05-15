@@ -66,9 +66,8 @@ func main() {
 
 	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
 
-	for i := range rand.Perm(25000) {
-		
-		dic.Guardar(i, i)
+	for _, i := range rand.Perm(21) {
+		dic.Guardar(i,i)
 	}
 	
 	seguirEjecutando := true
@@ -76,17 +75,21 @@ func main() {
 
 	dic.Iterar(func(c int, v int) bool {
 		fmt.Println("Entro la clave", c)
-		if !seguirEjecutando {
-			siguioEjecutandoCuandoNoDebia = true
-			fmt.Println("Fallo la clave", c)
-			return false
-		}
+
 		if c%100 == 0 {
 			fmt.Println("entro en la condicion", c)
 
 			seguirEjecutando = false
 			return false
 		}
+
+		if !seguirEjecutando {
+			fmt.Println("Fallo la clave", c)
+
+			siguioEjecutandoCuandoNoDebia = true
+			return false
+		}
+
 		return true
 	})
 	
