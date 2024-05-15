@@ -1,6 +1,7 @@
 package diccionario
 
 import (
+	"fmt"
 	TDAPila "tdas/pila"
 )
 
@@ -47,22 +48,15 @@ func crearNodo[K comparable, V any](clave K, valor V) *nodoAbb[K, V] {
 }
 
 func (arbol *abb[K, V]) buscar(padre **nodoAbb[K, V], clave K) **nodoAbb[K, V] {
-
 	if *padre == nil || (*padre).clave == clave {
 		return padre
 	}
 
-	claveActual := (*padre).clave
-	comparacion := arbol.cmp(clave, claveActual)
-
-	if comparacion < 0 {
+	if comparacion := arbol.cmp(clave, (*padre).clave); comparacion < 0 {
 		return arbol.buscar(&(*padre).izquierdo, clave)
-	} else if comparacion > 0 {
+	} else {
 		return arbol.buscar(&(*padre).derecho, clave)
 	}
-
-	return padre
-
 }
 
 func (arbol *abb[K, V]) Guardar(clave K, valor V) {
@@ -80,6 +74,7 @@ func (arbol *abb[K, V]) Guardar(clave K, valor V) {
 func (arbol *abb[K, V]) Pertenece(clave K) bool {
 
 	busqueda := arbol.buscar(&arbol.raiz, clave)
+	
 	return *busqueda != nil
 }
 
@@ -90,6 +85,7 @@ func (arbol *abb[K, V]) Cantidad() int {
 func (arbol *abb[K, V]) Borrar(clave K) V {
 
 	busqueda := arbol.buscar(&arbol.raiz, clave)
+	
 	var dato V
 
 	if *busqueda != nil {
@@ -97,6 +93,7 @@ func (arbol *abb[K, V]) Borrar(clave K) V {
 	}
 
 	if *busqueda == nil {
+		fmt.Println("fallo la clave", clave)
 		panic("La clave no pertenece al diccionario")
 
 	} else if (*busqueda).izquierdo == nil && (*busqueda).derecho == nil { //No tiene hijos
@@ -112,7 +109,7 @@ func (arbol *abb[K, V]) Borrar(clave K) V {
 
 	} else { //Tiene los dos hijos
 
-		reemplazante := buscarMasDerecho[K, V]((*busqueda).izquierdo)
+		reemplazante := buscarMasDerecho[K, V](&(*busqueda).izquierdo)
 		(*busqueda).clave, (*busqueda).dato = (*reemplazante).clave, (*reemplazante).dato
 		*reemplazante = nil
 
@@ -163,8 +160,8 @@ func (arbol *abb[K, V]) Iterador() IterDiccionario[K, V] {
 	iter.pila = TDAPila.CrearPilaDinamica[*nodoAbb[K, V]]()
 	iter.arbol = arbol
 	if arbol.raiz != nil {
-		minimo := buscarMasIzquierdo[K, V](arbol.raiz)
-		maximo := buscarMasDerecho[K, V](arbol.raiz)
+		minimo := buscarMasIzquierdo[K, V](&arbol.raiz)
+		maximo := buscarMasDerecho[K, V](&arbol.raiz)
 		iter.desde = &(*minimo).clave
 		iter.hasta = &(*maximo).clave
 
@@ -254,17 +251,17 @@ func (arbol *abb[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] 
 	return iter
 }
 
-func buscarMasDerecho[K comparable, V any](padre *nodoAbb[K, V]) **nodoAbb[K, V] {
+func buscarMasDerecho[K comparable, V any](padre **nodoAbb[K, V]) **nodoAbb[K, V] {
 
-	if padre.derecho == nil {
-		return &padre
+	if (*padre).derecho == nil {
+		return padre
 	}
-	return buscarMasDerecho(padre.derecho)
+	return buscarMasDerecho(&(*padre).derecho)
 }
 
-func buscarMasIzquierdo[K comparable, V any](padre *nodoAbb[K, V]) **nodoAbb[K, V] {
-	if padre.izquierdo == nil {
-		return &padre
+func buscarMasIzquierdo[K comparable, V any](padre **nodoAbb[K, V]) **nodoAbb[K, V] {
+	if (*padre).izquierdo == nil {
+		return padre
 	}
-	return buscarMasIzquierdo(padre.izquierdo)
+	return buscarMasIzquierdo(&(*padre).izquierdo)
 }

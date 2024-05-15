@@ -282,12 +282,13 @@ func ejecutarPruebaVolumenABB(b *testing.B, n int) {
 	require.True(b, ok, "Pertenece y Obtener con muchos elementos no funciona correctamente")
 	require.EqualValues(b, n, dic.Cantidad(), "La cantidad de elementos es incorrecta")
 
-	for i := 0; i < n; i++ {
-		ok = dic.Borrar(claves[i]) == valores[i]
+	for _, i := range rand.Perm(n){
+		ok = !dic.Pertenece(claves[i])
 		if !ok {
 			break
 		}
-		ok = !dic.Pertenece(claves[i])
+
+		ok = dic.Borrar(claves[i]) == valores[i]
 		if !ok {
 			break
 		}

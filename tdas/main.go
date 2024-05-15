@@ -26,33 +26,98 @@ func compararEnteros(a, b int) int {
 }
 
 /*
-TestGeneracionTodasCombinacionesReverso
-    catedra_test.go:459: Esta prueba genera todos los árboles posibles de 7 nodos con valores del 1 al 7, con sus diferentes estructuras. Para cada uno, borra los nodos del 5 al 2 (en ese orden)
-    catedra_test.go:478:
-                Error Trace:    /tmp/corrector.i30og9ah/skel/diccionario/catedra_test.go:478
-                Error:          Should be false
-                Test:           TestGeneracionTodasCombinacionesReverso
-                Messages:       Fallo al ver si pertenece 4 tras insertar en orden [1 2 3 5 4 6 7] y borrar justamente 4 (habiendo borrado los anteriores)
+
+func ejecutarPruebaVolumenABB(b *testing.B, n int) {
+	dic := TDADiccionario.CrearABB[string, int](compararCadenas)
+
+	claves := make([]string, n)
+	valores := make([]int, n)
+
+	for _, i := range rand.Perm(n) {
+		valores[i] = i
+		claves[i] = fmt.Sprintf("%08d", i)
+		dic.Guardar(claves[i], valores[i])
+	}
+
+	require.EqualValues(b, n, dic.Cantidad(), "La cantidad de elementos es incorrecta")
+
+	ok := true
+	for _, i := range rand.Perm(n) {
+		ok = dic.Pertenece(claves[i])
+		if !ok {
+			break
+		}
+		ok = dic.Obtener(claves[i]) == valores[i]
+		if !ok {
+			break
+		}
+	}
+
+	require.True(b, ok, "Pertenece y Obtener con muchos elementos no funciona correctamente")
+	require.EqualValues(b, n, dic.Cantidad(), "La cantidad de elementos es incorrecta")
+
+	for _, i := range rand.Perm(n){
+		ok = dic.Borrar(claves[i]) == valores[i]
+		if !ok {
+			break
+		}
+		ok = !dic.Pertenece(claves[i])
+		if !ok {
+			break
+		}
+	}
+
+	require.True(b, ok, "Borrar muchos elementos no funciona correctamente")
+	require.EqualValues(b, 0, dic.Cantidad())
+}
+
 */
 
 func main() {
+	n := 25000
 
-	
 	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
 
-	for _,i := range(rand.Perm(7)){
-		dic.Guardar(i,i)
+	ok := true
+
+	for _, i := range rand.Perm(n){
+		dic.Guardar(i, i)
+		ok = dic.Pertenece(i)
+
+		if !ok  { 
+			break
+		}
 	}
 
-	
-	dic.Borrar(5)
-	dic.Borrar(4)
-	dic.Borrar(3)
-	dic.Borrar(2)
+	for _, i := range rand.Perm(n) {
 
-	for i:= 5; i > 1; i --{
-		fmt.Println("El ", i, dic.Pertenece(i) )
-		
+		ok = dic.Pertenece(i)
+
+		if !ok  { 
+			fmt.Println("sep")
+			break
+		}
+
+
+		ok = dic.Obtener(i) == i
+		if !ok { 
+			fmt.Println("Se rompe en el obtener")
+			break
+		}
+
+		ok = dic.Borrar(i) == i
+		if !ok { 
+			fmt.Println("se rompio en borrar")
+			break
+		}
+
+		ok = !dic.Pertenece(i)
+		if !ok {
+			fmt.Println("Se rompe en el segundo pertenece")
+			break
+		}
 	}
+
+	fmt.Println("me dio", ok)
 
 }
