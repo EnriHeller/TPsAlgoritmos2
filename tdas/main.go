@@ -1,17 +1,13 @@
 package main
 
 import (
-	"fmt"
-	"math/rand"
 	TDADiccionario "tdas/diccionario"
 )
 
 func compararCadenas(cad1, cad2 string) int {
 	if cad1 < cad2 {
-		fmt.Println(cad1, "es menor que", cad2)
 		return -1
 	} else if cad1 > cad2 {
-		fmt.Println(cad1, "es mayor que", cad2)
 		return 1
 	}
 	return 0
@@ -29,69 +25,63 @@ func compararEnteros(a, b int) int {
 
 /*
 
-func TestVolumenIteradorCorteABB(t *testing.T) {
-	t.Log("Prueba de volumen de iterador interno, para validar que siempre que se indique que se corte" +
-		" la iteración con la función visitar, se corte")
+func TestDiccionarioBorrarABB(t *testing.T) {
+	t.Log("Guarda algunos pocos elementos en el diccionario, y se los borra, revisando que en todo momento " +
+		"el diccionario se comporte de manera adecuada")
+	clave1 := "Gato"
+	clave2 := "Perro"
+	clave3 := "Vaca"
+	valor1 := "miau"
+	valor2 := "guau"
+	valor3 := "moo"
+	claves := []string{clave1, clave2, clave3}
+	valores := []string{valor1, valor2, valor3}
+	dic := TDADiccionario.CrearABB[string, string](compararCadenas)
 
-	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
+	require.False(t, dic.Pertenece(claves[0]))
+	require.False(t, dic.Pertenece(claves[0]))
+	dic.Guardar(claves[0], valores[0])
+	dic.Guardar(claves[1], valores[1])
+	dic.Guardar(claves[2], valores[2])
 
-	for _, i := range rand.Perm(TAMS_VOLUMEN_ABB[0]) {
-		dic.Guardar(i, i)
-	}
+	require.True(t, dic.Pertenece(claves[2]))
+	require.EqualValues(t, valores[2], dic.Borrar(claves[2]))
+	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Borrar(claves[2]) })
+	require.EqualValues(t, 2, dic.Cantidad())
+	require.False(t, dic.Pertenece(claves[2]))
 
-	seguirEjecutando := true
-	siguioEjecutandoCuandoNoDebia := false
+	require.True(t, dic.Pertenece(claves[0]))
+	require.EqualValues(t, valores[0], dic.Borrar(claves[0]))
+	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Borrar(claves[0]) })
+	require.EqualValues(t, 1, dic.Cantidad())
+	require.False(t, dic.Pertenece(claves[0]))
+	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Obtener(claves[0]) })
 
-	dic.Iterar(func(c int, v int) bool {
-
-		if !seguirEjecutando {
-			siguioEjecutandoCuandoNoDebia = true
-			return false
-		}
-		if c%100 == 0 {
-			seguirEjecutando = false
-			return false
-		}
-		return true
-	})
-
-	require.False(t, seguirEjecutando, "Se tendría que haber encontrado un elemento que genere el corte")
-	require.False(t, siguioEjecutandoCuandoNoDebia,
-		"No debería haber seguido ejecutando si encontramos un elemento que hizo que la iteración corte")
+	require.True(t, dic.Pertenece(claves[1]))
+	require.EqualValues(t, valores[1], dic.Borrar(claves[1]))
+	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Borrar(claves[1]) })
+	require.EqualValues(t, 0, dic.Cantidad())
+	require.False(t, dic.Pertenece(claves[1]))
+	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() { dic.Obtener(claves[1]) })
 }
-
 */
 
 func main() {
 
-	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
+	clave1 := "Gato"
+	clave2 := "Perro"
+	clave3 := "Vaca"
+	valor1 := "miau"
+	valor2 := "guau"
+	valor3 := "moo"
+	claves := []string{clave1, clave2, clave3}
+	valores := []string{valor1, valor2, valor3}
+	dic := TDADiccionario.CrearABB[string, string](compararCadenas)
 
-	for _, i := range rand.Perm(21) {
-		dic.Guardar(i,i)
-	}
-	
-	seguirEjecutando := true
-	siguioEjecutandoCuandoNoDebia := false
+	dic.Guardar(claves[0], valores[0])
+	dic.Guardar(claves[1], valores[1])
+	dic.Guardar(claves[2], valores[2])
 
-	dic.Iterar(func(c int, v int) bool {
-		fmt.Println("Entro la clave", c)
+	dic.Borrar(claves[2])
 
-		if c%100 == 0 {
-			fmt.Println("entro en la condicion", c)
-
-			seguirEjecutando = false
-			return false
-		}
-
-		if !seguirEjecutando {
-			fmt.Println("Fallo la clave", c)
-
-			siguioEjecutandoCuandoNoDebia = true
-			return false
-		}
-
-		return true
-	})
-	
-	fmt.Println("se ejecuto cuando no debia", siguioEjecutandoCuandoNoDebia)
 }

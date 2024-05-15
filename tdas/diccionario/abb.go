@@ -1,7 +1,6 @@
 package diccionario
 
 import (
-	//"fmt"
 	TDAPila "tdas/pila"
 )
 
@@ -91,39 +90,32 @@ func (arbol *abb[K, V]) Cantidad() int {
 func (arbol *abb[K, V]) Borrar(clave K) V {
 
 	busqueda := arbol.buscar(&arbol.raiz, clave)
+	dato := (*busqueda).dato
 
-	if busqueda == nil || *busqueda == nil {
+	if *busqueda == nil {
 		panic("La clave no pertenece al diccionario")
-	}
 
-	//No tiene hijos
-	if (*busqueda).izquierdo == nil && (*busqueda).derecho == nil {
+	}else if (*busqueda).izquierdo == nil && (*busqueda).derecho == nil { //No tiene hijos
+		
 		*busqueda = nil
-	}
 
-	//Tiene solo hijo derecho
-	if (*busqueda).izquierdo == nil && (*busqueda).derecho != nil {
+	}else if (*busqueda).izquierdo == nil && (*busqueda).derecho != nil { //Tiene solo hijo derecho
+
 		*busqueda = (*busqueda).derecho
-	}
 
-	//Tiene solo hijo izquierdo
-	if (*busqueda).izquierdo != nil && (*busqueda).derecho == nil {
+	}else if (*busqueda).izquierdo != nil && (*busqueda).derecho == nil { //Tiene solo hijo izquierdo
 		*busqueda = (*busqueda).izquierdo
-	}
 
-	//Tiene los dos hijos
-	if (*busqueda).izquierdo != nil && (*busqueda).derecho != nil {
+	}else{ //Tiene los dos hijos
 
 		reemplazante := buscarMasDerecho[K, V]((*busqueda).izquierdo)
-
 		(*busqueda).clave, (*busqueda).dato = (*reemplazante).clave, (*reemplazante).dato
-
 		*reemplazante = nil
 
 	}
 
 	arbol.cantidad--
-	return (*busqueda).dato
+	return dato
 }
 
 func (arbol *abb[K, V]) Obtener(clave K) V {
