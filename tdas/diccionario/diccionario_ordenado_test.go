@@ -282,7 +282,7 @@ func ejecutarPruebaVolumenABB(b *testing.B, n int) {
 	require.True(b, ok, "Pertenece y Obtener con muchos elementos no funciona correctamente")
 	require.EqualValues(b, n, dic.Cantidad(), "La cantidad de elementos es incorrecta")
 
-	for i := 0 ; i < n ; i++ {
+	for i := 0; i < n; i++ {
 		ok = dic.Borrar(claves[i]) == valores[i]
 		if !ok {
 			break
@@ -471,14 +471,13 @@ func TestVolumenIteradorCorteABB(t *testing.T) {
 	siguioEjecutandoCuandoNoDebia := false
 
 	dic.Iterar(func(c int, v int) bool {
-		
-		if c % 100 == 0{
-			seguirEjecutando = false
-			return false
+		if !seguirEjecutando {
+			siguioEjecutandoCuandoNoDebia = true
 		}
 
-		if !seguirEjecutando{
-			siguioEjecutandoCuandoNoDebia = true
+		if c%100 == 0 {
+			seguirEjecutando = false
+			return false
 		}
 
 		return true

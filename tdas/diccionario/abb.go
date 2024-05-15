@@ -92,32 +92,38 @@ func (arbol *abb[K, V]) Borrar(clave K) V {
 
 	busqueda := arbol.buscar(&arbol.raiz, clave)
 
-	if *busqueda == nil {
+	if busqueda == nil || *busqueda == nil {
 		panic("La clave no pertenece al diccionario")
 	}
 
-	refeActual := *busqueda
-
-	if refeActual.izquierdo == nil && refeActual.derecho == nil {
+	//No tiene hijos
+	if (*busqueda).izquierdo == nil && (*busqueda).derecho == nil {
 		*busqueda = nil
 	}
 
-	if refeActual.izquierdo == nil && refeActual.derecho != nil {
-		*busqueda = refeActual.derecho
+	//Tiene solo hijo derecho
+	if (*busqueda).izquierdo == nil && (*busqueda).derecho != nil {
+		*busqueda = (*busqueda).derecho
 	}
 
-	if refeActual.izquierdo != nil && refeActual.derecho == nil {
-		*busqueda = refeActual.izquierdo
+	//Tiene solo hijo izquierdo
+	if (*busqueda).izquierdo != nil && (*busqueda).derecho == nil {
+		*busqueda = (*busqueda).izquierdo
 	}
 
-	if refeActual.izquierdo != nil && refeActual.derecho != nil {
-		reemplazante := buscarMasDerecho[K, V](refeActual.izquierdo)
-		refeActual.clave, refeActual.dato = reemplazante.clave, reemplazante.dato
-		reemplazante = nil
+	//Tiene los dos hijos
+	if (*busqueda).izquierdo != nil && (*busqueda).derecho != nil {
+
+		reemplazante := buscarMasDerecho[K, V]((*busqueda).izquierdo)
+
+		(*busqueda).clave, (*busqueda).dato = (*reemplazante).clave, (*reemplazante).dato
+
+		*reemplazante = nil
+
 	}
 
 	arbol.cantidad--
-	return refeActual.dato
+	return (*busqueda).dato
 }
 
 func (arbol *abb[K, V]) Obtener(clave K) V {
@@ -136,18 +142,18 @@ func (arbol *abb[K, V]) Iterar(visitar func(clave K, valor V) bool) {
 	arbol.iteradorInterno(arbol.raiz, visitar)
 }
 
-func (arbol *abb[K, V]) iteradorInterno(nodoActual *nodoAbb[K, V], visitar func(clave K, valor V) bool) bool{
+func (arbol *abb[K, V]) iteradorInterno(nodoActual *nodoAbb[K, V], visitar func(clave K, valor V) bool) bool {
 
 	if nodoActual != nil {
-		if !arbol.iteradorInterno(nodoActual.izquierdo, visitar){
+		if !arbol.iteradorInterno(nodoActual.izquierdo, visitar) {
 			return false
 		}
 
-		if !visitar(nodoActual.clave, nodoActual.dato){
+		if !visitar(nodoActual.clave, nodoActual.dato) {
 			return false
 		}
-	
-		if !arbol.iteradorInterno(nodoActual.derecho, visitar){
+
+		if !arbol.iteradorInterno(nodoActual.derecho, visitar) {
 			return false
 		}
 	}
@@ -163,8 +169,8 @@ func (arbol *abb[K, V]) Iterador() IterDiccionario[K, V] {
 	if arbol.raiz != nil {
 		minimo := buscarMasIzquierdo[K, V](arbol.raiz)
 		maximo := buscarMasDerecho[K, V](arbol.raiz)
-		iter.desde = &minimo.clave
-		iter.hasta = &maximo.clave
+		iter.desde = &(*minimo).clave
+		iter.hasta = &(*maximo).clave
 
 		iter.apilarSiguientes(arbol.raiz, iter.pila)
 	}
@@ -251,17 +257,17 @@ func (arbol *abb[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] 
 	return iter
 }
 
-func buscarMasDerecho[K comparable, V any](padre *nodoAbb[K, V]) *nodoAbb[K, V] {
+func buscarMasDerecho[K comparable, V any](padre *nodoAbb[K, V]) **nodoAbb[K, V] {
 
 	if padre.derecho == nil {
-		return padre
+		return &padre
 	}
 	return buscarMasDerecho(padre.derecho)
 }
 
-func buscarMasIzquierdo[K comparable, V any](padre *nodoAbb[K, V]) *nodoAbb[K, V] {
+func buscarMasIzquierdo[K comparable, V any](padre *nodoAbb[K, V]) **nodoAbb[K, V] {
 	if padre.izquierdo == nil {
-		return padre
+		return &padre
 	}
 	return buscarMasIzquierdo(padre.izquierdo)
 }
