@@ -47,11 +47,14 @@ func crearNodo[K comparable, V any](clave K, valor V) *nodoAbb[K, V] {
 }
 
 func (arbol *abb[K, V]) buscar(padre **nodoAbb[K, V], clave K) **nodoAbb[K, V] {
+
 	if *padre == nil || (*padre).clave == clave {
 		return padre
 	}
 
-	if comparacion := arbol.cmp(clave, (*padre).clave); comparacion < 0 {
+	comparacion := arbol.cmp(clave, (*padre).clave);
+
+	if comparacion < 0 {
 		return arbol.buscar(&(*padre).izquierdo, clave)
 	} else {
 		return arbol.buscar(&(*padre).derecho, clave)
@@ -83,38 +86,32 @@ func (arbol *abb[K, V]) Cantidad() int {
 func (arbol *abb[K, V]) Borrar(clave K) V {
 
 	busqueda := arbol.buscar(&arbol.raiz, clave)
-
-	var dato V
-
-	if *busqueda != nil {
-		dato = (*busqueda).dato
-	}
-
-	if *busqueda == nil {
+	
+	if *busqueda == nil{
 		panic("La clave no pertenece al diccionario")
-
-	} else if (*busqueda).izquierdo == nil && (*busqueda).derecho == nil { //No tiene hijos
-		*busqueda = nil
-
-	} else if (*busqueda).izquierdo == nil && (*busqueda).derecho != nil { //Tiene solo hijo derecho
-		*busqueda = (*busqueda).derecho
-		(*busqueda).derecho = nil
-
-	} else if (*busqueda).izquierdo != nil && (*busqueda).derecho == nil { //Tiene solo hijo izquierdo
-		*busqueda = (*busqueda).izquierdo
-		(*busqueda).izquierdo = nil
-
-	} else { //Tiene los dos hijos
-
-		reemplazante := buscarMasDerecho[K, V](&(*busqueda).izquierdo)
-		(*reemplazante).izquierdo = (*busqueda).izquierdo
-		(*reemplazante).derecho = (*busqueda).derecho
-		*busqueda = *reemplazante
-		*reemplazante = nil
-
 	}
 
-	arbol.cantidad--
+	dato := (*busqueda).dato
+
+	if (*busqueda).izquierdo == nil && (*busqueda).derecho == nil{
+		*busqueda = nil
+		arbol.cantidad --
+	}else if (*busqueda).izquierdo != nil && (*busqueda).derecho == nil{
+		(*busqueda) = (*busqueda).izquierdo
+		(*busqueda).izquierdo = nil
+		arbol.cantidad --
+	}else if (*busqueda).izquierdo == nil && (*busqueda).derecho != nil{
+		(*busqueda) = (*busqueda).derecho
+		(*busqueda).derecho = nil
+		arbol.cantidad --
+	}else{
+		izquierdoMasDerecho := buscarMasDerecho[K, V](&(*busqueda).izquierdo)
+		clave, valor := (**izquierdoMasDerecho).clave, (**izquierdoMasDerecho).dato
+
+		arbol.Borrar((*izquierdoMasDerecho).clave)
+		(*busqueda).clave, (*busqueda).dato = clave, valor
+	}
+	
 	return dato
 }
 

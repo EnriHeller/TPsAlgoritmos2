@@ -74,39 +74,41 @@ func ejecutarPruebaVolumenABB(b *testing.B, n int) {
 */
 
 func main() {
-	n := 25000
+	n := 10
 
 	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
 
 	ok := true
 
-	for _, i := range rand.Perm(n){
+	arr := rand.Perm(n)
+	fmt.Println(arr)
+
+	for _, i := range arr {
 		dic.Guardar(i, i)
 		ok = dic.Pertenece(i)
 
-		if !ok  { 
+
+		if !ok {
 			break
 		}
 	}
 
-	for _, i := range rand.Perm(n) {
+	for _, i := range arr {
 
 		ok = dic.Pertenece(i)
-
-		if !ok  { 
-			fmt.Println("sep")
+		fmt.Println("Pertenecio?", ok, i)
+		if !ok {
 			break
 		}
 
-
 		ok = dic.Obtener(i) == i
-		if !ok { 
+		if !ok {
 			fmt.Println("Se rompe en el obtener")
 			break
 		}
 
 		ok = dic.Borrar(i) == i
-		if !ok { 
+		if !ok {
 			fmt.Println("se rompio en borrar")
 			break
 		}

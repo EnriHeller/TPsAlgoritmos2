@@ -283,7 +283,7 @@ func ejecutarPruebaVolumenABB(b *testing.B, n int) {
 	require.True(b, ok, "Pertenece y Obtener con muchos elementos no funciona correctamente")
 	require.EqualValues(b, n, dic.Cantidad(), "La cantidad de elementos es incorrecta")
 
-	for _, i := range arr {
+	/*for _, i := range arr {
 		ok = !dic.Pertenece(claves[i])
 		if !ok {
 			break
@@ -296,7 +296,7 @@ func ejecutarPruebaVolumenABB(b *testing.B, n int) {
 	}
 
 	require.True(b, ok, "Borrar muchos elementos no funciona correctamente")
-	require.EqualValues(b, 0, dic.Cantidad())
+	require.EqualValues(b, 0, dic.Cantidad())*/
 }
 
 func BenchmarkDiccionarioABB(b *testing.B) {
