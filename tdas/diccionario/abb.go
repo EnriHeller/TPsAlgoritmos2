@@ -1,7 +1,6 @@
 package diccionario
 
 import (
-	
 	TDAPila "tdas/pila"
 )
 
@@ -50,16 +49,16 @@ func crearNodo[K comparable, V any](clave K, valor V) *nodoAbb[K, V] {
 func (arbol *abb[K, V]) buscar(padre **nodoAbb[K, V], clave K) **nodoAbb[K, V] {
 
 	if *padre == nil {
-        return padre
-    }
-
-    comparacion := arbol.cmp(clave, (*padre).clave)
-
-    if comparacion == 0 {
 		return padre
 	}
 
-	if comparacion < 0  { 
+	comparacion := arbol.cmp(clave, (*padre).clave)
+
+	if comparacion == 0 {
+		return padre
+	}
+
+	if comparacion < 0 {
 		return arbol.buscar(&((*padre).izquierdo), clave)
 	}
 
@@ -99,21 +98,19 @@ func (arbol *abb[K, V]) Borrar(clave K) V {
 
 	if (*busqueda).izquierdo == nil && (*busqueda).derecho == nil {
 		*busqueda = nil
-		arbol.cantidad--
 	} else if (*busqueda).izquierdo != nil && (*busqueda).derecho == nil {
 		(*busqueda) = (*busqueda).izquierdo
-		(*busqueda).izquierdo = nil
-		arbol.cantidad--
 	} else if (*busqueda).izquierdo == nil && (*busqueda).derecho != nil {
 		(*busqueda) = (*busqueda).derecho
-		arbol.cantidad--
 	} else {
 		izquierdoMasDerecho := buscarMasDerecho[K, V](&(*busqueda).izquierdo)
 		clave, valor := (**izquierdoMasDerecho).clave, (**izquierdoMasDerecho).dato
 		arbol.Borrar((*izquierdoMasDerecho).clave)
+		arbol.cantidad++
 		(*busqueda).clave, (*busqueda).dato = clave, valor
 	}
 
+	arbol.cantidad--
 	return dato
 }
 

@@ -255,22 +255,26 @@ func TestIteradorInternoValoresABB(t *testing.T) {
 
 func ejecutarPruebaVolumenABB(b *testing.B, n int) {
 	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
-
 	arr := rand.Perm(n)
+	ok := true
 
-	for _, randIndice := range arr {
-		dic.Guardar(randIndice, randIndice)
+	for i := 0; i < len(arr); i++ {
+		dic.Guardar(arr[i], arr[i])
+		ok = dic.Pertenece(arr[i])
+
+		if !ok {
+			break
+		}
 	}
 
 	require.EqualValues(b, n, dic.Cantidad(), "La cantidad de elementos es incorrecta")
 
-	ok := true
-	for _, randIndice := range arr {
-		ok = dic.Pertenece(randIndice)
+	for i := 0; i < len(arr); i++ {
+		ok = dic.Pertenece(arr[i])
 		if !ok {
 			break
 		}
-		ok = dic.Obtener(randIndice) == randIndice
+		ok = dic.Obtener(arr[i]) == arr[i]
 		if !ok {
 			break
 		}
@@ -279,10 +283,10 @@ func ejecutarPruebaVolumenABB(b *testing.B, n int) {
 	require.True(b, ok, "Pertenece y Obtener con muchos elementos no funciona correctamente")
 	require.EqualValues(b, n, dic.Cantidad(), "La cantidad de elementos es incorrecta")
 
-	for _, randIndice := range arr {
-		require.EqualValues(b, true, dic.Pertenece(randIndice))
-		require.EqualValues(b, randIndice, dic.Obtener(randIndice))
-		require.EqualValues(b, randIndice, dic.Borrar(randIndice))
+	for i := 0; i < len(arr); i++ {
+		require.EqualValues(b, true, dic.Pertenece(arr[i]))
+		require.EqualValues(b, arr[i], dic.Obtener(arr[i]))
+		require.EqualValues(b, arr[i], dic.Borrar(arr[i]))
 	}
 }
 
@@ -295,7 +299,7 @@ func BenchmarkDiccionarioABB(b *testing.B) {
 	for _, n := range TAMS_VOLUMEN_ABB {
 		b.Run(fmt.Sprintf("Prueba %d elementos", n), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				ejecutarPruebaVolumenABB(b,n)
+				ejecutarPruebaVolumenABB(b, n)
 			}
 		})
 	}
