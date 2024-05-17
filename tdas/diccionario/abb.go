@@ -83,7 +83,7 @@ func (arbol *abb[K, V]) Cantidad() int {
 func (arbol *abb[K, V]) Borrar(clave K) V {
 
 	busqueda := arbol.buscar(&arbol.raiz, clave)
-	
+
 	var dato V
 
 	if *busqueda != nil {
@@ -107,7 +107,9 @@ func (arbol *abb[K, V]) Borrar(clave K) V {
 	} else { //Tiene los dos hijos
 
 		reemplazante := buscarMasDerecho[K, V](&(*busqueda).izquierdo)
-		(*busqueda).clave, (*busqueda).dato = (*reemplazante).clave, (*reemplazante).dato
+		(*reemplazante).izquierdo = (*busqueda).izquierdo
+		(*reemplazante).derecho = (*busqueda).derecho
+		*busqueda = *reemplazante
 		*reemplazante = nil
 
 	}
