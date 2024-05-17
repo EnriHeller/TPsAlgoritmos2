@@ -56,12 +56,9 @@ func (arbol *abb[K, V]) buscar(padre **nodoAbb[K, V], clave K) **nodoAbb[K, V] {
 
 	if comparacion < 0 {
 		return arbol.buscar(&(*padre).izquierdo, clave)
-	} else if comparacion > 0 {
+	} else {
 		return arbol.buscar(&(*padre).derecho, clave)
 	}
-
-	return padre
-
 }
 
 func (arbol *abb[K, V]) Guardar(clave K, valor V) {
@@ -98,20 +95,23 @@ func (arbol *abb[K, V]) Borrar(clave K) V {
 
 	if (*busqueda).izquierdo == nil && (*busqueda).derecho == nil {
 		*busqueda = nil
+		arbol.cantidad--
 	} else if (*busqueda).izquierdo != nil && (*busqueda).derecho == nil {
 		(*busqueda) = (*busqueda).izquierdo
 		(*busqueda).izquierdo = nil
+		arbol.cantidad--
 	} else if (*busqueda).izquierdo == nil && (*busqueda).derecho != nil {
 		(*busqueda) = (*busqueda).derecho
 		(*busqueda).derecho = nil
+		arbol.cantidad--
 	} else {
 		izquierdoMasDerecho := buscarMasDerecho[K, V](&(*busqueda).izquierdo)
+		clave, valor := (**izquierdoMasDerecho).clave, (**izquierdoMasDerecho).dato
 
 		arbol.Borrar((*izquierdoMasDerecho).clave)
-		(*busqueda).clave, (*busqueda).dato = (*izquierdoMasDerecho).clave, (*izquierdoMasDerecho).dato
+		(*busqueda).clave, (*busqueda).dato = clave, valor
 	}
 
-	arbol.cantidad--
 	return dato
 }
 
