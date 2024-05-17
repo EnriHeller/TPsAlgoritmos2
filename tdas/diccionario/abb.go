@@ -1,7 +1,6 @@
 package diccionario
 
 import (
-	"fmt"
 	TDAPila "tdas/pila"
 )
 
@@ -172,9 +171,6 @@ func (iter *iterABB[K, V]) apilarSiguientes(primerNodo *nodoAbb[K, V]) {
 		return
 	}
 
-	fmt.Println("llego el", *iter.desde)
-	fmt.Println("llego el", primerNodo.clave)
-	fmt.Println("llego el", iter.arbol)
 	comparacionDesde := iter.arbol.cmp(*iter.desde, primerNodo.clave)
 	comparacionHasta := iter.arbol.cmp(*iter.hasta, primerNodo.clave)
 
@@ -246,9 +242,22 @@ func (arbol *abb[K, V]) _iterarRango(nodoActual *nodoAbb[K, V], desde *K, hasta 
 func (arbol *abb[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] {
 	iter := new(iterABB[K, V])
 	iter.pila = TDAPila.CrearPilaDinamica[*nodoAbb[K, V]]()
-	iter.desde = desde
-	iter.hasta = hasta
+
 	iter.arbol = arbol
+
+	if desde != nil {
+		iter.desde = desde
+	} else {
+		minimo := buscarMasIzquierdo[K, V](&arbol.raiz)
+		iter.desde = &(*minimo).clave
+	}
+
+	if hasta != nil {
+		iter.hasta = hasta
+	} else {
+		maximo := buscarMasDerecho[K, V](&arbol.raiz)
+		iter.hasta = &(*maximo).clave
+	}
 
 	iter.apilarSiguientes(arbol.raiz)
 	return iter
