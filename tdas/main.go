@@ -61,63 +61,17 @@ dic := TDADiccionario.CrearABB[int, int](compararEnteros)
 */
 
 func main() {
-	//n := 10
-	//arr := rand.Perm(n)
 
 	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
-
-	ok := true
-
 	arr := [10]int{25,10,7,15,5,9,30,27,50,28}
-	fmt.Println(arr)
 
 	for i := 0; i<len(arr); i++{
 		dic.Guardar(arr[i], arr[i])
-		ok = dic.Pertenece(arr[i])
-
-		if !ok {
-			break
-		}
 	}
+	desde := 125
+	hasta := 300
+	iter := dic.IteradorRango(&desde, &hasta)
 
-	for i := 0; i<len(arr); i++{
-
-		ok = dic.Pertenece(arr[i])
-
-		fmt.Println("Pertenecio?", ok, arr[i])
-
-		if !ok {
-			break
-		}
-		
-		ok = dic.Obtener(arr[i]) == arr[i]
-
-		if !ok {
-			fmt.Println("Se rompe en el obtener")
-			break
-		}
-
-		ok = (dic.Borrar(arr[i]) == arr[i])
-
-		if arr[i] == 10{
-			break
-		}
-		if !ok {
-			fmt.Println("se rompio en borrar")
-			break
-		}
-
-		/*
-	
-		
-		ok = !dic.Pertenece(i)
-
-		if !ok {
-			fmt.Println("Se rompe en el segundo pertenece")
-			break
-		}*/
-	}
-
-	fmt.Println("me dio", ok)
+	fmt.Println(iter.VerActual())
 
 }

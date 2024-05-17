@@ -1,6 +1,7 @@
 package diccionario
 
 import (
+	"fmt"
 	TDAPila "tdas/pila"
 )
 
@@ -160,29 +161,33 @@ func (arbol *abb[K, V]) Iterador() IterDiccionario[K, V] {
 		iter.desde = &(*minimo).clave
 		iter.hasta = &(*maximo).clave
 
-		iter.apilarSiguientes(arbol.raiz, iter.pila)
+		iter.apilarSiguientes(arbol.raiz)
 	}
 	return iter
 }
 
-func (iter *iterABB[K, V]) apilarSiguientes(primerNodo *nodoAbb[K, V], pila TDAPila.Pila[*nodoAbb[K, V]]) {
+func (iter *iterABB[K, V]) apilarSiguientes(primerNodo *nodoAbb[K, V]) {
 
 	if primerNodo == nil {
 		return
 	}
 
+	fmt.Println("llego el", *iter.desde)
+	fmt.Println("llego el", primerNodo.clave)
+	fmt.Println("llego el", iter.arbol)
 	comparacionDesde := iter.arbol.cmp(*iter.desde, primerNodo.clave)
 	comparacionHasta := iter.arbol.cmp(*iter.hasta, primerNodo.clave)
 
 	if comparacionDesde <= 0 && comparacionHasta >= 0 {
 		iter.pila.Apilar(primerNodo)
-		iter.apilarSiguientes(primerNodo.izquierdo, pila)
+		iter.apilarSiguientes(primerNodo.izquierdo)
 
 	} else if comparacionDesde > 0 {
-		iter.apilarSiguientes(primerNodo.derecho, pila)
+		iter.apilarSiguientes(primerNodo.derecho)
 	} else if comparacionHasta < 0 {
-		iter.apilarSiguientes(primerNodo.izquierdo, pila)
+		iter.apilarSiguientes(primerNodo.izquierdo)
 	}
+
 }
 
 func (iter *iterABB[K, V]) HaySiguiente() bool {
@@ -197,7 +202,7 @@ func (iter *iterABB[K, V]) Siguiente() {
 	}
 
 	nodoActual := iter.pila.Desapilar()
-	iter.apilarSiguientes(nodoActual.derecho, iter.pila)
+	iter.apilarSiguientes(nodoActual.derecho)
 }
 
 func (iter *iterABB[K, V]) VerActual() (K, V) {
@@ -243,7 +248,9 @@ func (arbol *abb[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] 
 	iter.pila = TDAPila.CrearPilaDinamica[*nodoAbb[K, V]]()
 	iter.desde = desde
 	iter.hasta = hasta
-	iter.apilarSiguientes(arbol.raiz, iter.pila)
+	iter.arbol = arbol
+
+	iter.apilarSiguientes(arbol.raiz)
 	return iter
 }
 
