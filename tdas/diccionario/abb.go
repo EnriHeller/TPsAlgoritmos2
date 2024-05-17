@@ -215,6 +215,16 @@ func (iter *iterABB[K, V]) VerActual() (K, V) {
 
 func (arbol *abb[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, dato V) bool) {
 
+	if desde == nil{
+		minimo := buscarMasDerecho[K,V](&arbol.raiz)
+		desde = &(*minimo).clave
+	}
+
+	if hasta == nil{
+		maximo := buscarMasDerecho[K,V](&arbol.raiz)
+		hasta = &(*maximo).clave
+	}
+
 	arbol._iterarRango(arbol.raiz, desde, hasta, visitar)
 }
 
