@@ -63,15 +63,15 @@ dic := TDADiccionario.CrearABB[int, int](compararEnteros)
 func main() {
 
 	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
-	arr := [10]int{25,10,7,15,5,9,30,27,50,28}
+	arr := [10]int{25, 10, 7, 15, 5, 9, 30, 27, 50, 28}
 
-	for i := 0; i<len(arr); i++{
+	for i := 0; i < len(arr); i++ {
 		dic.Guardar(arr[i], arr[i])
 	}
 	desde := 125
 	hasta := 300
 	iter := dic.IteradorRango(&desde, &hasta)
-
+	fmt.Println(iter)
 	fmt.Println(iter.VerActual())
 
 }

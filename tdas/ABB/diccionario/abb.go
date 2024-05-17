@@ -151,8 +151,17 @@ func (arbol *abb[K, V]) iteradorInterno(nodoActual *nodoAbb[K, V], visitar func(
 }
 
 func (arbol *abb[K, V]) Iterador() IterDiccionario[K, V] {
+	iter := new(iterABB[K, V])
+	iter.pila = TDAPila.CrearPilaDinamica[*nodoAbb[K, V]]()
+	iter.arbol = arbol
+	if arbol.raiz != nil {
+		minimo := buscarMasIzquierdo[K, V](&arbol.raiz)
+		maximo := buscarMasDerecho[K, V](&arbol.raiz)
+		iter.desde = &(*minimo).clave
+		iter.hasta = &(*maximo).clave
 
-	iter := arbol.IteradorRango(nil, nil)
+		iter.apilarSiguientes(arbol.raiz)
+	}
 	return iter
 }
 
@@ -206,16 +215,6 @@ func (iter *iterABB[K, V]) VerActual() (K, V) {
 
 func (arbol *abb[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, dato V) bool) {
 
-	if desde == nil {
-		minimo := buscarMasIzquierdo[K, V](&arbol.raiz)
-		desde = &(*minimo).clave
-	}
-
-	if hasta == nil {
-		maximo := buscarMasDerecho[K, V](&arbol.raiz)
-		hasta = &(*maximo).clave
-	}
-
 	arbol._iterarRango(arbol.raiz, desde, hasta, visitar)
 }
 
@@ -241,14 +240,10 @@ func (arbol *abb[K, V]) _iterarRango(nodoActual *nodoAbb[K, V], desde *K, hasta 
 }
 
 func (arbol *abb[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] {
-
 	iter := new(iterABB[K, V])
 	iter.pila = TDAPila.CrearPilaDinamica[*nodoAbb[K, V]]()
-	iter.arbol = arbol
 
-	if arbol.raiz == nil {
-		return iter
-	}
+	iter.arbol = arbol
 
 	if desde != nil {
 		iter.desde = desde
@@ -270,14 +265,14 @@ func (arbol *abb[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] 
 
 func buscarMasDerecho[K comparable, V any](padre **nodoAbb[K, V]) **nodoAbb[K, V] {
 
-	if (*padre) == nil || (*padre).derecho == nil {
+	if (*padre).derecho == nil {
 		return padre
 	}
 	return buscarMasDerecho(&(*padre).derecho)
 }
 
 func buscarMasIzquierdo[K comparable, V any](padre **nodoAbb[K, V]) **nodoAbb[K, V] {
-	if (*padre) == nil || (*padre).izquierdo == nil {
+	if (*padre).izquierdo == nil {
 		return padre
 	}
 	return buscarMasIzquierdo(&(*padre).izquierdo)
