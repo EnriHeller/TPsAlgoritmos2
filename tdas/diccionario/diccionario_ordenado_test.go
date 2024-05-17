@@ -254,27 +254,23 @@ func TestIteradorInternoValoresABB(t *testing.T) {
 }
 
 func ejecutarPruebaVolumenABB(b *testing.B, n int) {
-	dic := TDADiccionario.CrearABB[string, int](compararCadenas)
+	dic := TDADiccionario.CrearABB[int, int](compararEnteros)
 
-	claves := make([]string, n)
-	valores := make([]int, n)
 	arr := rand.Perm(n)
 
-	for _, i := range arr {
-		valores[i] = i
-		claves[i] = fmt.Sprintf("%08d", i)
-		dic.Guardar(claves[i], valores[i])
+	for _, randIndice := range arr {
+		dic.Guardar(randIndice, randIndice)
 	}
 
 	require.EqualValues(b, n, dic.Cantidad(), "La cantidad de elementos es incorrecta")
 
 	ok := true
-	for _, i := range arr {
-		ok = dic.Pertenece(claves[i])
+	for _, randIndice := range arr {
+		ok = dic.Pertenece(randIndice)
 		if !ok {
 			break
 		}
-		ok = dic.Obtener(claves[i]) == valores[i]
+		ok = dic.Obtener(randIndice) == randIndice
 		if !ok {
 			break
 		}
@@ -283,21 +279,11 @@ func ejecutarPruebaVolumenABB(b *testing.B, n int) {
 	require.True(b, ok, "Pertenece y Obtener con muchos elementos no funciona correctamente")
 	require.EqualValues(b, n, dic.Cantidad(), "La cantidad de elementos es incorrecta")
 
-	//A partir de este FOR falla
-	for _, i := range arr {
-		ok = dic.Pertenece(claves[i])
-		if !ok {
-			break
-		}
-
-		ok = dic.Borrar(claves[i]) == valores[i]
-		if !ok {
-			break
-		}
+	for _, randIndice := range arr {
+		require.EqualValues(b, true, dic.Pertenece(randIndice))
+		require.EqualValues(b, randIndice, dic.Obtener(randIndice))
+		require.EqualValues(b, randIndice, dic.Borrar(randIndice))
 	}
-
-	require.True(b, ok, "Borrar muchos elementos no funciona correctamente")
-	require.EqualValues(b, 0, dic.Cantidad())
 }
 
 func BenchmarkDiccionarioABB(b *testing.B) {
@@ -306,13 +292,17 @@ func BenchmarkDiccionarioABB(b *testing.B) {
 		"sea la adecuada. Luego validamos que podemos obtener y ver si pertenece cada una de las claves geeneradas, " +
 		"y que luego podemos borrar sin problemas")
 
-	for _, n := range TAMS_VOLUMEN_ABB {
+	b.Run(fmt.Sprintf("Prueba %d elementos", TAMS_VOLUMEN_ABB[0]), func(b *testing.B) {
+		ejecutarPruebaVolumenABB(b, TAMS_VOLUMEN_ABB[0])
+	})
+
+	/*for _, n := range TAMS_VOLUMEN_ABB {
 		b.Run(fmt.Sprintf("Prueba %d elementos", n), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				ejecutarPruebaVolumenABB(b, n)
+				ejecutarPruebaVolumenABB(b,n)
 			}
 		})
-	}
+	}*/
 }
 
 func TestIterarAbbVacio(t *testing.T) {

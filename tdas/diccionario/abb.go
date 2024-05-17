@@ -48,17 +48,21 @@ func crearNodo[K comparable, V any](clave K, valor V) *nodoAbb[K, V] {
 
 func (arbol *abb[K, V]) buscar(padre **nodoAbb[K, V], clave K) **nodoAbb[K, V] {
 
-	if *padre == nil || (*padre).clave == clave {
+	if *padre == nil {
+        return padre
+    }
+
+    comparacion := arbol.cmp(clave, (*padre).clave)
+
+    if comparacion == 0 {
 		return padre
 	}
 
-	comparacion := arbol.cmp(clave, (*padre).clave)
-
-	if comparacion < 0 {
-		return arbol.buscar(&(*padre).izquierdo, clave)
-	} else {
-		return arbol.buscar(&(*padre).derecho, clave)
+	if comparacion < 0  { 
+		return arbol.buscar(&((*padre).izquierdo), clave)
 	}
+
+	return arbol.buscar(&((*padre).derecho), clave)
 }
 
 func (arbol *abb[K, V]) Guardar(clave K, valor V) {
@@ -70,7 +74,6 @@ func (arbol *abb[K, V]) Guardar(clave K, valor V) {
 	} else {
 		(*busqueda).dato = valor
 	}
-
 }
 
 func (arbol *abb[K, V]) Pertenece(clave K) bool {
