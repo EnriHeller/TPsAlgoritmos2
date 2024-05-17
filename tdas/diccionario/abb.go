@@ -1,6 +1,7 @@
 package diccionario
 
 import (
+	
 	TDAPila "tdas/pila"
 )
 
@@ -105,12 +106,10 @@ func (arbol *abb[K, V]) Borrar(clave K) V {
 		arbol.cantidad--
 	} else if (*busqueda).izquierdo == nil && (*busqueda).derecho != nil {
 		(*busqueda) = (*busqueda).derecho
-		(*busqueda).derecho = nil
 		arbol.cantidad--
 	} else {
 		izquierdoMasDerecho := buscarMasDerecho[K, V](&(*busqueda).izquierdo)
 		clave, valor := (**izquierdoMasDerecho).clave, (**izquierdoMasDerecho).dato
-
 		arbol.Borrar((*izquierdoMasDerecho).clave)
 		(*busqueda).clave, (*busqueda).dato = clave, valor
 	}

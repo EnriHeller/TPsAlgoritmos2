@@ -99,6 +99,9 @@ func main() {
 
 		ok = (dic.Borrar(arr[i]) == arr[i])
 
+		if arr[i] == 10{
+			break
+		}
 		if !ok {
 			fmt.Println("se rompio en borrar")
 			break

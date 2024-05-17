@@ -292,17 +292,13 @@ func BenchmarkDiccionarioABB(b *testing.B) {
 		"sea la adecuada. Luego validamos que podemos obtener y ver si pertenece cada una de las claves geeneradas, " +
 		"y que luego podemos borrar sin problemas")
 
-	b.Run(fmt.Sprintf("Prueba %d elementos", TAMS_VOLUMEN_ABB[0]), func(b *testing.B) {
-		ejecutarPruebaVolumenABB(b, TAMS_VOLUMEN_ABB[0])
-	})
-
-	/*for _, n := range TAMS_VOLUMEN_ABB {
+	for _, n := range TAMS_VOLUMEN_ABB {
 		b.Run(fmt.Sprintf("Prueba %d elementos", n), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				ejecutarPruebaVolumenABB(b,n)
 			}
 		})
-	}*/
+	}
 }
 
 func TestIterarAbbVacio(t *testing.T) {
