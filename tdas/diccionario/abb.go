@@ -52,13 +52,16 @@ func (arbol *abb[K, V]) buscar(padre **nodoAbb[K, V], clave K) **nodoAbb[K, V] {
 		return padre
 	}
 
-	comparacion := arbol.cmp(clave, (*padre).clave);
+	comparacion := arbol.cmp(clave, (*padre).clave)
 
 	if comparacion < 0 {
 		return arbol.buscar(&(*padre).izquierdo, clave)
-	} else {
+	} else if comparacion > 0 {
 		return arbol.buscar(&(*padre).derecho, clave)
 	}
+
+	return padre
+
 }
 
 func (arbol *abb[K, V]) Guardar(clave K, valor V) {
@@ -86,32 +89,29 @@ func (arbol *abb[K, V]) Cantidad() int {
 func (arbol *abb[K, V]) Borrar(clave K) V {
 
 	busqueda := arbol.buscar(&arbol.raiz, clave)
-	
-	if *busqueda == nil{
+
+	if *busqueda == nil {
 		panic("La clave no pertenece al diccionario")
 	}
 
 	dato := (*busqueda).dato
 
-	if (*busqueda).izquierdo == nil && (*busqueda).derecho == nil{
+	if (*busqueda).izquierdo == nil && (*busqueda).derecho == nil {
 		*busqueda = nil
-		arbol.cantidad --
-	}else if (*busqueda).izquierdo != nil && (*busqueda).derecho == nil{
+	} else if (*busqueda).izquierdo != nil && (*busqueda).derecho == nil {
 		(*busqueda) = (*busqueda).izquierdo
 		(*busqueda).izquierdo = nil
-		arbol.cantidad --
-	}else if (*busqueda).izquierdo == nil && (*busqueda).derecho != nil{
+	} else if (*busqueda).izquierdo == nil && (*busqueda).derecho != nil {
 		(*busqueda) = (*busqueda).derecho
 		(*busqueda).derecho = nil
-		arbol.cantidad --
-	}else{
+	} else {
 		izquierdoMasDerecho := buscarMasDerecho[K, V](&(*busqueda).izquierdo)
-		clave, valor := (**izquierdoMasDerecho).clave, (**izquierdoMasDerecho).dato
 
 		arbol.Borrar((*izquierdoMasDerecho).clave)
-		(*busqueda).clave, (*busqueda).dato = clave, valor
+		(*busqueda).clave, (*busqueda).dato = (*izquierdoMasDerecho).clave, (*izquierdoMasDerecho).dato
 	}
-	
+
+	arbol.cantidad--
 	return dato
 }
 
