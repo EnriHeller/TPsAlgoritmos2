@@ -19,6 +19,8 @@ func CrearHeap[T any](funcion_cmp func(T, T) int) ColaPrioridad[T] {
 
 func CrearHeapArr[T any](arreglo []T, funcion_cmp func(T, T) int) ColaPrioridad[T] {
 
+
+
 }
 
 func (heap *colaConPrioridad[T]) Cantidad() int {
@@ -39,9 +41,22 @@ func (heap *colaConPrioridad[T]) VerMax() T {
 
 func (heap *colaConPrioridad[T]) Encolar(dato T) {
 
+	if 
+
 }
 
 func (heap *colaConPrioridad[T]) Desencolar() T {
 
 	return heap.datos[0]
+}
+
+
+func swap(dato1 *T, dato2 *T) {
+	*dato1, *dato2 = *dato, *dato1
+}
+
+
+func downHeap[T any](arr []T, func_cmp func(T, T) int, cantidad, indice int) {
+
+	if indice >=
 }
