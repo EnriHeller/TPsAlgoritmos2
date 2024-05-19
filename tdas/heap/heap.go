@@ -3,6 +3,8 @@ package cola_prioridad
 const (
 	CAPACIDAD_INICIAL int = 10
 	CANT_INICIAL      int = 0
+	COEF_REDIMENSION  int = 4
+	VALOR_REDIMENSION int = 2
 )
 
 type colaConPrioridad[T any] struct {
@@ -41,13 +43,30 @@ func (heap *colaConPrioridad[T]) VerMax() T {
 
 func (heap *colaConPrioridad[T]) Encolar(dato T) {
 
-	if 
-
+	heap.datos[heap.cant] = dato
+	heap.cant++
+	heapity(heap.datos, heap.cmp)
+	cap := len(heap.datos)
+	if heap.cant == cap {
+		heap.redimensionar(heap.cant * VALOR_REDIMENSION)
+	}
+	upHeap(...)
 }
 
 func (heap *colaConPrioridad[T]) Desencolar() T {
 
-	return heap.datos[0]
+	if heap.cant == 0 {
+		panic("La cola esta vacia")
+	}
+	dato := heap.datos[0]
+	cap := len(heap.datos)
+	if heap.cant * COEF_REDIMENSION <= cap && cap > CAPACIDAD_INICIAL {
+		heap.redimensionar(cap / VALOR_REDIMENSION)
+	}
+	heap.cant--
+	downHeap()
+
+	return dato
 }
 
 
@@ -56,7 +75,30 @@ func swap(dato1 *T, dato2 *T) {
 }
 
 
-func downHeap[T any](arr []T, func_cmp func(T, T) int, cantidad, indice int) {
+func downHeap[T any]() {
 
-	if indice >=
+}
+
+func upHeap[T any](){
+
+}
+
+
+func obtenerMayor(arr []T, padre, der, izq T, func_cmp func(T,T)int) int {
+
+	max := padre
+
+	if func_cmp(arr[padre], arr[der]) < 0 && arr[der] > arr[izq]{
+		max = der
+	} else if func_cmp(arr[padre], arr[izq]) < 0 && arr[izq] > arr[der] [
+		max = izq
+	]
+	return max
+}
+
+func (heap *colaConPrioridad[T])redimensionar(nuevaCapacidad int) {
+
+	nuevo := make([]T, nuevaCapacidad)
+	copy(nueva, heap.datos)
+	heap.datos = nueva
 }
