@@ -14,15 +14,14 @@ type colaConPrioridad[T any] struct {
 }
 
 func CrearHeap[T any](funcion_cmp func(T, T) int) ColaPrioridad[T] {
-
 	nuevo := make([]T, CAPACIDAD_INICIAL)
 	return &colaConPrioridad[T]{datos: nuevo, cant: CANT_INICIAL, cmp: funcion_cmp}
 }
 
 func CrearHeapArr[T any](arreglo []T, funcion_cmp func(T, T) int) ColaPrioridad[T] {
-
-
-
+	//Aca habrá que hacer downheap del ultimo al primero con cada elemento del arreglo
+	nuevo := make([]T, CAPACIDAD_INICIAL)
+	return &colaConPrioridad[T]{datos: nuevo, cant: CANT_INICIAL, cmp: funcion_cmp}
 }
 
 func (heap *colaConPrioridad[T]) Cantidad() int {
@@ -38,6 +37,7 @@ func (heap *colaConPrioridad[T]) VerMax() T {
 	if heap.cant == CANT_INICIAL {
 		panic("La cola esta vacia")
 	}
+
 	return heap.datos[0]
 }
 
@@ -45,12 +45,14 @@ func (heap *colaConPrioridad[T]) Encolar(dato T) {
 
 	heap.datos[heap.cant] = dato
 	heap.cant++
-	heapity(heap.datos, heap.cmp)
+	heap.upHeap(heap.cant - 1)
+
+	/*heapify(heap.datos, heap.cmp)
 	cap := len(heap.datos)
 	if heap.cant == cap {
 		heap.redimensionar(heap.cant * VALOR_REDIMENSION)
-	}
-	upHeap(...)
+	}*/
+
 }
 
 func (heap *colaConPrioridad[T]) Desencolar() T {
@@ -60,45 +62,96 @@ func (heap *colaConPrioridad[T]) Desencolar() T {
 	}
 	dato := heap.datos[0]
 	cap := len(heap.datos)
-	if heap.cant * COEF_REDIMENSION <= cap && cap > CAPACIDAD_INICIAL {
+	if heap.cant*COEF_REDIMENSION <= cap && cap > CAPACIDAD_INICIAL {
 		heap.redimensionar(cap / VALOR_REDIMENSION)
 	}
 	heap.cant--
-	downHeap()
+	//downHeap()
 
 	return dato
 }
 
-
-func swap(dato1 *T, dato2 *T) {
-	*dato1, *dato2 = *dato, *dato1
+func (heap *colaConPrioridad[T]) swap(dato1 *T, dato2 *T) {
+	*dato1, *dato2 = *dato2, *dato1
 }
 
 
-func downHeap[T any]() {
+func (heap *colaConPrioridad[T]) downHeap(i int) {
+	padre := &heap.datos[i]
+	hijoIzq, hijoDer, tieneHijos := heap.obtenerHijos(i)
+
+	mayor := heap.obtenerMayor(i)
+
+	if !tieneHijos || mayor == padre{
+		return
+	}
+
+	heap.swap(mayor,padre)
+
+	if mayor == hijoIzq{
+		heap.downHeap((2*i)+1)
+	}else if mayor == hijoDer{
+		heap.downHeap((2*i)+2)
+	}
+	
 
 }
 
-func upHeap[T any](){
+func (heap *colaConPrioridad[T]) upHeap(i int) {
 
+	padre, iPadre, tienePadre := heap.obtenerPadre(i)
+
+	if !tienePadre || heap.cmp(heap.datos[i], *padre) < 0 {
+		return
+	}
+
+	heap.swap(&heap.datos[i], padre)
+	heap.upHeap(iPadre)
 }
 
+func (heap *colaConPrioridad[T]) obtenerHijos(i int) (*T, *T, bool) {
+	hijoIzq := (2 * i) + 1
+	hijoDer := (2 * i) + 2
 
-func obtenerMayor(arr []T, padre, der, izq T, func_cmp func(T,T)int) int {
+	if hijoIzq > len(heap.datos) || hijoDer > len(heap.datos) {
+		return nil, nil, false
+	}
 
+	return &heap.datos[hijoIzq], &heap.datos[hijoDer], true
+}
+
+func (heap *colaConPrioridad[T]) obtenerPadre(i int) (*T, int, bool) {
+
+	padre := (i - 1) / 2
+
+	if padre < 0 {
+		return &heap.datos[0], 0, false
+	}
+
+	return &heap.datos[padre], padre, true
+}
+
+func (heap *colaConPrioridad[T]) obtenerMayor(iPadre int) *T {
+	padre := heap.datos[iPadre]
 	max := padre
+	hijoIzq, hijoDer, tieneHijos := heap.obtenerHijos(iPadre)
 
-	if func_cmp(arr[padre], arr[der]) < 0 && arr[der] > arr[izq]{
-		max = der
-	} else if func_cmp(arr[padre], arr[izq]) < 0 && arr[izq] > arr[der] [
-		max = izq
-	]
-	return max
+	if !tieneHijos {
+		return &max
+	}
+
+	if heap.cmp(padre, *hijoDer) < 0 && heap.cmp(*hijoIzq, *hijoDer) < 0 {
+		max = *hijoDer
+	} else if heap.cmp(padre, *hijoIzq) < 0 && heap.cmp(*hijoDer, *hijoIzq) < 0 {
+		max = *hijoIzq
+	}
+
+	return &max
 }
 
-func (heap *colaConPrioridad[T])redimensionar(nuevaCapacidad int) {
+func (heap *colaConPrioridad[T]) redimensionar(nuevaCapacidad int) {
 
 	nuevo := make([]T, nuevaCapacidad)
-	copy(nueva, heap.datos)
-	heap.datos = nueva
+	copy(nuevo, heap.datos)
+	heap.datos = nuevo
 }
