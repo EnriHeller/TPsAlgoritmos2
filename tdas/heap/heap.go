@@ -19,9 +19,13 @@ func CrearHeap[T any](funcion_cmp func(T, T) int) ColaPrioridad[T] {
 }
 
 func CrearHeapArr[T any](arreglo []T, funcion_cmp func(T, T) int) ColaPrioridad[T] {
-	//Aca habrá que hacer downheap del ultimo al primero con cada elemento del arreglo
-	nuevo := make([]T, CAPACIDAD_INICIAL)
-	return &colaConPrioridad[T]{datos: nuevo, cant: CANT_INICIAL, cmp: funcion_cmp}
+
+	heap := new(colaConPrioridad[T])
+	heap.datos = arreglo
+	heap.cant = len(arreglo)
+	heap.cmp = funcion_cmp
+	heap.heapify(heap.datos)
+	return heap
 }
 
 func (heap *colaConPrioridad[T]) Cantidad() int {
@@ -46,12 +50,10 @@ func (heap *colaConPrioridad[T]) Encolar(dato T) {
 	heap.datos[heap.cant] = dato
 	heap.cant++
 	heap.upHeap(heap.cant - 1)
-
-	/*heapify(heap.datos, heap.cmp)
 	cap := len(heap.datos)
 	if heap.cant == cap {
 		heap.redimensionar(heap.cant * VALOR_REDIMENSION)
-	}*/
+	}
 
 }
 
@@ -65,9 +67,9 @@ func (heap *colaConPrioridad[T]) Desencolar() T {
 	if heap.cant*COEF_REDIMENSION <= cap && cap > CAPACIDAD_INICIAL {
 		heap.redimensionar(cap / VALOR_REDIMENSION)
 	}
+	heap.datos[0] = heap.datos[heap.cant-1]
+	heap.downHeap(0)
 	heap.cant--
-	//downHeap()
-
 	return dato
 }
 
@@ -75,25 +77,23 @@ func (heap *colaConPrioridad[T]) swap(dato1 *T, dato2 *T) {
 	*dato1, *dato2 = *dato2, *dato1
 }
 
-
 func (heap *colaConPrioridad[T]) downHeap(i int) {
 	padre := &heap.datos[i]
 	hijoIzq, hijoDer, tieneHijos := heap.obtenerHijos(i)
 
 	mayor := heap.obtenerMayor(i)
 
-	if !tieneHijos || mayor == padre{
+	if !tieneHijos || mayor == padre {
 		return
 	}
 
-	heap.swap(mayor,padre)
+	heap.swap(mayor, padre)
 
-	if mayor == hijoIzq{
-		heap.downHeap((2*i)+1)
-	}else if mayor == hijoDer{
-		heap.downHeap((2*i)+2)
+	if mayor == hijoIzq {
+		heap.downHeap((2 * i) + 1)
+	} else if mayor == hijoDer {
+		heap.downHeap((2 * i) + 2)
 	}
-	
 
 }
 
@@ -107,6 +107,26 @@ func (heap *colaConPrioridad[T]) upHeap(i int) {
 
 	heap.swap(&heap.datos[i], padre)
 	heap.upHeap(iPadre)
+}
+
+func (heap *colaConPrioridad[T]) heapify(arr []T) {
+
+	for i := len(arr) - 1; i > 0; i-- {
+		heap.downHeap(i)
+	}
+}
+
+func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
+
+	heap := new(colaConPrioridad[T])
+	heap.datos = elementos
+	heap.cant = len(elementos)
+	heap.cmp = funcion_cmp
+	heap.heapify(heap.datos)
+	prim := heap.datos[0]
+	ult := heap.datos[heap.cant-1]
+	heap.swap(&prim, &ult)
+
 }
 
 func (heap *colaConPrioridad[T]) obtenerHijos(i int) (*T, *T, bool) {
