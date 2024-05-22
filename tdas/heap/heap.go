@@ -50,7 +50,7 @@ func (heap *colaConPrioridad[T]) Encolar(dato T) {
 
 	heap.datos[heap.cant] = dato
 	heap.cant++
-	upHeap(heap.cant - 1,heap.datos, heap.cmp)
+	upHeap(heap.cant-1, heap.datos, heap.cmp)
 	cap := len(heap.datos)
 	if heap.cant == cap {
 		heap.redimensionar(heap.cant * VALOR_REDIMENSION)
@@ -59,7 +59,8 @@ func (heap *colaConPrioridad[T]) Encolar(dato T) {
 }
 
 func (heap *colaConPrioridad[T]) Desencolar() T {
-	if heap.cant == 0 {
+
+	if heap.EstaVacia() {
 		panic("La cola esta vacia")
 	}
 	dato := heap.datos[0]
@@ -68,7 +69,7 @@ func (heap *colaConPrioridad[T]) Desencolar() T {
 		heap.redimensionar(cap / VALOR_REDIMENSION)
 	}
 	heap.datos[0] = heap.datos[heap.cant-1]
-	downHeap(0,heap.datos, heap.cmp)
+	downHeap(0, heap.datos, heap.cmp)
 	heap.cant--
 	return dato
 }
@@ -92,48 +93,47 @@ func downHeap[T any](i int, arr []T, func_cmp func(T, T) int) {
 
 	if func_cmp(mayor, *hijoIzq) == 0 {
 
-		downHeap((2 * i) + 1, arr, func_cmp)
-	
-	} else if func_cmp(mayor, *hijoDer) == 0  {
-		downHeap((2 * i) + 2, arr, func_cmp)
+		downHeap((2*i)+1, arr, func_cmp)
+
+	} else if func_cmp(mayor, *hijoDer) == 0 {
+		downHeap((2*i)+2, arr, func_cmp)
 	}
 
 }
 
 func upHeap[T any](i int, arr []T, func_cmp func(T, T) int) {
 
-	padre, iPadre, tienePadre := obtenerPadre(i,arr)
+	padre, iPadre, tienePadre := obtenerPadre(i, arr)
 
 	if !tienePadre || func_cmp(arr[i], *padre) < 0 {
 		return
 	}
 
 	swap(&arr[i], padre)
-	upHeap(iPadre,arr,func_cmp)
+	upHeap(iPadre, arr, func_cmp)
 }
 
 func heapify[T any](arr []T, func_cmp func(T, T) int) {
 
 	for i := len(arr) - 1; i > 0; i-- {
-		downHeap(i,arr,func_cmp)
+		downHeap(i, arr, func_cmp)
 	}
 }
 
 func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
 
-	if len(elementos) == 0 || len(elementos) == 1{
+	if len(elementos) == 0 || len(elementos) == 1 {
 		return
 	}
 
-	heapify(elementos,funcion_cmp)
+	heapify(elementos, funcion_cmp)
 	prim := elementos[0]
-	ult := elementos[len(elementos) - 1]
+	ult := elementos[len(elementos)-1]
 	swap(&prim, &ult)
 	downHeap(0, elementos, funcion_cmp)
 
-	
 	elementosActualizado := elementos[:len(elementos)-2]
-	HeapSort(elementosActualizado,funcion_cmp)
+	HeapSort(elementosActualizado, funcion_cmp)
 }
 
 func obtenerHijos[T any](i int, arr []T) (*T, *T, bool) {
@@ -158,13 +158,13 @@ func obtenerPadre[T any](i int, arr []T) (*T, int, bool) {
 	return &arr[padre], padre, true
 }
 
-func obtenerMayor[T any](arr []T, iPadre int, func_cmp func(T,T) int) int {
+func obtenerMayor[T any](arr []T, iPadre int, func_cmp func(T, T) int) int {
 
 	max := iPadre
-	iIzq := (2*iPadre) + 1
-	iDer := (2*iPadre) + 2
+	iIzq := (2 * iPadre) + 1
+	iDer := (2 * iPadre) + 2
 
-	if func_cmp(arr[iPadre], arr[iDer]) < 0 && func_cmp(arr[iDer], arr[iIzq]) > 0{
+	if func_cmp(arr[iPadre], arr[iDer]) < 0 && func_cmp(arr[iDer], arr[iIzq]) > 0 {
 		max = iDer
 	} else if func_cmp(arr[iPadre], arr[iIzq]) < 0 && func_cmp(arr[iIzq], arr[iDer]) > 0 {
 		max = iIzq
