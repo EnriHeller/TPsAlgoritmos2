@@ -43,3 +43,24 @@ func TestEncolar(t *testing.T) {
 	require.Equal(t, 8, heap.Cantidad())
 	require.Equal(t, 54, heap.VerMax())
 }
+
+func TestDEsencolar(t *testing.T) {
+
+	heap := TDAHeap.CrearHeap(compararEnteros)
+
+	arreglo := []int{3, 5, 0, 8, 11, 23, 54, 17}
+	for _, i := range arreglo {
+		heap.Encolar(i)
+	}
+	require.Equal(t, 8, heap.Cantidad())
+	require.Equal(t, 54, heap.Desencolar())
+	require.Equal(t, 23, heap.Desencolar())
+	require.Equal(t, 17, heap.Desencolar())
+	require.Equal(t, 11, heap.Desencolar())
+	require.Equal(t, 8, heap.Desencolar())
+	require.Equal(t, 5, heap.Desencolar())
+	require.Equal(t, 3, heap.Desencolar())
+	require.Equal(t, 0, heap.Desencolar())
+	require.True(t, heap.EstaVacia())
+	require.Equal(t, 0, heap.Cantidad())
+}
