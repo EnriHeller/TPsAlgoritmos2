@@ -24,7 +24,7 @@ func CrearHeapArr[T any](arreglo []T, funcion_cmp func(T, T) int) ColaPrioridad[
 	heap.datos = arreglo
 	heap.cant = len(arreglo)
 	heap.cmp = funcion_cmp
-	heap.heapify(heap.datos)
+	heapify(heap.datos, heap.cmp)
 
 	return heap
 }
@@ -50,7 +50,7 @@ func (heap *colaConPrioridad[T]) Encolar(dato T) {
 
 	heap.datos[heap.cant] = dato
 	heap.cant++
-	heap.upHeap(heap.cant - 1)
+	upHeap(heap.cant - 1,heap.datos, heap.cmp)
 	cap := len(heap.datos)
 	if heap.cant == cap {
 		heap.redimensionar(heap.cant * VALOR_REDIMENSION)
@@ -59,7 +59,6 @@ func (heap *colaConPrioridad[T]) Encolar(dato T) {
 }
 
 func (heap *colaConPrioridad[T]) Desencolar() T {
-
 	if heap.cant == 0 {
 		panic("La cola esta vacia")
 	}
@@ -69,7 +68,7 @@ func (heap *colaConPrioridad[T]) Desencolar() T {
 		heap.redimensionar(cap / VALOR_REDIMENSION)
 	}
 	heap.datos[0] = heap.datos[heap.cant-1]
-	heap.downHeap(0)
+	downHeap(0,heap.datos, heap.cmp)
 	heap.cant--
 	return dato
 }
@@ -78,57 +77,63 @@ func swap[T any](dato1 *T, dato2 *T) {
 	*dato1, *dato2 = *dato2, *dato1
 }
 
-func (heap *colaConPrioridad[T]) downHeap(i int) {
-	padre := &heap.datos[i]
-	hijoIzq, hijoDer, tieneHijos := obtenerHijos(i, heap.datos)
+func downHeap[T any](i int, arr []T, func_cmp func(T, T) int) {
+	padre := arr[i]
+	hijoIzq, hijoDer, tieneHijos := obtenerHijos(i, arr)
 
-	mayor := obtenerMayor(heap.datos, heap.cmp, padre, hijoIzq, hijoDer)
+	iMayor := obtenerMayor(arr, i, func_cmp)
+	mayor := arr[iMayor]
 
-	if !tieneHijos || mayor == padre {
+	if !tieneHijos || func_cmp(mayor, padre) == 0 {
 		return
 	}
 
-	swap(mayor, padre)
+	swap(&mayor, &padre)
 
-	if mayor == hijoIzq {
-		heap.downHeap((2 * i) + 1)
-	} else if mayor == hijoDer {
-		heap.downHeap((2 * i) + 2)
+	if func_cmp(mayor, *hijoIzq) == 0 {
+
+		downHeap((2 * i) + 1, arr, func_cmp)
+	
+	} else if func_cmp(mayor, *hijoDer) == 0  {
+		downHeap((2 * i) + 2, arr, func_cmp)
 	}
 
 }
 
-func (heap *colaConPrioridad[T]) upHeap(i int) {
+func upHeap[T any](i int, arr []T, func_cmp func(T, T) int) {
 
-	padre, iPadre, tienePadre := obtenerPadre(i,heap.datos)
+	padre, iPadre, tienePadre := obtenerPadre(i,arr)
 
-	if !tienePadre || heap.cmp(heap.datos[i], *padre) < 0 {
+	if !tienePadre || func_cmp(arr[i], *padre) < 0 {
 		return
 	}
 
-	swap(&heap.datos[i], padre)
-	heap.upHeap(iPadre)
+	swap(&arr[i], padre)
+	upHeap(iPadre,arr,func_cmp)
 }
 
-func (heap *colaConPrioridad[T]) heapify(arr []T) {
+func heapify[T any](arr []T, func_cmp func(T, T) int) {
 
 	for i := len(arr) - 1; i > 0; i-- {
-		heap.downHeap(i)
+		downHeap(i,arr,func_cmp)
 	}
 }
 
 func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
 
-	heap := new(colaConPrioridad[T])
-	heap.datos = elementos
-	heap.cant = len(elementos)
-	heap.cmp = funcion_cmp
-	heap.heapify(heap.datos)
+	if len(elementos) == 0 || len(elementos) == 1{
+		return
+	}
 
-	prim := heap.datos[0]
-	ult := heap.datos[heap.cant-1]
+	heapify(elementos,funcion_cmp)
+	prim := elementos[0]
+	ult := elementos[len(elementos) - 1]
 	swap(&prim, &ult)
+	downHeap(0, elementos, funcion_cmp)
+
 	
+	elementosActualizado := elementos[:len(elementos)-2]
+	HeapSort(elementosActualizado,funcion_cmp)
 }
 
 func obtenerHijos[T any](i int, arr []T) (*T, *T, bool) {
@@ -153,16 +158,19 @@ func obtenerPadre[T any](i int, arr []T) (*T, int, bool) {
 	return &arr[padre], padre, true
 }
 
-func obtenerMayor[T any](arr []T, func_cmp func(T, T) int , padre, der, izq *T) *T {
+func obtenerMayor[T any](arr []T, iPadre int, func_cmp func(T,T) int) int {
 
-    max := padre
+	max := iPadre
+	iIzq := (2*iPadre) + 1
+	iDer := (2*iPadre) + 2
 
-    if func_cmp(*padre, *der) < 0 && func_cmp(*der, *izq) > 0{
-        max = der
-    } else if func_cmp(*padre, *izq) < 0 && func_cmp(*izq, *der) > 0{
-        max = izq
+	if func_cmp(arr[iPadre], arr[iDer]) < 0 && func_cmp(arr[iDer], arr[iIzq]) > 0{
+		max = iDer
+	} else if func_cmp(arr[iPadre], arr[iIzq]) < 0 && func_cmp(arr[iIzq], arr[iDer]) > 0 {
+		max = iIzq
 	}
-    return max
+
+	return max
 }
 
 func (heap *colaConPrioridad[T]) redimensionar(nuevaCapacidad int) {
