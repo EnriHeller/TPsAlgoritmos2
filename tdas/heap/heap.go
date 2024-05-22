@@ -105,7 +105,7 @@ func upHeap[T any](i int, arr []T, func_cmp func(T, T) int) {
 
 	padre, iPadre, tienePadre := obtenerPadre(i, arr)
 
-	if !tienePadre || func_cmp(arr[i], *padre) < 0 {
+	if !tienePadre || func_cmp(*padre, arr[i]) > 0 {
 		return
 	}
 
@@ -151,7 +151,7 @@ func obtenerPadre[T any](i int, arr []T) (*T, int, bool) {
 
 	padre := (i - 1) / 2
 
-	if padre < 0 {
+	if i == 0 {
 		return &arr[0], 0, false
 	}
 
