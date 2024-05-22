@@ -74,7 +74,7 @@ func (heap *colaConPrioridad[T]) Desencolar() T {
 	return dato
 }
 
-func (heap *colaConPrioridad[T]) swap(dato1 *T, dato2 *T) {
+func swap[T any](dato1 *T, dato2 *T) {
 	*dato1, *dato2 = *dato2, *dato1
 }
 
@@ -88,7 +88,7 @@ func (heap *colaConPrioridad[T]) downHeap(i int) {
 		return
 	}
 
-	heap.swap(mayor, padre)
+	swap(mayor, padre)
 
 	if mayor == hijoIzq {
 		heap.downHeap((2 * i) + 1)
@@ -106,7 +106,7 @@ func (heap *colaConPrioridad[T]) upHeap(i int) {
 		return
 	}
 
-	heap.swap(&heap.datos[i], padre)
+	swap(&heap.datos[i], padre)
 	heap.upHeap(iPadre)
 }
 
@@ -127,7 +127,7 @@ func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
 
 	prim := heap.datos[0]
 	ult := heap.datos[heap.cant-1]
-	heap.swap(&prim, &ult)
+	swap(&prim, &ult)
 	
 }
 
