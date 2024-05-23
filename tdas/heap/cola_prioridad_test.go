@@ -11,11 +11,6 @@ const (
 	TEST_VOLUMEN int = 10000
 )
 
-var arregloOrdenadoHeapsort = []int{0, 3, 5, 8, 11, 17, 23, 54}
-
-var arregloOrdenado = []int{54, 23, 17, 11, 8, 5, 3, 0}
-var arregloDesordenado = []int{3, 5, 0, 8, 11, 23, 54, 17}
-
 func compararCadenas(cad1, cad2 string) int {
 	if cad1 < cad2 {
 		return -1
@@ -37,7 +32,6 @@ func TestColaPrioridadVacia(t *testing.T) {
 	require.PanicsWithValue(t, "La cola está vacía", func() { heap.VerMax() })
 	require.PanicsWithValue(t, "La cola está vacía", func() { heap.Desencolar() })
 	require.Equal(t, 0, heap.Cantidad())
-
 }
 
 func TestEncolar(t *testing.T) {
@@ -55,9 +49,12 @@ func TestEncolar(t *testing.T) {
 
 func TestDesencolar(t *testing.T) {
 
-	heap := TDAHeap.CrearHeap(compararEnteros)
+	arregloOrdenado := []int{54, 23, 17, 11, 8, 5, 3, 0}
 
-	for _, i := range arregloDesordenado {
+	heap := TDAHeap.CrearHeap(compararEnteros)
+	test := []int{3, 5, 0, 8, 11, 23, 54, 17}
+
+	for _, i := range test{
 		heap.Encolar(i)
 	}
 
@@ -115,6 +112,8 @@ func TestHeapDeCadenas(t *testing.T) {
 	require.True(t, heap.EstaVacia())
 }
 
+
+
 func TestVolumen(t *testing.T) {
 
 	t.Log("Pruebas de volumen de heap")
@@ -150,10 +149,22 @@ func TestCrearHeapArregloVacio(t *testing.T) {
 	require.EqualValues(t, 1, heap.Cantidad())
 }
 
+func TestHeapsort(t *testing.T) {
+	test := []int{3, 5, 0, 8, 11, 23, 54, 17}
+	arregloOrdenado := []int{0, 3, 5, 8, 11, 17, 23, 54}
+
+	TDAHeap.HeapSort(test, compararEnteros)
+	require.Equal(t, arregloOrdenado, test)
+}
+
+
 func TestCrearHeapArreglo(t *testing.T) {
 	t.Log("Prueba crea un heap con un arreglo de enteros")
 
-	heap := TDAHeap.CrearHeapArr(arregloDesordenado, compararEnteros)
+	arregloOrdenado := []int{54, 23, 17, 11, 8, 5, 3, 0}
+	test := []int{3, 5, 0, 8, 11, 23, 54, 17}
+
+	heap := TDAHeap.CrearHeapArr(test, compararEnteros)
 
 	for _, elem := range arregloOrdenado {
 		require.Equal(t, elem, heap.Desencolar())
@@ -162,8 +173,4 @@ func TestCrearHeapArreglo(t *testing.T) {
 	require.True(t, heap.EstaVacia())
 }
 
-func TestHeapsort(t *testing.T) {
-	test := arregloDesordenado
-	TDAHeap.HeapSort(test, compararEnteros)
-	require.Equal(t, arregloOrdenadoHeapsort, test)
-}
+
