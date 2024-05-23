@@ -29,8 +29,8 @@ func TestHeapVacio(t *testing.T) {
 	t.Log("Prueba que al crear un heap vacio, se comporte como corresponde")
 	heap := TDAHeap.CrearHeap(compararEnteros)
 	require.True(t, heap.EstaVacia())
-	require.PanicsWithValue(t, "La cola está vacía", func() { heap.VerMax() })
-	require.PanicsWithValue(t, "La cola está vacía", func() { heap.Desencolar() })
+	require.PanicsWithValue(t, "La cola esta vacia", func() { heap.VerMax() })
+	require.PanicsWithValue(t, "La cola esta vacia", func() { heap.Desencolar() })
 	require.Equal(t, 0, heap.Cantidad())
 }
 
@@ -70,8 +70,8 @@ func TestHeapDeCadenas(t *testing.T) {
 	t.Log("Pruebas primitivas de heap de strings")
 	heap := TDAHeap.CrearHeap(compararCadenas)
 	require.True(t, heap.EstaVacia())
-	require.PanicsWithValue(t, "La cola está vacía", func() { heap.VerMax() })
-	require.PanicsWithValue(t, "La cola está vacía", func() { heap.Desencolar() })
+	require.PanicsWithValue(t, "La cola esta vacia", func() { heap.VerMax() })
+	require.PanicsWithValue(t, "La cola esta vacia", func() { heap.Desencolar() })
 	require.EqualValues(t, 0, heap.Cantidad())
 
 	heap.Encolar("Algoritmos")
@@ -137,8 +137,8 @@ func TestCrearHeapArregloVacio(t *testing.T) {
 	arr := []int{}
 	heap := TDAHeap.CrearHeapArr(arr, compararEnteros)
 	require.True(t, heap.EstaVacia())
-	require.PanicsWithValue(t, "La cola está vacía", func() { heap.VerMax() })
-	require.PanicsWithValue(t, "La cola está vacía", func() { heap.Desencolar() })
+	require.PanicsWithValue(t, "La cola esta vacia", func() { heap.VerMax() })
+	require.PanicsWithValue(t, "La cola esta vacia", func() { heap.Desencolar() })
 	require.EqualValues(t, 0, heap.Cantidad())
 
 	heap.Encolar(9)
