@@ -22,6 +22,10 @@ func CrearHeapArr[T any](arreglo []T, funcion_cmp func(T, T) int) ColaPrioridad[
 
 	heap := new(colaConPrioridad[T])
 	heap.datos = arreglo
+	if len(arreglo) == 0{
+		nuevo := make([]T, CAPACIDAD_INICIAL)
+		heap.datos = nuevo
+	}
 	heap.cant = len(arreglo)
 	heap.cmp = funcion_cmp
 	heapify(heap.datos, heap.cmp)
@@ -140,26 +144,7 @@ func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
 	swap(&prim, &ult)
 	downHeap(0, elementos, funcion_cmp)
 
-	elementosActualizado := elementos[:len(elementos)-2]
-	HeapSort(elementosActualizado, funcion_cmp)
-}
-
-func obtenerHijos[T any](i int, arr []T) (*T, *T, bool) {
-
-	indiceIzq := (2 * i) + 1
-	indiceDer := (2 * i) + 2
-
-	var hijoIzq, hijoDer *T
-
-	if indiceIzq < len(arr) {
-		hijoIzq = &arr[indiceIzq]
-	}
-
-	if indiceDer < len(arr) {
-		hijoDer = &arr[indiceDer]
-	}
-
-	return hijoIzq, hijoDer, (hijoIzq != nil || hijoDer != nil)
+	HeapSort(elementos[:len(elementos)-2], funcion_cmp)
 }
 
 func obtenerPadre[T any](i int, arr []T) (*T, int, bool) {
@@ -173,22 +158,6 @@ func obtenerPadre[T any](i int, arr []T) (*T, int, bool) {
 	return &arr[iPadre], iPadre, true
 }
 
-func obtenerMayor[T any](arr []T, iPadre int, func_cmp func(T, T) int) int {
-
-	max := iPadre
-	iIzq := (2 * iPadre) + 1
-	iDer := (2 * iPadre) + 2
-
-	if iIzq > len(arr) || iDer > len(arr) {
-		return max
-	} else if func_cmp(arr[iDer], arr[iPadre]) > 0 && func_cmp(arr[iDer], arr[iIzq]) > 0 {
-		max = iDer
-	} else if func_cmp(arr[iIzq], arr[iPadre]) > 0 && func_cmp(arr[iIzq], arr[iDer]) > 0 {
-		max = iIzq
-	}
-
-	return max
-}
 
 func (heap *colaConPrioridad[T]) redimensionar(nuevaCapacidad int) {
 
