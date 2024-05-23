@@ -22,7 +22,7 @@ func CrearHeapArr[T any](arreglo []T, funcion_cmp func(T, T) int) ColaPrioridad[
 
 	heap := new(colaConPrioridad[T])
 	heap.datos = arreglo
-	if len(arreglo) == 0{
+	if len(arreglo) == 0 {
 		nuevo := make([]T, CAPACIDAD_INICIAL)
 		heap.datos = nuevo
 	}
@@ -134,15 +134,15 @@ func heapify[T any](arr []T, func_cmp func(T, T) int) {
 
 func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
 
-	if len(elementos) == 0 || len(elementos) == 1{
+	if len(elementos) == 0 || len(elementos) == 1 {
 		return
 	}
-	
-	heapify(elementos,funcion_cmp)
-	swap(&elementos[0],&elementos[len(elementos)-1])
 
-	downHeap(0,elementos[:len(elementos)-1],funcion_cmp)
-	HeapSort(elementos[:len(elementos)-1],funcion_cmp)
+	heapify(elementos, funcion_cmp)
+	swap(&elementos[0], &elementos[len(elementos)-1])
+
+	downHeap(0, elementos[:len(elementos)-1], funcion_cmp)
+	HeapSort(elementos[:len(elementos)-1], funcion_cmp)
 }
 
 func obtenerPadre[T any](i int, arr []T) (*T, int, bool) {
@@ -155,7 +155,6 @@ func obtenerPadre[T any](i int, arr []T) (*T, int, bool) {
 
 	return &arr[iPadre], iPadre, true
 }
-
 
 func (heap *colaConPrioridad[T]) redimensionar(nuevaCapacidad int) {
 
