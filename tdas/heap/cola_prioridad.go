@@ -9,11 +9,11 @@ type ColaPrioridad[T any] interface {
 	Encolar(T)
 
 	// VerMax devuelve el elemento con máxima prioridad. Si está vacía, entra en pánico con un mensaje
-	// "La cola esta vacia".
+	// "La cola está vacía".
 	VerMax() T
 
 	// Desencolar elimina el elemento con máxima prioridad, y lo devuelve. Si está vacía, entra en pánico con un
-	// mensaje "La cola esta vacia"
+	// mensaje "La cola está vacía"
 	Desencolar() T
 
 	// Cantidad devuelve la cantidad de elementos que hay en la cola de prioridad.

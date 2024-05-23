@@ -25,8 +25,8 @@ func TestColaPrioridadVacia(t *testing.T) {
 	t.Log("Prueba que al crear una cola vacia, se comporte como corresponde")
 	heap := TDAHeap.CrearHeap(compararEnteros)
 	require.True(t, heap.EstaVacia())
-	require.PanicsWithValue(t, "La cola esta vacia", func() { heap.VerMax() })
-	require.PanicsWithValue(t, "La cola esta vacia", func() { heap.Desencolar() })
+	require.PanicsWithValue(t, "La cola está vacía", func() { heap.VerMax() })
+	require.PanicsWithValue(t, "La cola está vacía", func() { heap.Desencolar() })
 	require.Equal(t, 0, heap.Cantidad())
 
 }
@@ -44,7 +44,7 @@ func TestEncolar(t *testing.T) {
 	require.Equal(t, 54, heap.VerMax())
 }
 
-func TestDEsencolar(t *testing.T) {
+func TestDesencolar(t *testing.T) {
 
 	heap := TDAHeap.CrearHeap(compararEnteros)
 
@@ -52,6 +52,7 @@ func TestDEsencolar(t *testing.T) {
 	for _, i := range arreglo {
 		heap.Encolar(i)
 	}
+
 	require.Equal(t, 8, heap.Cantidad())
 	require.Equal(t, 54, heap.Desencolar())
 	require.Equal(t, 23, heap.Desencolar())
