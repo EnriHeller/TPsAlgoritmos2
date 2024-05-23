@@ -127,24 +127,18 @@ func upHeap[T any](i int, arr []T, func_cmp func(T, T) int) {
 
 func heapify[T any](arr []T, func_cmp func(T, T) int) {
 
-	for i := len(arr) - 1; i > 0; i-- {
+	for i := len(arr) - 1; i >= 0; i-- {
 		downHeap(i, arr, func_cmp)
 	}
 }
 
 func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
 
-	if len(elementos) == 0 || len(elementos) == 1 {
-		return
-	}
-
-	heapify(elementos, funcion_cmp)
-	prim := elementos[0]
-	ult := elementos[len(elementos)-1]
-	swap(&prim, &ult)
-	downHeap(0, elementos, funcion_cmp)
-
-	HeapSort(elementos[:len(elementos)-2], funcion_cmp)
+	heapify(elementos,funcion_cmp)
+	swap(&elementos[0],&elementos[len(elementos)-1])
+	
+	downHeap(0,elementos[:len(elementos)-2],funcion_cmp)
+	HeapSort(elementos[:len(elementos)-2],funcion_cmp)
 }
 
 func obtenerPadre[T any](i int, arr []T) (*T, int, bool) {
