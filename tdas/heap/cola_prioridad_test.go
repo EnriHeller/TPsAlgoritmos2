@@ -127,9 +127,9 @@ func TestVolumen(t *testing.T) {
 	}
 
 	for i := TEST_VOLUMEN; i > 0; i-- {
+		require.Equal(t, i-1, heap.VerMax())
 		require.Equal(t, i-1, heap.Desencolar())
 		require.Equal(t, i-1, heap.Cantidad())
-		require.Equal(t, i-1, heap.VerMax())
 	}
 	require.True(t, heap.EstaVacia())
 }
