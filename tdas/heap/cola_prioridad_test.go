@@ -11,7 +11,8 @@ const (
 	TEST_VOLUMEN int = 10000
 )
 
-var test_heap_arreglo = []int{3, 7, 11, 6, 9, 17}
+var arregloOrdenado = []int{54, 23, 17, 11, 8, 5, 3, 0}
+var arregloDesordenado = []int{3, 5, 0, 8, 11, 23, 54, 17}
 
 func compararCadenas(cad1, cad2 string) int {
 	if cad1 < cad2 {
@@ -54,8 +55,6 @@ func TestDesencolar(t *testing.T) {
 
 	heap := TDAHeap.CrearHeap(compararEnteros)
 
-	arregloOrdenado := []int{54, 23, 17, 11, 8, 5, 3, 0}
-	arregloDesordenado := []int{3, 5, 0, 8, 11, 23, 54, 17}
 	for _, i := range arregloDesordenado {
 		heap.Encolar(i)
 	}
@@ -153,7 +152,14 @@ func TestCrearHeapArreglo(t *testing.T) {
 
 	t.Log("Prueba crea un heap con un arreglo de enteros")
 
-	heap := TDAHeap.CrearHeapArr(test_heap_arreglo, compararEnteros)
+	heap := TDAHeap.CrearHeapArr(arregloDesordenado, compararEnteros)
 	require.True(t, heap.EstaVacia())
 
+}
+
+func TestHeapsort(t *testing.T) {
+
+	test := arregloDesordenado
+	TDAHeap.HeapSort(test, compararEnteros)
+	require.Equal(t, arregloOrdenado, test)
 }
