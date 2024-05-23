@@ -24,9 +24,9 @@ func compararEnteros(a, b int) int {
 	return a - b
 }
 
-func TestColaPrioridadVacia(t *testing.T) {
+func TestHeapVacio(t *testing.T) {
 
-	t.Log("Prueba que al crear una cola vacia, se comporte como corresponde")
+	t.Log("Prueba que al crear un heap vacio, se comporte como corresponde")
 	heap := TDAHeap.CrearHeap(compararEnteros)
 	require.True(t, heap.EstaVacia())
 	require.PanicsWithValue(t, "La cola está vacía", func() { heap.VerMax() })
@@ -166,6 +166,5 @@ func TestCrearHeapArreglo(t *testing.T) {
 	for _, elem := range arregloOrdenado {
 		require.Equal(t, elem, heap.Desencolar())
 	}
-
 	require.True(t, heap.EstaVacia())
 }

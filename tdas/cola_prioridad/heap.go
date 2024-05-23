@@ -19,18 +19,15 @@ func CrearHeap[T any](funcion_cmp func(T, T) int) ColaPrioridad[T] {
 }
 
 func CrearHeapArr[T any](arreglo []T, funcion_cmp func(T, T) int) ColaPrioridad[T] {
-
-	heap := new(colaConPrioridad[T])
-	heap.datos = arreglo
+	var datos []T
 	if len(arreglo) == 0 {
-		nuevo := make([]T, CAPACIDAD_INICIAL)
-		heap.datos = nuevo
+		datos = make([]T, CAPACIDAD_INICIAL)
+	} else {
+		datos = make([]T, len(arreglo))
+		copy(datos, arreglo)
+		heapify(datos, funcion_cmp)
 	}
-	heap.cant = len(arreglo)
-	heap.cmp = funcion_cmp
-	heapify(heap.datos, heap.cmp)
-
-	return heap
+	return &colaConPrioridad[T]{datos: datos, cant: len(arreglo), cmp: funcion_cmp}
 }
 
 func (heap *colaConPrioridad[T]) Cantidad() int {
@@ -43,7 +40,7 @@ func (heap *colaConPrioridad[T]) EstaVacia() bool {
 
 func (heap *colaConPrioridad[T]) VerMax() T {
 
-	if heap.cant == CANT_INICIAL {
+	if heap.EstaVacia() {
 		panic("La cola está vacía")
 	}
 
