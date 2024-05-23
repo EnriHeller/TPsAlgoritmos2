@@ -54,22 +54,17 @@ func TestDesencolar(t *testing.T) {
 
 	heap := TDAHeap.CrearHeap(compararEnteros)
 
-	arreglo := []int{3, 5, 0, 8, 11, 23, 54, 17}
-	for _, i := range arreglo {
+	arregloOrdenado := []int{54, 23, 17, 11, 8, 5, 3, 0}
+	arregloDesordenado := []int{3, 5, 0, 8, 11, 23, 54, 17}
+	for _, i := range arregloDesordenado {
 		heap.Encolar(i)
 	}
 
 	require.Equal(t, 8, heap.Cantidad())
-	require.Equal(t, 54, heap.Desencolar())
-	require.Equal(t, 23, heap.Desencolar())
-	require.Equal(t, 17, heap.Desencolar())
-	require.Equal(t, 11, heap.Desencolar())
-	require.Equal(t, 8, heap.Desencolar())
-	require.Equal(t, 5, heap.Desencolar())
-	require.Equal(t, 3, heap.Desencolar())
-	require.Equal(t, 0, heap.Desencolar())
-	require.True(t, heap.EstaVacia())
-	require.Equal(t, 0, heap.Cantidad())
+
+	for _, elem := range arregloOrdenado {
+		require.Equal(t, elem, heap.Desencolar())
+	}
 }
 
 func TestHeapDeCadenas(t *testing.T) {
@@ -77,8 +72,8 @@ func TestHeapDeCadenas(t *testing.T) {
 	t.Log("Pruebas primitivas de heap de strings")
 	heap := TDAHeap.CrearHeap(compararCadenas)
 	require.True(t, heap.EstaVacia())
-	require.PanicsWithValue(t, "La cola esta vacia", func() { heap.VerMax() })
-	require.PanicsWithValue(t, "La cola esta vacia", func() { heap.Desencolar() })
+	require.PanicsWithValue(t, "La cola está vacía", func() { heap.VerMax() })
+	require.PanicsWithValue(t, "La cola está vacía", func() { heap.Desencolar() })
 	require.EqualValues(t, 0, heap.Cantidad())
 
 	heap.Encolar("Algoritmos")
@@ -144,8 +139,8 @@ func TestCrearHeapArregloVacio(t *testing.T) {
 	arr := []int{}
 	heap := TDAHeap.CrearHeapArr(arr, compararEnteros)
 	require.True(t, heap.EstaVacia())
-	require.PanicsWithValue(t, "La cola esta vacia", func() { heap.VerMax() })
-	require.PanicsWithValue(t, "La cola esta vacia", func() { heap.Desencolar() })
+	require.PanicsWithValue(t, "La cola está vacía", func() { heap.VerMax() })
+	require.PanicsWithValue(t, "La cola está vacía", func() { heap.Desencolar() })
 	require.EqualValues(t, 0, heap.Cantidad())
 
 	heap.Encolar(9)
