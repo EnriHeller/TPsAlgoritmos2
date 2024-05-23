@@ -10,7 +10,8 @@ import (
 const (
 	TEST_VOLUMEN int = 10000
 )
-var arregloOrdenadoHeapsort = []int{0,3,5,8,11,17,23,54}
+
+var arregloOrdenadoHeapsort = []int{0, 3, 5, 8, 11, 17, 23, 54}
 
 var arregloOrdenado = []int{54, 23, 17, 11, 8, 5, 3, 0}
 var arregloDesordenado = []int{3, 5, 0, 8, 11, 23, 54, 17}
@@ -154,11 +155,11 @@ func TestCrearHeapArreglo(t *testing.T) {
 
 	heap := TDAHeap.CrearHeapArr(arregloDesordenado, compararEnteros)
 
-	for _,elem := range arregloOrdenado{
+	for _, elem := range arregloOrdenado {
 		require.Equal(t, elem, heap.Desencolar())
 	}
 
-	require.True(t, !heap.EstaVacia())
+	require.True(t, heap.EstaVacia())
 }
 
 func TestHeapsort(t *testing.T) {

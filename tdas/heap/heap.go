@@ -134,11 +134,15 @@ func heapify[T any](arr []T, func_cmp func(T, T) int) {
 
 func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
 
+	if len(elementos) == 0 || len(elementos) == 1{
+		return
+	}
+	
 	heapify(elementos,funcion_cmp)
 	swap(&elementos[0],&elementos[len(elementos)-1])
-	
-	downHeap(0,elementos[:len(elementos)-2],funcion_cmp)
-	HeapSort(elementos[:len(elementos)-2],funcion_cmp)
+
+	downHeap(0,elementos[:len(elementos)-1],funcion_cmp)
+	HeapSort(elementos[:len(elementos)-1],funcion_cmp)
 }
 
 func obtenerPadre[T any](i int, arr []T) (*T, int, bool) {
