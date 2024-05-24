@@ -81,6 +81,17 @@ func (heap *colaConPrioridad[T]) Desencolar() T {
 	return dato
 }
 
+func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
+	if len(elementos) < 2 {
+		return
+	}
+	heapify(elementos, funcion_cmp)
+	for i := len(elementos) - 1; i > 0; i-- {
+		swap(&elementos[0], &elementos[i])
+		downHeap(0, elementos[:i], funcion_cmp)
+	}
+}
+
 func swap[T any](dato1 *T, dato2 *T) {
 	*dato1, *dato2 = *dato2, *dato1
 }
@@ -107,7 +118,6 @@ func downHeap[T any](i int, arr []T, func_cmp func(T, T) int) {
 		swap(&arr[i], &arr[mayor])
 		downHeap(mayor, arr, func_cmp)
 	}
-
 }
 
 func upHeap[T any](i int, arr []T, func_cmp func(T, T) int) {
@@ -126,17 +136,6 @@ func heapify[T any](arr []T, func_cmp func(T, T) int) {
 
 	for i := len(arr) - 1; i >= 0; i-- {
 		downHeap(i, arr, func_cmp)
-	}
-}
-
-func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
-	if len(elementos) < 2 {
-		return
-	}
-	heapify(elementos, funcion_cmp)
-	for i := len(elementos) - 1; i > 0; i-- {
-		swap(&elementos[0], &elementos[i])
-		downHeap(0, elementos[:i], funcion_cmp)
 	}
 }
 
