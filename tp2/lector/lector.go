@@ -1,6 +1,6 @@
 package tp2
 
-type lector interface {
+type Lector interface {
 
 	//Procesa de forma completa un archivo de log.
 	Procesar(string) (string, error)

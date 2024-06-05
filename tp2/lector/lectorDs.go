@@ -6,19 +6,26 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	Heap "tdas/cola_prioridad"
 	Dic "tdas/diccionario"
 	"time"
 )
 
 var arrInstrucciones = []string{"agregar_archivo", "ver_visitantes", "ver_mas_visitados"}
 
-type Lector struct {
-	instrucciones Dic.Diccionario[string, bool]
-	ips           Dic.DiccionarioOrdenado[string, bool]
-	sitios        Dic.DiccionarioOrdenado[string, int]
+
+type sitiosVisitados struct {
+	nombre   string
+	cantidad int
 }
 
-func CrearLector() Lector {
+type lector struct {
+	instrucciones Dic.Diccionario[string, bool]
+	ips           Dic.DiccionarioOrdenado[string, bool]
+	sitios        Dic.Diccionario[string, int]
+}
+
+func CrearLector() lector {
 	instrucciones := Dic.CrearHash[string, bool]()
 	ips := Dic.CrearABB[string, bool](compararIps)
 
@@ -26,13 +33,13 @@ func CrearLector() Lector {
 		instrucciones.Guardar(instruccion, true)
 	}
 
-	return Lector{
+	return lector{
 		instrucciones: instrucciones,
 		ips:           ips,
 	}
 }
 
-func (l *Lector) Procesar(comando string) ([]string, error) {
+func (l *lector) Procesar(comando string) ([]string, error) {
 
 	var resultado []string
 	elementos := strings.Fields(comando)
@@ -65,15 +72,16 @@ func (l *Lector) Procesar(comando string) ([]string, error) {
 	return resultado, nil
 }
 
-func (l *Lector) agregarArchivo(ruta string) Dic.Diccionario[string, bool] {
+func (l *lector) agregarArchivo(ruta string) Dic.Diccionario[string, bool] {
 
 	res := Dic.CrearHash[string, bool]()
-	sitios := Dic.CrearHash[string, int]()
 	archivo, err := os.Open(ruta)
+
 	if err != nil {
 		fmt.Printf("Error %v al abrir el archivo %s", ruta, err)
 		return res
 	}
+
 	defer archivo.Close()
 
 	s := bufio.NewScanner(archivo)
@@ -81,20 +89,27 @@ func (l *Lector) agregarArchivo(ruta string) Dic.Diccionario[string, bool] {
 	var ipAnterior string
 	var visitadoAnterior string
 	contador := 0
+
 	for s.Scan() {
 		linea := strings.Fields(s.Text())
 		ip, fecha, visitado := linea[0], linea[1], linea[2]
 
+		//Guardo cantidad de veces que se visitó un sitio
+		l.guardarSitios(visitado)
+
 		if !l.ips.Pertenece(ip) {
 			l.ips.Guardar(ip, true)
 		}
+
 		if fechaAnterior == "" && ipAnterior == "" && visitadoAnterior == "" {
 			fechaAnterior = fecha
 			ipAnterior = ip
 			visitadoAnterior = visitado
 			continue
 		}
+
 		diferencia := obtenerDiferencia(fechaAnterior, fecha)
+
 		if diferencia <= 2 && visitado == visitadoAnterior && ip == ipAnterior {
 			contador++
 		} else {
@@ -117,7 +132,16 @@ func (l *Lector) agregarArchivo(ruta string) Dic.Diccionario[string, bool] {
 	return res
 }
 
-func (l *Lector) verVisitantes(desde string, hasta string) []string {
+func (l *lector) guardarSitios(visitado string) {
+	if !l.sitios.Pertenece(visitado) {
+		l.sitios.Guardar(visitado, 1)
+	} else {
+		valorActual := l.sitios.Obtener(visitado)
+		l.sitios.Guardar(visitado, valorActual+1)
+	}
+}
+
+func (l *lector) verVisitantes(desde string, hasta string) []string {
 
 	var resultado []string
 	for iter := l.ips.IteradorRango(&desde, &hasta); iter.HaySiguiente(); iter.Siguiente() {
@@ -127,9 +151,8 @@ func (l *Lector) verVisitantes(desde string, hasta string) []string {
 	return resultado
 }
 
-func (l *Lector) verMasVisitados(n int) []string {
-
-	return resultado
+func (l *lector) verMasVisitados(n int) []string {
+	return l.TopKStream(n)
 }
 
 func obtenerDiferencia(anterior, actual string) int {
@@ -149,7 +172,7 @@ func compararIps(a, b string) int {
 	nuevo1 := make([]int, len(arr1))
 	nuevo2 := make([]int, len(arr2))
 
-	for i, _ := range arr1 {
+	for i := range arr1 {
 		num, _ := strconv.Atoi(arr1[i])
 		nuevo1[i] = num
 		num, _ = strconv.Atoi(arr2[i])
@@ -162,5 +185,36 @@ func compararIps(a, b string) int {
 			return 1
 		}
 	}
+
 	return 0
+}
+
+func (l *lector) TopKStream(k int) []string {
+
+	sitiosArr := make([]sitiosVisitados, k)
+
+	for iter := l.sitios.Iterador(); iter.HaySiguiente(); iter.Siguiente() {
+		clave, valor := iter.VerActual()
+		sitiosArr = append(sitiosArr, sitiosVisitados{nombre: clave, cantidad: valor})
+	}
+
+	cp := Heap.CrearHeapArr(sitiosArr[:k], func(s1, s2 sitiosVisitados) int {
+		c1, c2 := s1.cantidad, s2.cantidad
+		return c2 - c1
+	})
+
+	for _, elem := range sitiosArr[k:] {
+		if elem.cantidad > cp.VerMax().cantidad {
+			cp.Desencolar()
+			cp.Encolar(elem)
+		}
+	}
+
+	top := make([]string, k)
+
+	for i := 0; !cp.EstaVacia(); i++ {
+		top[k-i-1] = cp.Desencolar().nombre
+	}
+
+	return top
 }
