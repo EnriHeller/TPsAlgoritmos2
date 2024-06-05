@@ -13,7 +13,6 @@ import (
 
 var arrInstrucciones = []string{"agregar_archivo", "ver_visitantes", "ver_mas_visitados"}
 
-
 type sitiosVisitados struct {
 	nombre   string
 	cantidad int
@@ -39,42 +38,42 @@ func CrearLector() lector {
 	}
 }
 
-func (l *lector) Procesar(comando string) ([]string, error) {
+func (l *lector) Procesar(comando string) (string, []string, error) {
 
 	var resultado []string
-	elementos := strings.Fields(comando)
+	elementos := strings.Split(comando, "\t")
 	instruccion := elementos[0]
 
 	if !l.instrucciones.Pertenece(instruccion) {
-		return resultado, fmt.Errorf("comando no valido")
+		return instruccion, resultado, fmt.Errorf("comando no valido")
 	}
 
 	switch instruccion {
 
 	case "agregar_archivo":
 		nombreArchivo := elementos[1]
-		l.agregarArchivo(nombreArchivo)
+		resultado = l.agregarArchivo(nombreArchivo)
 
 	case "ver_visitantes":
 		desde, hasta := elementos[1], elementos[2]
-		l.verVisitantes(desde, hasta)
+		resultado = l.verVisitantes(desde, hasta)
 
 	case "ver_mas_visitados":
 		n, err := strconv.Atoi(elementos[1])
 
 		if err != nil {
-			return resultado, err
+			return instruccion, resultado, err
 		}
 
-		l.verMasVisitados(n)
+		resultado = l.verMasVisitados(n)
 	}
 
-	return resultado, nil
+	return instruccion, resultado, nil
 }
 
-func (l *lector) agregarArchivo(ruta string) Dic.Diccionario[string, bool] {
+func (l *lector) agregarArchivo(ruta string) []string {
 
-	res := Dic.CrearHash[string, bool]()
+	var res []string
 	archivo, err := os.Open(ruta)
 
 	if err != nil {
@@ -92,7 +91,7 @@ func (l *lector) agregarArchivo(ruta string) Dic.Diccionario[string, bool] {
 
 	for s.Scan() {
 		linea := strings.Fields(s.Text())
-		ip, fecha, visitado := linea[0], linea[1], linea[2]
+		ip, fecha, visitado := linea[0], linea[1], linea[3]
 
 		//Guardo cantidad de veces que se visitó un sitio
 		l.guardarSitios(visitado)
@@ -117,7 +116,7 @@ func (l *lector) agregarArchivo(ruta string) Dic.Diccionario[string, bool] {
 		}
 
 		if contador == 5 {
-			res.Guardar(ip, true)
+			res = append(res, ip)
 			contador = 0
 		}
 
@@ -213,8 +212,10 @@ func (l *lector) TopKStream(k int) []string {
 	top := make([]string, k)
 
 	for i := 0; !cp.EstaVacia(); i++ {
-		top[k-i-1] = cp.Desencolar().nombre
+		tope := cp.Desencolar()
+		sitio := tope.nombre
+		cant := tope.cantidad
+		top[k-i-1] = sitio + " - " + strconv.Itoa(cant)
 	}
-
 	return top
 }
