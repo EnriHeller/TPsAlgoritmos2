@@ -1,14 +1,22 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
+	//"bufio"
+	//"fmt"
+	//"os"
 	lector "tp2/lector"
 )
 
 func main() {
-	entrada := bufio.NewScanner(os.Stdin)
+
+	l := lector.CrearLector()
+
+	l.Procesar("agregar_archivo test01.log")
+	l.Procesar("ver_mas_visitados 3")
+
+	
+
+	/*entrada := bufio.NewScanner(os.Stdin)
 
 	for entrada.Scan() {
 		comando := entrada.Text()
@@ -18,9 +26,6 @@ func main() {
 
 		if err != nil {
 			fmt.Println("ERROR", err)
-		} else {
-			//imprimir por salida estandar
-			fmt.Println(resultado)
 		}
 
 		switch instruccion {
@@ -49,5 +54,5 @@ func main() {
 
 	if errEntrada := entrada.Err(); errEntrada != nil {
 		fmt.Printf("Error al leer entrada: %s", errEntrada)
-	}
+	}*/
 }

@@ -27,6 +27,7 @@ type lector struct {
 func CrearLector() lector {
 	instrucciones := Dic.CrearHash[string, bool]()
 	ips := Dic.CrearABB[string, bool](compararIps)
+	sitios := Dic.CrearHash[string, int]()
 
 	for _, instruccion := range arrInstrucciones {
 		instrucciones.Guardar(instruccion, true)
@@ -35,6 +36,7 @@ func CrearLector() lector {
 	return lector{
 		instrucciones: instrucciones,
 		ips:           ips,
+		sitios: sitios,
 	}
 }
 
@@ -64,8 +66,9 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 		if err != nil {
 			return instruccion, resultado, err
 		}
-		fmt.Println("el resultado aca es", resultado)
+
 		resultado = l.verMasVisitados(n)
+
 	}
 
 	return instruccion, resultado, nil
@@ -211,10 +214,11 @@ func (l *lector) TopKStream(k int) []string {
 
 	top := make([]string, k)
 
-	for i := 0; !cp.EstaVacia(); i++ {
+	for i:= 0; !cp.EstaVacia(); i++ {
 		tope := cp.Desencolar()
 		sitio := tope.nombre
 		cant := tope.cantidad
+		fmt.Println("appendeaste esto", sitio + " - " + strconv.Itoa(cant))
 		top[k-i-1] = sitio + " - " + strconv.Itoa(cant)
 	}
 	return top
