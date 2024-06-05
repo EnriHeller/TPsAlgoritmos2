@@ -17,7 +17,7 @@ func main() {
 		instruccion, resultado, err := lectorDs.Procesar(comando)
 
 		if err != nil {
-			fmt.Println("ERROR")
+			fmt.Println("ERROR", err)
 		} else {
 			//imprimir por salida estandar
 			fmt.Println(resultado)

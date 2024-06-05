@@ -41,7 +41,7 @@ func CrearLector() lector {
 func (l *lector) Procesar(comando string) (string, []string, error) {
 
 	var resultado []string
-	elementos := strings.Split(comando, "\t")
+	elementos := strings.Fields(comando)
 	instruccion := elementos[0]
 
 	if !l.instrucciones.Pertenece(instruccion) {
@@ -64,7 +64,7 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 		if err != nil {
 			return instruccion, resultado, err
 		}
-
+		fmt.Println("el resultado aca es", resultado)
 		resultado = l.verMasVisitados(n)
 	}
 
@@ -90,7 +90,7 @@ func (l *lector) agregarArchivo(ruta string) []string {
 	contador := 0
 
 	for s.Scan() {
-		linea := strings.Fields(s.Text())
+		linea := strings.Split(s.Text(),"\t")
 		ip, fecha, visitado := linea[0], linea[1], linea[3]
 
 		//Guardo cantidad de veces que se visitó un sitio
