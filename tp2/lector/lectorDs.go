@@ -83,7 +83,6 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 func (l *lector) agregarArchivo(ruta string) []string {
 
 	var res []string
-
 	entradas := Dic.CrearHash[string, solicitud]()
 	archivo, err := os.Open(ruta)
 
@@ -99,6 +98,7 @@ func (l *lector) agregarArchivo(ruta string) []string {
 	for s.Scan() {
 		linea := strings.Split(s.Text(), "\t")
 		ip, fecha, visitado := linea[0], linea[1], linea[3]
+		entradas.Guardar(ip, solicitud{ultimoSitio: visitado, ultimaFecha: fecha, contador: 1})
 
 		if !entradas.Pertenece(ip) {
 			entradas.Guardar(ip, solicitud{ultimoSitio: visitado, ultimaFecha: fecha, contador: 0})
@@ -126,8 +126,8 @@ func (l *lector) agregarArchivo(ruta string) []string {
 			res = append(res, ip)
 			entradas.Guardar(ip, solicitud{ultimoSitio: visitado, ultimaFecha: fecha, contador: 0})
 		}
-
 	}
+
 	err = s.Err()
 	if err != nil {
 		fmt.Println(err)
