@@ -67,13 +67,10 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 
 	case "ver_mas_visitados":
 		n, err := strconv.Atoi(elementos[1])
-
 		if err != nil {
 			return instruccion, resultado, err
 		}
-
 		resultado = l.verMasVisitados(n)
-
 	}
 
 	return instruccion, resultado, nil
@@ -81,13 +78,13 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 
 func (l *lector) agregarArchivo(ruta string) []string {
 
-	var res []string
+	var resDesordenado []string
 	entradas := Dic.CrearHash[string, solicitud]()
 	archivo, err := os.Open(ruta)
 
 	if err != nil {
 		fmt.Printf("Error %v al abrir el archivo %s", ruta, err)
-		return res
+		return resDesordenado
 	}
 
 	defer archivo.Close()
@@ -121,7 +118,7 @@ func (l *lector) agregarArchivo(ruta string) []string {
 		}
 
 		if contador+1 == 5 {
-			res = append(res, ip)
+			resDesordenado = append(resDesordenado, ip)
 			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: 0})
 		}
 	}
@@ -129,6 +126,32 @@ func (l *lector) agregarArchivo(ruta string) []string {
 	err = s.Err()
 	if err != nil {
 		fmt.Println(err)
+	}
+
+	heapRes := Heap.CrearHeapArr(resDesordenado, func(ip1, ip2 string) int{
+		arrIp1 := strings.Split(ip1, ".")
+		arrIp2 := strings.Split(ip2, ".")
+
+		var ip1SinPuntos string
+		var ip2SinPuntos string
+
+		for i := range(arrIp1){
+			ip1SinPuntos += arrIp1[i]
+		}
+		for i := range(arrIp2){
+			ip2SinPuntos += arrIp2[i]
+		}
+
+		ip1Num, _:= strconv.Atoi(ip1SinPuntos)
+		ip2Num, _ := strconv.Atoi(ip2SinPuntos)
+		
+		return ip2Num - ip1Num
+	})
+
+	var res []string
+
+	for !heapRes.EstaVacia(){
+		res = append(res, heapRes.Desencolar() )
 	}
 
 	return res
