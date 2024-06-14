@@ -24,6 +24,12 @@ type lector struct {
 	sitios        Dic.Diccionario[string, int]
 }
 
+type solicitud struct {
+	ultimoSitio string
+	ultimaFecha string
+	contador    int
+}
+
 func CrearLector() lector {
 	instrucciones := Dic.CrearHash[string, bool]()
 	ips := Dic.CrearABB[string, bool](compararIps)
@@ -36,7 +42,7 @@ func CrearLector() lector {
 	return lector{
 		instrucciones: instrucciones,
 		ips:           ips,
-		sitios: sitios,
+		sitios:        sitios,
 	}
 }
 
@@ -77,6 +83,7 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 func (l *lector) agregarArchivo(ruta string) []string {
 
 	var res []string
+	entradas := Dic.CrearHash[string, solicitud]()
 	archivo, err := os.Open(ruta)
 
 	if err != nil {
@@ -87,15 +94,14 @@ func (l *lector) agregarArchivo(ruta string) []string {
 	defer archivo.Close()
 
 	s := bufio.NewScanner(archivo)
-	var fechaAnterior string
-	var ipAnterior string
-	var visitadoAnterior string
-	contador := 1
 
 	for s.Scan() {
-		linea := strings.Split(s.Text(),"\t")
+		linea := strings.Split(s.Text(), "\t")
 		ip, fecha, visitado := linea[0], linea[1], linea[3]
-
+		if !entradas.Pertenece(ip) {
+			entradas.Guardar(ip, solicitud{ultimoSitio: visitado, ultimaFecha: fecha, contador: 1})
+			continue
+		}
 		//Guardo cantidad de veces que se visitó un sitio
 		l.guardarSitios(visitado)
 
@@ -103,27 +109,22 @@ func (l *lector) agregarArchivo(ruta string) []string {
 			l.ips.Guardar(ip, true)
 		}
 
-		if fechaAnterior == "" && ipAnterior == "" && visitadoAnterior == "" {
-			fechaAnterior = fecha
-			ipAnterior = ip
-			visitadoAnterior = visitado
-			continue
-		}
+		datos := entradas.Obtener(ip)
+		sitioAnterior, fechaAnterior, contador := datos.ultimoSitio, datos.ultimaFecha, datos.contador
 
 		diferencia := obtenerDiferencia(fechaAnterior, fecha)
 
-		if diferencia <= 2 && visitado == visitadoAnterior && ip == ipAnterior {
-			contador++
+		if diferencia <= 2 && visitado == sitioAnterior {
+			entradas.Guardar(ip, solicitud{ultimoSitio: visitado, ultimaFecha: fecha, contador: contador + 1})
 		} else {
-			contador = 1
+			entradas.Guardar(ip, solicitud{ultimoSitio: visitado, ultimaFecha: fecha, contador: 1})
 		}
 
-		if contador == 5 {
+		if contador+1 == 5 {
 			res = append(res, ip)
-			contador = 1
+			entradas.Guardar(ip, solicitud{ultimoSitio: visitado, ultimaFecha: fecha, contador: 1})
 		}
 
-		fechaAnterior, ipAnterior, visitadoAnterior = fecha, ip, visitado
 	}
 	err = s.Err()
 	if err != nil {
@@ -214,12 +215,12 @@ func (l *lector) TopKStream(k int) []string {
 
 	top := make([]string, k)
 
-	for i:= 0; !cp.EstaVacia(); i++ {
+	for i := 0; !cp.EstaVacia(); i++ {
 		tope := cp.Desencolar()
 		sitio := tope.nombre
 		cant := tope.cantidad
 
-		if cant != 0{
+		if cant != 0 {
 			top[k-i-1] = sitio + " - " + strconv.Itoa(cant)
 		}
 

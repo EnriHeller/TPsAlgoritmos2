@@ -19,7 +19,7 @@ func main() {
 
 	for entrada.Scan() {
 		comando := entrada.Text()
-		
+
 		instruccion, resultado, err := lectorDs.Procesar(comando)
 
 		if err != nil {
@@ -44,7 +44,7 @@ func main() {
 		case "ver_mas_visitados":
 			fmt.Println("Sitios más visitados:")
 			for _, sitio := range resultado {
-				if sitio != ""{
+				if sitio != "" {
 					fmt.Println("\t" + sitio)
 				}
 			}
