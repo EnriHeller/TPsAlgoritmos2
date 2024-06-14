@@ -28,10 +28,10 @@ func main() {
 
 		switch instruccion {
 		case "agregar_archivo":
-
 			for _, ip := range resultado {
 				fmt.Println("DoS: " + ip)
 			}
+
 			fmt.Println("OK")
 
 		case "ver_visitantes":

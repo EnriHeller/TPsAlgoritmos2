@@ -25,7 +25,6 @@ type lector struct {
 }
 
 type solicitud struct {
-	ultimoSitio string
 	ultimaFecha string
 	contador    int
 }
@@ -98,10 +97,9 @@ func (l *lector) agregarArchivo(ruta string) []string {
 	for s.Scan() {
 		linea := strings.Split(s.Text(), "\t")
 		ip, fecha, visitado := linea[0], linea[1], linea[3]
-		entradas.Guardar(ip, solicitud{ultimoSitio: visitado, ultimaFecha: fecha, contador: 1})
 
 		if !entradas.Pertenece(ip) {
-			entradas.Guardar(ip, solicitud{ultimoSitio: visitado, ultimaFecha: fecha, contador: 0})
+			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: 0})
 		}
 
 		//Guardo cantidad de veces que se visitó un sitio
@@ -112,19 +110,19 @@ func (l *lector) agregarArchivo(ruta string) []string {
 		}
 
 		datos := entradas.Obtener(ip)
-		sitioAnterior, fechaAnterior, contador := datos.ultimoSitio, datos.ultimaFecha, datos.contador
+		fechaAnterior, contador := datos.ultimaFecha, datos.contador
 
 		diferencia := obtenerDiferencia(fechaAnterior, fecha)
 
-		if diferencia <= 2 && visitado == sitioAnterior {
-			entradas.Guardar(ip, solicitud{ultimoSitio: visitado, ultimaFecha: fecha, contador: contador + 1})
+		if diferencia <= 2 {
+			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: contador + 1})
 		} else {
-			entradas.Guardar(ip, solicitud{ultimoSitio: visitado, ultimaFecha: fecha, contador: 0})
+			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: 0})
 		}
 
 		if contador+1 == 5 {
 			res = append(res, ip)
-			entradas.Guardar(ip, solicitud{ultimoSitio: visitado, ultimaFecha: fecha, contador: 0})
+			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: 0})
 		}
 	}
 
