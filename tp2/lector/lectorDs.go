@@ -100,7 +100,7 @@ func (l *lector) agregarArchivo(ruta string) []string {
 		ip, fecha, visitado := linea[0], linea[1], linea[3]
 		if !entradas.Pertenece(ip) {
 			entradas.Guardar(ip, solicitud{ultimoSitio: visitado, ultimaFecha: fecha, contador: 1})
-			continue
+
 		}
 		//Guardo cantidad de veces que se visitó un sitio
 		l.guardarSitios(visitado)
