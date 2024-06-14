@@ -114,7 +114,7 @@ func (l *lector) agregarArchivo(ruta string) []string {
 
 		diferencia := obtenerDiferencia(fechaAnterior, fecha)
 
-		if diferencia <= 2 {
+		if diferencia < 2 {
 			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: contador + 1})
 		} else {
 			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: 0})
