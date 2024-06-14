@@ -8,12 +8,6 @@ import (
 )
 
 func main() {
-
-	/*l := lector.CrearLector()
-
-	l.Procesar("agregar_archivo test01.log")
-	l.Procesar("ver_mas_visitados 3")*/
-
 	entrada := bufio.NewScanner(os.Stdin)
 	lectorDs := lector.CrearLector()
 
@@ -35,10 +29,16 @@ func main() {
 			fmt.Println("OK")
 
 		case "ver_visitantes":
+
+			if len(resultado) == 0{
+				break
+			}
+
 			fmt.Println("Visitantes:")
 			for _, ip := range resultado {
 				fmt.Println("\t" + ip)
 			}
+
 			fmt.Println("OK")
 
 		case "ver_mas_visitados":

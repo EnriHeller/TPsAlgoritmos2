@@ -55,8 +55,12 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 		return instruccion, resultado, fmt.Errorf("comando no valido")
 	}
 
-	switch instruccion {
+	if len(elementos) == 1{
+		fmt.Fprintf(os.Stderr, "Error en comando %s\n", instruccion)
+		return instruccion, resultado, nil
+	}
 
+	switch instruccion {
 	case "agregar_archivo":
 		nombreArchivo := elementos[1]
 		resultado = l.agregarArchivo(nombreArchivo)
@@ -64,7 +68,7 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 	case "ver_visitantes":
 		desde, hasta := elementos[1], elementos[2]
 		resultado = l.verVisitantes(desde, hasta)
-
+	
 	case "ver_mas_visitados":
 		n, err := strconv.Atoi(elementos[1])
 		if err != nil {
