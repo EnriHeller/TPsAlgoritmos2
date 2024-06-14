@@ -128,31 +128,7 @@ func (l *lector) agregarArchivo(ruta string) []string {
 		fmt.Println(err)
 	}
 
-	heapRes := Heap.CrearHeapArr(resDesordenado, func(ip1, ip2 string) int{
-		arrIp1 := strings.Split(ip1, ".")
-		arrIp2 := strings.Split(ip2, ".")
-
-		var ip1SinPuntos string
-		var ip2SinPuntos string
-
-		for i := range(arrIp1){
-			ip1SinPuntos += arrIp1[i]
-		}
-		for i := range(arrIp2){
-			ip2SinPuntos += arrIp2[i]
-		}
-
-		ip1Num, _:= strconv.Atoi(ip1SinPuntos)
-		ip2Num, _ := strconv.Atoi(ip2SinPuntos)
-		
-		return ip2Num - ip1Num
-	})
-
-	var res []string
-
-	for !heapRes.EstaVacia(){
-		res = append(res, heapRes.Desencolar() )
-	}
+	res := OrdenarArregloIps(resDesordenado)
 
 	return res
 }
@@ -249,4 +225,39 @@ func (l *lector) TopKStream(k int) []string {
 
 	}
 	return top
+}
+func OrdenarArregloIps(arr []string) []string {
+	countingSort(arr, 256, 3)
+	countingSort(arr, 256, 2)
+	countingSort(arr, 256, 1)
+	countingSort(arr, 256, 0)
+	return arr
+}
+
+func countingSort(elementos []string, rango int, digito int) {
+	frecuencias := make([]int, rango)
+	sumasAcumuladas := make([]int, rango)
+	resultado := make([]string, len(elementos))
+
+	for _, elem := range elementos {
+		datos := strings.Split(elem, ".")
+		valor, _ := strconv.Atoi(datos[digito])
+		frecuencias[valor]++
+	}
+
+	for i := 1; i < len(frecuencias); i++ {
+		sumasAcumuladas[i] = sumasAcumuladas[i-1] + frecuencias[i-1]
+	}
+
+	for _, elem := range elementos {
+		datos := strings.Split(elem, ".")
+		valor, _ := strconv.Atoi(datos[digito])
+		pos := sumasAcumuladas[valor]
+		resultado[pos] = elem
+		sumasAcumuladas[valor]++
+	}
+
+	for i := 0; i < len(resultado); i++ {
+		elementos[i] = resultado[i]
+	}
 }
