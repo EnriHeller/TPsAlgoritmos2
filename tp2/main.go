@@ -17,39 +17,33 @@ func main() {
 		instruccion, resultado, err := lectorDs.Procesar(comando)
 
 		if err != nil {
-			fmt.Println("ERROR", err)
-		}
-
-		switch instruccion {
-		case "agregar_archivo":
-			for _, ip := range resultado {
-				fmt.Println("DoS: " + ip)
-			}
-
-			fmt.Println("OK")
-
-		case "ver_visitantes":
-
-			if len(resultado) == 0{
-				break
-			}
-
-			fmt.Println("Visitantes:")
-			for _, ip := range resultado {
-				fmt.Println("\t" + ip)
-			}
-
-			fmt.Println("OK")
-
-		case "ver_mas_visitados":
-			fmt.Println("Sitios más visitados:")
-			for _, sitio := range resultado {
-				if sitio != "" {
-					fmt.Println("\t" + sitio)
+			fmt.Fprintf(os.Stderr, "Error en comando %s\n", instruccion)
+		}else{
+			switch instruccion {
+			case "agregar_archivo":
+				for _, ip := range resultado {
+					fmt.Println("DoS: " + ip)
 				}
+	
+				fmt.Println("OK")
+	
+			case "ver_visitantes":
+				fmt.Println("Visitantes:")
+				for _, ip := range resultado {
+					fmt.Println("\t" + ip)
+				}
+	
+				fmt.Println("OK")
+	
+			case "ver_mas_visitados":
+				fmt.Println("Sitios más visitados:")
+				for _, sitio := range resultado {
+					if sitio != "" {
+						fmt.Println("\t" + sitio)
+					}
+				}
+				fmt.Println("OK")
 			}
-			fmt.Println("OK")
-
 		}
 	}
 

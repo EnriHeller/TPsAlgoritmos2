@@ -56,8 +56,7 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 	}
 
 	if len(elementos) == 1{
-		fmt.Fprintf(os.Stderr, "Error en comando %s\n", instruccion)
-		return instruccion, resultado, nil
+		return instruccion, resultado, fmt.Errorf("parámetros invalidos")
 	}
 
 	switch instruccion {
