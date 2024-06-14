@@ -18,6 +18,7 @@ type sitiosVisitados struct {
 	cantidad int
 }
 
+
 type lector struct {
 	instrucciones Dic.Diccionario[string, bool]
 	ips           Dic.DiccionarioOrdenado[string, bool]
@@ -90,7 +91,7 @@ func (l *lector) agregarArchivo(ruta string) []string {
 	var fechaAnterior string
 	var ipAnterior string
 	var visitadoAnterior string
-	contador := 0
+	contador := 1
 
 	for s.Scan() {
 		linea := strings.Split(s.Text(),"\t")
@@ -115,16 +116,15 @@ func (l *lector) agregarArchivo(ruta string) []string {
 		if diferencia <= 2 && visitado == visitadoAnterior && ip == ipAnterior {
 			contador++
 		} else {
-			contador = 0
+			contador = 1
 		}
 
 		if contador == 5 {
 			res = append(res, ip)
-			contador = 0
+			contador = 1
 		}
 
-		fechaAnterior = fecha
-
+		fechaAnterior, ipAnterior, visitadoAnterior = fecha, ip, visitado
 	}
 	err = s.Err()
 	if err != nil {
@@ -164,6 +164,7 @@ func obtenerDiferencia(anterior, actual string) int {
 	ant, _ := time.Parse(layout, anterior)
 	act, _ := time.Parse(layout, actual)
 	dif := act.Sub(ant)
+
 	return int(dif.Seconds())
 }
 
@@ -218,8 +219,11 @@ func (l *lector) TopKStream(k int) []string {
 		tope := cp.Desencolar()
 		sitio := tope.nombre
 		cant := tope.cantidad
-		fmt.Println("appendeaste esto", sitio + " - " + strconv.Itoa(cant))
-		top[k-i-1] = sitio + " - " + strconv.Itoa(cant)
+
+		if cant != 0{
+			top[k-i-1] = sitio + " - " + strconv.Itoa(cant)
+		}
+
 	}
 	return top
 }
