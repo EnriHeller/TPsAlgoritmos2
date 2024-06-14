@@ -18,7 +18,6 @@ type sitiosVisitados struct {
 	cantidad int
 }
 
-
 type lector struct {
 	instrucciones Dic.Diccionario[string, bool]
 	ips           Dic.DiccionarioOrdenado[string, bool]
