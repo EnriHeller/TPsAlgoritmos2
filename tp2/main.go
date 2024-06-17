@@ -10,7 +10,7 @@ import (
 func main() {
 	entrada := bufio.NewScanner(os.Stdin)
 	lectorDs := lector.CrearLector()
-
+	
 	for entrada.Scan() {
 		comando := entrada.Text()
 

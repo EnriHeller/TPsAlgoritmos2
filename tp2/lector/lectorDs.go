@@ -62,6 +62,12 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 	switch instruccion {
 	case "agregar_archivo":
 		nombreArchivo := elementos[1]
+
+		//En caso que se agregue un archivo nuevo, se reinician los valores del struct
+		ips := Dic.CrearABB[string, bool](compararIps)
+		sitios := Dic.CrearHash[string, int]()
+		l.ips, l.sitios =  ips, sitios
+
 		res, err := l.agregarArchivo(nombreArchivo)
 
 		if err != nil{
@@ -87,6 +93,7 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 
 func (l *lector) agregarArchivo(ruta string) ([]string, error) {
 
+	hashAuxiliar := Dic.CrearHash[string, bool]()
 	var resDesordenado []string
 	entradas := Dic.CrearHash[string, solicitud]()
 	archivo, err := os.Open(ruta)
@@ -126,9 +133,14 @@ func (l *lector) agregarArchivo(ruta string) ([]string, error) {
 		}
 
 		if contador+1 == 5 {
-			resDesordenado = append(resDesordenado, ip)
+			hashAuxiliar.Guardar(ip, true)
 			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: 0})
 		}
+	}
+
+	for iter:= hashAuxiliar.Iterador(); iter.HaySiguiente(); iter.Siguiente(){
+		clave, _ :=  iter.VerActual()
+		resDesordenado = append(resDesordenado, clave )
 	}
 
 	err = s.Err()
