@@ -15,26 +15,24 @@ func main() {
 		comando := entrada.Text()
 
 		instruccion, resultado, err := lectorDs.Procesar(comando)
-
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error en comando %s\n", instruccion)
-		}else{
+			msgError := "Error en comando " + instruccion
+			fmt.Fprintln(os.Stderr, msgError)
+		} else {
 			switch instruccion {
 			case "agregar_archivo":
 				for _, ip := range resultado {
 					fmt.Println("DoS: " + ip)
 				}
-	
 				fmt.Println("OK")
-	
+
 			case "ver_visitantes":
 				fmt.Println("Visitantes:")
 				for _, ip := range resultado {
 					fmt.Println("\t" + ip)
 				}
-	
 				fmt.Println("OK")
-	
+
 			case "ver_mas_visitados":
 				fmt.Println("Sitios más visitados:")
 				for _, sitio := range resultado {
@@ -48,6 +46,6 @@ func main() {
 	}
 
 	if errEntrada := entrada.Err(); errEntrada != nil {
-		fmt.Printf("Error al leer entrada: %s", errEntrada)
+		fmt.Fprintln(os.Stderr, errEntrada)
 	}
 }

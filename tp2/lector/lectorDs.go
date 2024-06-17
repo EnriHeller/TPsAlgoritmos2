@@ -62,7 +62,13 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 	switch instruccion {
 	case "agregar_archivo":
 		nombreArchivo := elementos[1]
-		resultado = l.agregarArchivo(nombreArchivo)
+		res, err := l.agregarArchivo(nombreArchivo)
+
+		if err != nil{
+			return instruccion, resultado, err
+		}
+
+		resultado = res
 
 	case "ver_visitantes":
 		desde, hasta := elementos[1], elementos[2]
@@ -79,15 +85,14 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 	return instruccion, resultado, nil
 }
 
-func (l *lector) agregarArchivo(ruta string) []string {
+func (l *lector) agregarArchivo(ruta string) ([]string, error) {
 
 	var resDesordenado []string
 	entradas := Dic.CrearHash[string, solicitud]()
 	archivo, err := os.Open(ruta)
 
 	if err != nil {
-		fmt.Printf("Error %v al abrir el archivo %s", ruta, err)
-		return resDesordenado
+		return resDesordenado, err
 	}
 
 	defer archivo.Close()
@@ -133,7 +138,7 @@ func (l *lector) agregarArchivo(ruta string) []string {
 
 	res := OrdenarArregloIps(resDesordenado)
 
-	return res
+	return res, nil
 }
 
 func (l *lector) guardarSitios(visitado string) {
