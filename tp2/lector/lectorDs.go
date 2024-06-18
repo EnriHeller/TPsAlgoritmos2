@@ -26,7 +26,7 @@ type lector struct {
 
 /*type solicitud struct {
 	ip string
-	fechasMenosDeDosSegs  
+	fechasMenosDeDosSegs
 }*/
 
 func CrearLector() lector {
@@ -121,7 +121,7 @@ func (l *lector) agregarArchivo(ruta string) ([]string, error) {
 
 		if !entradas.Pertenece(ip) {
 			heapActual := Heap.CrearHeap(func(f1, f2 string) int {
-				return obtenerDiferencia(f1,f2)
+				return obtenerDiferencia(f1, f2)
 			})
 			heapActual.Encolar(fecha)
 			entradas.Guardar(ip, heapActual)
@@ -133,7 +133,7 @@ func (l *lector) agregarArchivo(ruta string) ([]string, error) {
 
 		diferencia := obtenerDiferencia(tope, fecha)
 
-		for diferencia >= 2 && !heapActual.EstaVacia(){
+		for diferencia >= 2 && !heapActual.EstaVacia() {
 			tope = heapActual.VerMax()
 			heapActual.Desencolar()
 			diferencia = obtenerDiferencia(tope, fecha)
@@ -148,7 +148,7 @@ func (l *lector) agregarArchivo(ruta string) ([]string, error) {
 		}
 	}
 
-	for iter := hashAuxiliar.Iterador() ; iter.HaySiguiente(); iter.Siguiente(){
+	for iter := hashAuxiliar.Iterador(); iter.HaySiguiente(); iter.Siguiente() {
 		actual, _ := iter.VerActual()
 		resDesordenado = append(resDesordenado, actual)
 	}
