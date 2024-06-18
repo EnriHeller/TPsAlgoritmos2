@@ -24,10 +24,10 @@ type lector struct {
 	sitios        Dic.Diccionario[string, int]
 }
 
-type solicitud struct {
-	ultimaFecha string
-	contador    int
-}
+/*type solicitud struct {
+	ip string
+	fechasMenosDeDosSegs  
+}*/
 
 func CrearLector() lector {
 	instrucciones := Dic.CrearHash[string, bool]()
@@ -93,9 +93,10 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 
 func (l *lector) agregarArchivo(ruta string) ([]string, error) {
 
-	hashAuxiliar := Dic.CrearHash[string, bool]()
 	var resDesordenado []string
-	entradas := Dic.CrearHash[string, solicitud]()
+	hashAuxiliar := Dic.CrearHash[string, bool]()
+
+	entradas := Dic.CrearHash[string, Heap.ColaPrioridad[string]]()
 	archivo, err := os.Open(ruta)
 
 	if err != nil {
@@ -110,39 +111,46 @@ func (l *lector) agregarArchivo(ruta string) ([]string, error) {
 		linea := strings.Split(s.Text(), "\t")
 		ip, fecha, visitado := linea[0], linea[1], linea[3]
 
-		if !entradas.Pertenece(ip) {
-			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: 0})
-		}
-
-		//Guardo cantidad de veces que se visitó un sitio
+		//Guardo cantidad de veces que se visitó un sitio para sitios mas visitados
 		l.guardarSitios(visitado)
 
+		//Guardo Ips para Ver Visitantes
 		if !l.ips.Pertenece(ip) {
 			l.ips.Guardar(ip, true)
 		}
 
-		datos := entradas.Obtener(ip)
-		fechaAnterior, contador := datos.ultimaFecha, datos.contador
-
-		diferencia := obtenerDiferencia(fechaAnterior, fecha)
-
-		if diferencia < 2 {
-			contador++
-			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: contador + 1})
-		} else {
-			contador = 1
-			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: 1})
+		if !entradas.Pertenece(ip) {
+			heapActual := Heap.CrearHeap(func(f1, f2 string) int {
+				return obtenerDiferencia(f1,f2)
+			})
+			heapActual.Encolar(fecha)
+			entradas.Guardar(ip, heapActual)
+			continue
 		}
 
-		if contador >= 5 {
+		heapActual := entradas.Obtener(ip)
+		tope := heapActual.VerMax()
+
+		diferencia := obtenerDiferencia(tope, fecha)
+
+		for diferencia >= 2 && !heapActual.EstaVacia(){
+			tope = heapActual.VerMax()
+			heapActual.Desencolar()
+			diferencia = obtenerDiferencia(tope, fecha)
+		}
+
+		heapActual.Encolar(fecha)
+		entradas.Guardar(ip, heapActual)
+
+		if heapActual.Cantidad() == 5 {
 			hashAuxiliar.Guardar(ip, true)
+			entradas.Borrar(ip)
 		}
-		entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: contador})
 	}
 
-	for iter := hashAuxiliar.Iterador(); iter.HaySiguiente(); iter.Siguiente() {
-		clave, _ := iter.VerActual()
-		resDesordenado = append(resDesordenado, clave)
+	for iter := hashAuxiliar.Iterador() ; iter.HaySiguiente(); iter.Siguiente(){
+		actual, _ := iter.VerActual()
+		resDesordenado = append(resDesordenado, actual)
 	}
 
 	err = s.Err()
