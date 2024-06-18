@@ -55,7 +55,7 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 		return instruccion, resultado, fmt.Errorf("comando no valido")
 	}
 
-	if len(elementos) == 1{
+	if len(elementos) == 1 {
 		return instruccion, resultado, fmt.Errorf("parámetros invalidos")
 	}
 
@@ -66,11 +66,11 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 		//En caso que se agregue un archivo nuevo, se reinician los valores del struct
 		ips := Dic.CrearABB[string, bool](compararIps)
 		sitios := Dic.CrearHash[string, int]()
-		l.ips, l.sitios =  ips, sitios
+		l.ips, l.sitios = ips, sitios
 
 		res, err := l.agregarArchivo(nombreArchivo)
 
-		if err != nil{
+		if err != nil {
 			return instruccion, resultado, err
 		}
 
@@ -79,7 +79,7 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 	case "ver_visitantes":
 		desde, hasta := elementos[1], elementos[2]
 		resultado = l.verVisitantes(desde, hasta)
-	
+
 	case "ver_mas_visitados":
 		n, err := strconv.Atoi(elementos[1])
 		if err != nil {
@@ -127,7 +127,7 @@ func (l *lector) agregarArchivo(ruta string) ([]string, error) {
 		diferencia := obtenerDiferencia(fechaAnterior, fecha)
 
 		if diferencia < 2 {
-			contador ++
+			contador++
 			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: contador + 1})
 		} else {
 			contador = 1
@@ -140,9 +140,9 @@ func (l *lector) agregarArchivo(ruta string) ([]string, error) {
 		entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: contador})
 	}
 
-	for iter:= hashAuxiliar.Iterador(); iter.HaySiguiente(); iter.Siguiente(){
-		clave, _ :=  iter.VerActual()
-		resDesordenado = append(resDesordenado, clave )
+	for iter := hashAuxiliar.Iterador(); iter.HaySiguiente(); iter.Siguiente() {
+		clave, _ := iter.VerActual()
+		resDesordenado = append(resDesordenado, clave)
 	}
 
 	err = s.Err()
