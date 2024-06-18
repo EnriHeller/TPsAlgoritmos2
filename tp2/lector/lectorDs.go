@@ -127,15 +127,17 @@ func (l *lector) agregarArchivo(ruta string) ([]string, error) {
 		diferencia := obtenerDiferencia(fechaAnterior, fecha)
 
 		if diferencia < 2 {
+			contador ++
 			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: contador + 1})
 		} else {
-			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: 0})
+			contador = 1
+			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: 1})
 		}
 
-		if contador+1 == 5 {
+		if contador >= 5 {
 			hashAuxiliar.Guardar(ip, true)
-			entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: 0})
 		}
+		entradas.Guardar(ip, solicitud{ultimaFecha: fecha, contador: contador})
 	}
 
 	for iter:= hashAuxiliar.Iterador(); iter.HaySiguiente(); iter.Siguiente(){
@@ -178,7 +180,7 @@ func (l *lector) verMasVisitados(n int) []string {
 
 func obtenerDiferencia(anterior, actual string) int {
 
-	var layout = time.RFC3339
+	var layout = "2006-01-02T15:04:05-07:00"
 
 	ant, _ := time.Parse(layout, anterior)
 	act, _ := time.Parse(layout, actual)
