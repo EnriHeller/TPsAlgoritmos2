@@ -3,7 +3,7 @@ from collections import deque
 
 #NOTA: Puede haber vertices unidos consigo mismos.
 
-#Mínimo seguimientos:
+#Mínimos seguimientos:
 # Busco camino minimo entre vertice origen y destino. Imprimo lista de vertices que se recorren.
 
 def camino_minimo(grafo, origen, destino):
@@ -12,7 +12,7 @@ def camino_minimo(grafo, origen, destino):
     padres = {origen: None}
 
     heap = [(origen, 0)]
-    heapq.heapify(heap)
+    #heapq.heapify(heap)
 
     while heap:
         v, dist_v = heapq.heappop(heap)
@@ -62,7 +62,30 @@ def vertices_n_dist(grafo, v, n):
 
 #Delincuentes más importantes: 
 # Obtener los n mas importantes (centralidad) usando pageRank
+def pageRank(grafo, v):
+    d = 0.6
+    N = len(grafo.obtener_vertices())
+    sumatoria = 0
 
+    for w in grafo.adyacentes(v):
+        sumatoria += pageRank(grafo, w)/len(grafo.adyacentes(w))
+
+    res = (1- d)/N + d*sumatoria
+
+    return res
+
+def obtenerNMasCentrales(grafo,n):
+    resultado = []
+
+    for v in grafo.obtener_vertices():
+        pr = pageRank(grafo, v)
+        resultado.append((v, pr))
+
+    sorted(resultado)
+    largoLista = len(resultado)
+
+    grafo.centrales = resultado[largoLista-n:]
+    return resultado[largoLista-n:]
 
 #Persecución rápida:
 # Dado un vertice en concreto, quiero el camino minimo entre los k vertices mas importantes. En caso de tener caminos de igual largo, priorizar los que vayan a un vertice más importante. Esto se aplica para una lista de vertices concretos
@@ -75,7 +98,9 @@ def vertices_n_dist(grafo, v, n):
 #Ciclo más corto:
 #  Se pasa un vertice por parámetro y se busca el camino más corto donde se empiece y termine por este vertice. Si no hay ciclo, se envía "No se encontro recorrido".
 
+
 #CFC:
 # Obtengo cada Componente fuertemente conexa del grafo
+
 
 
