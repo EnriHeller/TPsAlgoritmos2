@@ -75,17 +75,23 @@ def pageRank(grafo, v):
     return res
 
 def obtenerNMasCentrales(grafo,n):
-    resultado = []
 
-    for v in grafo.obtener_vertices():
-        pr = pageRank(grafo, v)
-        resultado.append((v, pr))
+    if len(grafo.centrales) == 0:
+        resultado = []
+        for v in grafo.obtener_vertices():
+            pr = pageRank(grafo, v)
+            resultado.append((v, pr))
 
-    sorted(resultado)
-    largoLista = len(resultado)
+        sorted(resultado)
+        grafo.centrales = resultado
 
-    grafo.centrales = resultado[largoLista-n:]
-    return resultado[largoLista-n:]
+        largoLista = len(resultado)
+        return resultado[largoLista-n:]
+    else:
+        resultado = grafo.centrales
+        largoLista = len(resultado)
+        return resultado[largoLista-n:]
+
 
 #Persecución rápida:
 # Dado un vertice en concreto, quiero el camino minimo entre los k vertices mas importantes. En caso de tener caminos de igual largo, priorizar los que vayan a un vertice más importante. Esto se aplica para una lista de vertices concretos
