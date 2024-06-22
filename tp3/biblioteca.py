@@ -2,12 +2,11 @@ import heapq
 from collections import deque
 from pila import Pila
 
-
 #NOTA: Puede haber vertices unidos consigo mismos.
 
 #Mínimos seguimientos:
-# Busco camino minimo entre vertice origen y destino. Imprimo lista de vertices que se recorren.
 
+# Busco camino minimo entre vertice origen y destino. Imprimo lista de vertices que se recorren.
 def camino_minimo(grafo, origen, destino):
     distancias = {v: float("inf") for v in grafo.obtener_vertices()}
     distancias[origen] = 0
@@ -24,7 +23,7 @@ def camino_minimo(grafo, origen, destino):
 
         visitados.add(v)
 
-        if v == destino and dist_v != 0:
+        if v == destino:
             break
 
         for w in grafo.adyacentes(v):
@@ -36,13 +35,16 @@ def camino_minimo(grafo, origen, destino):
                 padres[w] = v
                 heapq.heappush(heap, (dist_w, w))
 
+    if destino not in padres:
+        return []
+
     resultado = []
     actual = destino
     while actual is not None:
         resultado.append(actual)
         actual = padres[actual]
 
-    return resultado[::-1] if distancias[destino] != float("inf") else []
+    return resultado[::-1]
 
 #Divulgación de rumor: 
 # Obtengo lista de todos los vertices que se pueden visitar a partir del vertice pasado por parámetro, a un radio de n.
@@ -68,30 +70,36 @@ def divulgar(grafo, v, n):
     return list(visitados)
 
 #Delincuentes más importantes: 
+
 # Obtener los n mas importantes (centralidad) usando pageRank
-def pageRank(grafo, v):
-    d = 0.6
+def pageRank(grafo, v, pr = {}, iteracion = 0,max_iter = 100, d=0.85):
+    if v in pr:
+        return pr[v]
+    
+    if iteracion >= max_iter:
+        return pr.get(v, (1 - d) / len(grafo.obtener_vertices()))
+
     N = len(grafo.obtener_vertices())
     sumatoria = 0
 
     for w in grafo.adyacentes(v):
-        sumatoria += pageRank(grafo, w)/len(grafo.adyacentes(w))
+        sumatoria += pageRank(grafo, w, pr, iteracion + 1)/len(grafo.adyacentes(w))
 
     res = (1- d)/N + d*sumatoria
+    pr[v] = res
 
     return res
 
 def obtenerNMasCentrales(grafo,n):
-
     if len(grafo.centrales) == 0:
         resultado = []
         for v in grafo.obtener_vertices():
             pr = pageRank(grafo, v)
             resultado.append((v, pr))
 
-        sorted(resultado)
-        grafo.centrales = resultado
-
+        resultado.sort(key=lambda v:v[1])
+        grafo.centrales = [tupla[0] for tupla in resultado]
+        resultado = grafo.centrales
         largoLista = len(resultado)
         return resultado[largoLista-n:]
     else:
@@ -103,19 +111,23 @@ def obtenerNMasCentrales(grafo,n):
 #Persecución rápida:
 # Dado un vertice en concreto, quiero el camino minimo entre los k vertices mas importantes. En caso de tener caminos de igual largo, priorizar los que vayan a un vertice más importante. Esto se aplica para una lista de vertices concretos
 def caminos_mas_rapidos(grafo, vertices, k):
-    kMasImportantes = obtenerNMasCentrales(grafo, k)
+    kMasImportantes = [v for v, _ in obtenerNMasCentrales(grafo, k)]
     resultado = []
 
     for v in vertices:
         caminos_minimos = []
         for w in kMasImportantes:
-            cm = camino_minimo(grafo,v,w)
-            caminos_minimos.append((len(cm), cm))
-        sorted(caminos_minimos)
-        resultado.append((v, caminos_minimos[0][1]))
+            cm = camino_minimo(grafo, v, w)
+            if cm: 
+                caminos_minimos.append((len(cm), cm))
+        
+        if caminos_minimos:
+            caminos_minimos.sort(key=lambda cm:(cm[0], cm[1]))
+            resultado.append(caminos_minimos[0][1])
+        else:
+            resultado.append([])
 
-    sorted(resultado)
-    return resultado[0][1]
+    return resultado[0]
 
 #Comunidades: 
 # Obtener comunidades de al menos n integrantes usando labelPropagation
@@ -141,7 +153,6 @@ def max_freq(grafo, v, Label, frecuencias, visitados):
 
 #Ciclo más corto:
 #  Se pasa un vertice por parámetro y se busca el camino más corto donde se empiece y termine por este vertice. Si no hay ciclo, se envía "No se encontro recorrido".
-
 
 def cicloMasCorto(grafo, v):
     # Buscar el ciclo más corto que comienza y termina en 'v'
@@ -173,7 +184,7 @@ def dfs_cfc(grafo, v, visitados, orden, mas_bajo, pila, apilados, cfcs, contador
     visitados.add(v)
     pila.apilar(v)
     apilados.add(v)
-    
+
     for w in grafo.adyacentes(v):
         if w not in visitados:
             dfs_cfc(grafo, w, visitados, orden, mas_bajo, pila, apilados, cfcs, contador_global)
