@@ -14,26 +14,46 @@ class Grafo:
             self.vertices[v]= {}
 
     def adyacentes(self, v):
+        if v not in self.vertices:
+            raise ValueError("La clave " + v + " no pertenece al grafo")
         return list(self.vertices[v].keys())
     
     def agregar_arista(self, v, w, peso):
+        if v not in self.vertices:
+            raise ValueError("La clave " + v + " no pertenece al grafo")
+        if w not in self.vertices:
+            raise ValueError("La clave " + w + " no pertenece al grafo")  
         self.vertices[v][w] = peso
         if not self.dirigido:
             self.vertices[w][v] = peso
     
     def peso_arista(self, v, w):
+        if v not in self.vertices:
+            raise ValueError("La clave " + v + " no pertenece al grafo")
+        if w not in self.vertices:
+            raise ValueError("La clave " + w + " no pertenece al grafo")       
         return self.vertices[v][w]
     
     def estan_unidos(self, v, w):
+        if v not in self.vertices:
+            raise ValueError("La clave " + v + " no pertenece al grafo")
+        if w not in self.vertices:
+            raise ValueError("La clave " + w + " no pertenece al grafo")  
         return w in self.vertices[v]
     
     def borrar_vertice(self, v):
+        if v not in self.vertices:
+            raise ValueError("La clave " + v + " no pertenece al grafo")
         self.vertices.pop(v)
         for vert in self.vertices:
             if v in vert:
                 vert.pop(v)
     
     def borrar_arista(self,v,w):
+        if v not in self.vertices:
+            raise ValueError("La clave " + v + " no pertenece al grafo")
+        if w not in self.vertices:
+            raise ValueError("La clave " + w + " no pertenece al grafo")  
         self.vertices[v].pop(w)
         if not self.dirigido:
             self.vertices[w].pop(v)
