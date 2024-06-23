@@ -82,7 +82,8 @@ def main(archivo_datos):
 
         pass
     elif comando == "divulgar_ciclo":
-        pass
+        resultado = b.ciclo_mas_corto(grafo, params_arr[0])
+        print(resultado)
     
     elif comando == "cfc":
         cfcs = b.cfcs_grafo(grafo)

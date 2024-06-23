@@ -1,6 +1,7 @@
 import heapq
 from collections import deque
 from pila import Pila
+from grafo import Grafo
 
 #NOTA: Puede haber vertices unidos consigo mismos.
 
@@ -131,75 +132,65 @@ def caminos_mas_rapidos(grafo, vertices, k):
 
 #Comunidades: 
 # Obtener comunidades de al menos n integrantes usando labelPropagation
-
-def obtener_comunidades(grafo, n):
-    Label = labelPropagation(grafo)
-    comunidades = {}
-    for vertice, numero in Label.items():
-        if numero not in comunidades:
-            comunidades[numero] = []
-        comunidades[numero].append(vertice)
-    
-    filtro_comunidades = {numero: arreglo for numero, arreglo in comunidades.items() if len(arreglo)>=int(n)}
-    resultado = []
-
-    for c in filtro_comunidades:
-        resultado.append(filtro_comunidades[c])
-
-    return resultado
-
-
 def labelPropagation(grafo):
     vertices = grafo.obtener_vertices()
-    Label = {v: i for i,v in enumerate(vertices)}
+    Label = {v: v for v in vertices}
 
-    for v in vertices:
-        ws_con_v = obtener_ws_con_v(grafo, v)
-        LabelWs = {w: Label[w] for w in ws_con_v if w in Label}
-        Label[v] = max_freq(grafo,v,LabelWs)
-    
-    return Label
+    for v in Label:
+        frecuencias = {w: 0 for w in grafo.adyacentes(v)}
+        #Calculo maximas frecuencias
+        visitados = set(v)
+        max_freq(grafo, v, Label, frecuencias, visitados)
+        freq_ordenadas = sorted(frecuencias, key= lambda clave: frecuencias[clave], reverse= True)
+        Label[v] = freq_ordenadas[0]
 
-def obtener_ws_con_v(grafo, v):
-    res = []
-    for w in grafo.obtener_vertices():
-        for x in grafo.adyacentes(w):
-            if x == v:
-                res.append(w)
-    return res
-
-def max_freq(grafo,v, LabelWs):
-    frecuencias = {w:0 for w in LabelWs}
-
+def max_freq(grafo, v, Label, frecuencias, visitados):
     for w in grafo.adyacentes(v):
-        if w in LabelWs:
-            frecuencias[w] += 1
-    
-    mas_frecuente = max(frecuencias, key= frecuencias.get)
-    return LabelWs[mas_frecuente]
-
+        if w not in visitados:
+            visitados.add(w)
+            valor = Label[w]
+            frecuencias[valor] += 1
+            max_freq(grafo, w, Label,frecuencias, visitados)
 
 #Ciclo más corto:
 #  Se pasa un vertice por parámetro y se busca el camino más corto donde se empiece y termine por este vertice. Si no hay ciclo, se envía "No se encontro recorrido".
 
-def cicloMasCorto(grafo, v):
-    # Buscar el ciclo más corto que comienza y termina en 'v'
-    res = camino_minimo(grafo, v, v)
+def ciclo_mas_corto(grafo, origen):
+    cola = deque(origen)
+    padres = {origen: None}
+    visitados = set(origen)
     
-    # Si el camino encontrado tiene menos de 2 vértices, no es un ciclo válido
-    if len(res) < 2:
-        return "No se encontró recorrido"
-    
-    return res
+    while cola:
+        v = cola.popleft()
+        for w in grafo.adyacentes(v):
+            if w not in visitados:
+                padres[w] = v
+                cola.append(w)
+                visitados.add(w)
+            else:
+                if w == origen:
+                    return reconstruir_ciclo(padres, w, v)
+                    
+    return "No se encontro recorrido"   
 
+
+def reconstruir_ciclo(padre, inicio, fin):
+    v = fin
+    camino = [inicio]
+    while v is not None:
+        camino.append(v)
+        v = padre[v]
+    #camino.append(inicio)
+    return camino[::-1]
 
 #CFC:
+
 def cfcs_grafo(grafo):
     resultados = []
     visitados = set()
     pila = Pila()
     
-    for v in grafo.obtener_vertices():
+    for v in grafo:
         if v not in visitados:
             dfs_cfc(grafo, v, visitados, {}, {}, pila, set(), resultados, [0])
     return resultados
@@ -229,5 +220,21 @@ def dfs_cfc(grafo, v, visitados, orden, mas_bajo, pila, apilados, cfcs, contador
         cfcs.append(nueva_cfc)
 
 
+'''def main():
+    grafo = Grafo(True, vertices=["a","b","c","d","e", "f"])
 
+    grafo.agregar_arista("a" ,"b" ,1)
+    grafo.agregar_arista("b" ,"c" ,1)
+    grafo.agregar_arista("c" ,"d" ,1)
+    grafo.agregar_arista( "d","a" ,1)
+    grafo.agregar_arista( "d","e" ,1)
+    grafo.agregar_arista( "e","a" ,1)
+    grafo.agregar_arista( "c","a" ,1)
+    grafo.agregar_arista( "d","f" ,1)
+    grafo.agregar_arista( "f","e" ,1)
+    grafo.agregar_arista( "f","a" ,1)
+    #grafo.agregar_arista( "d","f" ,1)
 
+    print(ciclo_mas_corto(grafo, "a"))
+
+main()'''
