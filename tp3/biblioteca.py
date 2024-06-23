@@ -199,7 +199,7 @@ def cfcs_grafo(grafo):
     visitados = set()
     pila = Pila()
     
-    for v in grafo:
+    for v in grafo.obtener_vertices():
         if v not in visitados:
             dfs_cfc(grafo, v, visitados, {}, {}, pila, set(), resultados, [0])
     return resultados

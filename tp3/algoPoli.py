@@ -45,18 +45,27 @@ def persecucion(grafo, vertices, k):
     res = b.caminos_mas_rapidos(grafo,vertices, k)
     return " -> ".join(res)
 
+def divulgar(grafo, vertice, n):
+    res = b.divulgar(grafo, vertice, n)
+    return ", ".join(res)
+
+
 def main(archivo_datos):
     grafo = construir_grafo(archivo_datos)
     entrada = input("Ingrese un comando: ")
     comando, params_arr, k = parsearComando(entrada)
     formato = ""
+
     if comando == "min_seguimientos":
         origen, destino = params_arr
         formato = min_seguimientos(grafo, origen, destino)
+    
     elif comando == "mas_imp":
+        #REHACER
         cantidad = int(params_arr[0])
         formato = mas_imp(grafo, cantidad)
     elif comando == "persecucion":
+        #REHACER
         formato = persecucion(grafo, params_arr, k)
         
     elif comando == "comunidades":
@@ -68,11 +77,19 @@ def main(archivo_datos):
             print(respuesta + vertices)
 
     elif comando == "divulgar":
+        #REHACER
+        formato = divulgar(grafo,params_arr[0], k)
+
         pass
     elif comando == "divulgar_ciclo":
         pass
+    
     elif comando == "cfc":
-        pass
+        cfcs = b.cfcs_grafo(grafo)
+        for i,cfc in enumerate(cfcs):
+            respuesta = f"CFC {i+1}: "
+            vertices = ", ".join(cfc)
+            print(respuesta + vertices)
     else:
         print("Comando no valido.")
     
