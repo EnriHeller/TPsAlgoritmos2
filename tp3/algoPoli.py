@@ -22,10 +22,15 @@ def construir_grafo(archivo_datos):
 
 def parsearComando(entrada):
     elementos = entrada.split(" ")
-    params_arr = elementos[1].split(",")
+
+    params_arr = []
     k = 0
+
+    if len(elementos) > 1:
+        params_arr = elementos[1].split(",")
     if len(elementos) > 2:
         k = int(elementos[2])
+
     return elementos[0], params_arr, k
 
 def min_seguimientos(grafo, origen, destino):
@@ -44,20 +49,24 @@ def main(archivo_datos):
     grafo = construir_grafo(archivo_datos)
     entrada = input("Ingrese un comando: ")
     comando, params_arr, k = parsearComando(entrada)
-    resultado = ""
-
+    formato = ""
     if comando == "min_seguimientos":
         origen, destino = params_arr
-        resultado = min_seguimientos(grafo, origen, destino)
+        formato = min_seguimientos(grafo, origen, destino)
     elif comando == "mas_imp":
         cantidad = int(params_arr[0])
-        resultado = mas_imp(grafo, cantidad)
-        
+        formato = mas_imp(grafo, cantidad)
     elif comando == "persecucion":
-        resultado = persecucion(grafo, params_arr, k)
+        formato = persecucion(grafo, params_arr, k)
         
     elif comando == "comunidades":
-        pass
+        comunidades = b.obtener_comunidades(grafo, params_arr[0])
+
+        for i,c in enumerate(comunidades):
+            respuesta = f"Comunidad {i+1}: "
+            vertices = ", ".join(c)
+            print(respuesta + vertices)
+
     elif comando == "divulgar":
         pass
     elif comando == "divulgar_ciclo":
@@ -67,7 +76,7 @@ def main(archivo_datos):
     else:
         print("Comando no valido.")
     
-    if resultado:
-        print(resultado)
+    if formato:
+        print(formato)
 
 main(mensajes_minimos)

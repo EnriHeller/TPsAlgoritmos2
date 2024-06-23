@@ -131,25 +131,53 @@ def caminos_mas_rapidos(grafo, vertices, k):
 
 #Comunidades: 
 # Obtener comunidades de al menos n integrantes usando labelPropagation
+
+def obtener_comunidades(grafo, n):
+    Label = labelPropagation(grafo)
+    comunidades = {}
+    for vertice, numero in Label.items():
+        if numero not in comunidades:
+            comunidades[numero] = []
+        comunidades[numero].append(vertice)
+    
+    filtro_comunidades = {numero: arreglo for numero, arreglo in comunidades.items() if len(arreglo)>=int(n)}
+    resultado = []
+
+    for c in filtro_comunidades:
+        resultado.append(filtro_comunidades[c])
+
+    return resultado
+
+
 def labelPropagation(grafo):
     vertices = grafo.obtener_vertices()
-    Label = {v: v for v in vertices}
+    Label = {v: i for i,v in enumerate(vertices)}
 
-    for v in Label:
-        frecuencias = {w: 0 for w in grafo.adyacentes(v)}
-        #Calculo maximas frecuencias
-        visitados = set(v)
-        max_freq(grafo, v, Label, frecuencias, visitados)
-        freq_ordenadas = sorted(frecuencias, key= lambda clave: frecuencias[clave], reverse= True)
-        Label[v] = freq_ordenadas[0]
+    for v in vertices:
+        ws_con_v = obtener_ws_con_v(grafo, v)
+        LabelWs = {w: Label[w] for w in ws_con_v if w in Label}
+        Label[v] = max_freq(grafo,v,LabelWs)
+    
+    return Label
 
-def max_freq(grafo, v, Label, frecuencias, visitados):
+def obtener_ws_con_v(grafo, v):
+    res = []
+    for w in grafo.obtener_vertices():
+        for x in grafo.adyacentes(w):
+            if x == v:
+                res.append(w)
+    return res
+
+def max_freq(grafo,v, LabelWs):
+    frecuencias = {w:0 for w in LabelWs}
+
     for w in grafo.adyacentes(v):
-        if w not in visitados:
-            visitados.add(w)
-            valor = Label[w]
-            frecuencias[valor] += 1
-            max_freq(grafo, w, Label,frecuencias, visitados)
+        if w in LabelWs:
+            frecuencias[w] += 1
+    
+    mas_frecuente = max(frecuencias, key= frecuencias.get)
+    return LabelWs[mas_frecuente]
+
 
 #Ciclo más corto:
 #  Se pasa un vertice por parámetro y se busca el camino más corto donde se empiece y termine por este vertice. Si no hay ciclo, se envía "No se encontro recorrido".
@@ -166,7 +194,6 @@ def cicloMasCorto(grafo, v):
 
 
 #CFC:
-
 def cfcs_grafo(grafo):
     resultados = []
     visitados = set()
