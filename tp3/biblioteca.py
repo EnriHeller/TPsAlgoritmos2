@@ -156,31 +156,30 @@ def max_freq(grafo, v, Label, frecuencias, visitados):
 #  Se pasa un vertice por parámetro y se busca el camino más corto donde se empiece y termine por este vertice. Si no hay ciclo, se envía "No se encontro recorrido".
 
 def ciclo_mas_corto(grafo, origen):
-    cola = deque(origen)
+    cola = deque()
+    cola.append(origen)
+    visitados = set()
     padres = {origen: None}
-    visitados = set(origen)
-    
+
     while cola:
         v = cola.popleft()
+        visitados.add(v)
         for w in grafo.adyacentes(v):
             if w not in visitados:
                 padres[w] = v
                 cola.append(w)
-                visitados.add(w)
-            else:
-                if w == origen:
-                    return reconstruir_ciclo(padres, w, v)
-                    
-    return "No se encontro recorrido"   
+            elif w in visitados and w == origen:
+                return reconstruir_camino(padres, v, origen)
 
+    return "No se encontro recorrido"
 
-def reconstruir_ciclo(padre, inicio, fin):
-    v = fin
-    camino = [inicio]
-    while v is not None:
-        camino.append(v)
-        v = padre[v]
-    #camino.append(inicio)
+def reconstruir_camino(padres, final, origen):
+    camino = [origen]
+    actual = final
+    while actual != None:
+        camino.append(actual)
+        actual = padres[actual]
+
     return camino[::-1]
 
 #CFC:

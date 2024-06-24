@@ -49,25 +49,30 @@ def divulgar(grafo, vertice, n):
     res = b.divulgar(grafo, vertice, n)
     return ", ".join(res)
 
+def divulgar_ciclo(grafo, vertice):
+    res = b.ciclo_mas_corto(grafo, vertice)
+    return " -> ".join(res)
 
 def main(archivo_datos):
     grafo = construir_grafo(archivo_datos)
     entrada = input("Ingrese un comando: ")
     comando, params_arr, k = parsearComando(entrada)
-    formato = ""
+    resultado = ""
 
     if comando == "min_seguimientos":
         origen, destino = params_arr
-        formato = min_seguimientos(grafo, origen, destino)
+        resultado = min_seguimientos(grafo, origen, destino)
     
-    elif comando == "mas_imp":
-        #REHACER
-        cantidad = int(params_arr[0])
-        formato = mas_imp(grafo, cantidad)
-    elif comando == "persecucion":
-        #REHACER
-        formato = persecucion(grafo, params_arr, k)
-        
+    elif comando == "divulgar_ciclo":
+        resultado = divulgar_ciclo(grafo,params_arr[0])
+    
+    elif comando == "cfc":
+        cfcs = b.cfcs_grafo(grafo)
+        for i,cfc in enumerate(cfcs):
+            respuesta = f"CFC {i+1}: "
+            vertices = ", ".join(cfc)
+            print(respuesta + vertices)
+    
     elif comando == "comunidades":
         comunidades = b.obtener_comunidades(grafo, params_arr[0])
 
@@ -76,25 +81,21 @@ def main(archivo_datos):
             vertices = ", ".join(c)
             print(respuesta + vertices)
 
-    elif comando == "divulgar":
-        #REHACER
-        formato = divulgar(grafo,params_arr[0], k)
-
-        pass
-    elif comando == "divulgar_ciclo":
-        resultado = b.ciclo_mas_corto(grafo, params_arr[0])
-        print(resultado)
+    #A Reparar:
+    elif comando == "mas_imp":
+        cantidad = int(params_arr[0])
+        resultado = mas_imp(grafo, cantidad)
     
-    elif comando == "cfc":
-        cfcs = b.cfcs_grafo(grafo)
-        for i,cfc in enumerate(cfcs):
-            respuesta = f"CFC {i+1}: "
-            vertices = ", ".join(cfc)
-            print(respuesta + vertices)
+    elif comando == "persecucion":
+        resultado = persecucion(grafo, params_arr, k)
+
+    elif comando == "divulgar":
+        resultado = divulgar(grafo,params_arr[0], k)
+
     else:
         print("Comando no valido.")
     
-    if formato:
-        print(formato)
+    if resultado:
+        print(resultado)
 
 main(mensajes_minimos)
