@@ -24,9 +24,15 @@ type lector struct {
 	sitios        Dic.Diccionario[string, int]
 }
 
+/*type solicitud struct {
+	ip string
+	fechasMenosDeDosSegs
+}*/
+
 func CrearLector() lector {
 	instrucciones := Dic.CrearHash[string, bool]()
 	ips := Dic.CrearABB[string, bool](compararIps)
+	sitios := Dic.CrearHash[string, int]()
 
 	for _, instruccion := range arrInstrucciones {
 		instrucciones.Guardar(instruccion, true)
@@ -35,6 +41,7 @@ func CrearLector() lector {
 	return lector{
 		instrucciones: instrucciones,
 		ips:           ips,
+		sitios:        sitios,
 	}
 }
 
@@ -48,11 +55,26 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 		return instruccion, resultado, fmt.Errorf("comando no valido")
 	}
 
-	switch instruccion {
+	if len(elementos) == 1 {
+		return instruccion, resultado, fmt.Errorf("parámetros invalidos")
+	}
 
+	switch instruccion {
 	case "agregar_archivo":
 		nombreArchivo := elementos[1]
-		resultado = l.agregarArchivo(nombreArchivo)
+
+		//En caso que se agregue un archivo nuevo, se reinician los valores del struct
+		ips := Dic.CrearABB[string, bool](compararIps)
+		sitios := Dic.CrearHash[string, int]()
+		l.ips, l.sitios = ips, sitios
+
+		res, err := l.agregarArchivo(nombreArchivo)
+
+		if err != nil {
+			return instruccion, resultado, err
+		}
+
+		resultado = res
 
 	case "ver_visitantes":
 		desde, hasta := elementos[1], elementos[2]
@@ -60,75 +82,85 @@ func (l *lector) Procesar(comando string) (string, []string, error) {
 
 	case "ver_mas_visitados":
 		n, err := strconv.Atoi(elementos[1])
-
 		if err != nil {
 			return instruccion, resultado, err
 		}
-		fmt.Println("el resultado aca es", resultado)
 		resultado = l.verMasVisitados(n)
 	}
 
 	return instruccion, resultado, nil
 }
 
-func (l *lector) agregarArchivo(ruta string) []string {
+func (l *lector) agregarArchivo(ruta string) ([]string, error) {
 
-	var res []string
+	var resDesordenado []string
+	hashAuxiliar := Dic.CrearHash[string, bool]()
+
+	entradas := Dic.CrearHash[string, Heap.ColaPrioridad[string]]()
 	archivo, err := os.Open(ruta)
 
 	if err != nil {
-		fmt.Printf("Error %v al abrir el archivo %s", ruta, err)
-		return res
+		return resDesordenado, err
 	}
 
 	defer archivo.Close()
 
 	s := bufio.NewScanner(archivo)
-	var fechaAnterior string
-	var ipAnterior string
-	var visitadoAnterior string
-	contador := 0
 
 	for s.Scan() {
-		linea := strings.Split(s.Text(),"\t")
+		linea := strings.Split(s.Text(), "\t")
 		ip, fecha, visitado := linea[0], linea[1], linea[3]
 
-		//Guardo cantidad de veces que se visitó un sitio
+		//Guardo cantidad de veces que se visitó un sitio para sitios mas visitados
 		l.guardarSitios(visitado)
 
+		//Guardo Ips para Ver Visitantes
 		if !l.ips.Pertenece(ip) {
 			l.ips.Guardar(ip, true)
 		}
 
-		if fechaAnterior == "" && ipAnterior == "" && visitadoAnterior == "" {
-			fechaAnterior = fecha
-			ipAnterior = ip
-			visitadoAnterior = visitado
+		if !entradas.Pertenece(ip) {
+			heapActual := Heap.CrearHeap(func(f1, f2 string) int {
+				return obtenerDiferencia(f1, f2)
+			})
+			heapActual.Encolar(fecha)
+			entradas.Guardar(ip, heapActual)
 			continue
 		}
 
-		diferencia := obtenerDiferencia(fechaAnterior, fecha)
+		heapActual := entradas.Obtener(ip)
+		tope := heapActual.VerMax()
 
-		if diferencia <= 2 && visitado == visitadoAnterior && ip == ipAnterior {
-			contador++
-		} else {
-			contador = 0
+		diferencia := obtenerDiferencia(tope, fecha)
+
+		for diferencia >= 2 && !heapActual.EstaVacia() {
+			tope = heapActual.VerMax()
+			heapActual.Desencolar()
+			diferencia = obtenerDiferencia(tope, fecha)
 		}
 
-		if contador == 5 {
-			res = append(res, ip)
-			contador = 0
+		heapActual.Encolar(fecha)
+		entradas.Guardar(ip, heapActual)
+
+		if heapActual.Cantidad() == 5 {
+			hashAuxiliar.Guardar(ip, true)
+			entradas.Borrar(ip)
 		}
-
-		fechaAnterior = fecha
-
 	}
+
+	for iter := hashAuxiliar.Iterador(); iter.HaySiguiente(); iter.Siguiente() {
+		actual, _ := iter.VerActual()
+		resDesordenado = append(resDesordenado, actual)
+	}
+
 	err = s.Err()
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	return res
+	res := OrdenarArregloIps(resDesordenado)
+
+	return res, nil
 }
 
 func (l *lector) guardarSitios(visitado string) {
@@ -156,11 +188,12 @@ func (l *lector) verMasVisitados(n int) []string {
 
 func obtenerDiferencia(anterior, actual string) int {
 
-	var layout = time.RFC3339
+	var layout = "2006-01-02T15:04:05-07:00"
 
 	ant, _ := time.Parse(layout, anterior)
 	act, _ := time.Parse(layout, actual)
 	dif := act.Sub(ant)
+
 	return int(dif.Seconds())
 }
 
@@ -215,7 +248,46 @@ func (l *lector) TopKStream(k int) []string {
 		tope := cp.Desencolar()
 		sitio := tope.nombre
 		cant := tope.cantidad
-		top[k-i-1] = sitio + " - " + strconv.Itoa(cant)
+
+		if cant != 0 {
+			top[k-i-1] = sitio + " - " + strconv.Itoa(cant)
+		}
+
 	}
 	return top
+}
+func OrdenarArregloIps(arr []string) []string {
+	countingSort(arr, 256, 3)
+	countingSort(arr, 256, 2)
+	countingSort(arr, 256, 1)
+	countingSort(arr, 256, 0)
+	return arr
+}
+
+func countingSort(elementos []string, rango int, digito int) {
+	frecuencias := make([]int, rango)
+	sumasAcumuladas := make([]int, rango)
+	resultado := make([]string, len(elementos))
+
+	for _, elem := range elementos {
+		datos := strings.Split(elem, ".")
+		valor, _ := strconv.Atoi(datos[digito])
+		frecuencias[valor]++
+	}
+
+	for i := 1; i < len(frecuencias); i++ {
+		sumasAcumuladas[i] = sumasAcumuladas[i-1] + frecuencias[i-1]
+	}
+
+	for _, elem := range elementos {
+		datos := strings.Split(elem, ".")
+		valor, _ := strconv.Atoi(datos[digito])
+		pos := sumasAcumuladas[valor]
+		resultado[pos] = elem
+		sumasAcumuladas[valor]++
+	}
+
+	for i := 0; i < len(resultado); i++ {
+		elementos[i] = resultado[i]
+	}
 }
