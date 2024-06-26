@@ -51,24 +51,21 @@ def camino_minimo(grafo, origen, destino):
 # Obtengo lista de todos los vertices que se pueden visitar a partir del vertice pasado por parámetro, a un radio de n.
 
 def divulgar(grafo, v, n):
+    visitados = {}
     cola = deque()
-    orden = {v: 0}
-    visitados = set(v)
-    cola.append(v)
+    cola.append((v, 0))
 
     while cola:
-        actual = cola.popleft()
-
-        if orden[actual] == n:
-            break
-
-        for w in grafo.adyacentes(actual):
-            if w not in visitados:
-                visitados.add(actual)
-                orden[w] = orden[actual] + 1
-                cola.append(w)
-
-    return list(visitados)
+        vert, dist = cola.popleft()
+        if dist == n:
+            continue
+        elif dist < n:
+            for w in grafo.adyacentes(vert):
+                if w not in visitados or visitados[w] > dist + 1:
+                    visitados[w] = dist + 1
+                    cola.append((w, dist+1))
+    visitados.pop(v)
+    return list(visitados.keys())
 
 #Delincuentes más importantes: 
 

@@ -80,6 +80,9 @@ def main(archivo_datos):
             respuesta = f"Comunidad {i+1}: "
             vertices = ", ".join(c)
             print(respuesta + vertices)
+            
+    elif comando == "divulgar":
+        resultado = divulgar(grafo,params_arr[0], k)
 
     #A Reparar:
     elif comando == "mas_imp":
@@ -88,9 +91,6 @@ def main(archivo_datos):
     
     elif comando == "persecucion":
         resultado = persecucion(grafo, params_arr, k)
-
-    elif comando == "divulgar":
-        resultado = divulgar(grafo,params_arr[0], k)
 
     else:
         print("Comando no valido.")
