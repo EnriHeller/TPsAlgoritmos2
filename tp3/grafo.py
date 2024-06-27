@@ -4,10 +4,10 @@ class Grafo:
     def __init__(self, dirigido = False, vertices=[]):
         self.dirigido= dirigido
         self.vertices = {v:{} for v in vertices}
-        self.centrales = []
+        self.central = []
 
     def obtener_vertices(self):
-        return list(self.vertices.keys())
+        return self.vertices.keys()
     
     def agregar_vertice(self, v):
         if v not in self.vertices:
@@ -16,7 +16,7 @@ class Grafo:
     def adyacentes(self, v):
         if v not in self.vertices:
             raise ValueError("La clave " + v + " no pertenece al grafo")
-        return list(self.vertices[v].keys())
+        return self.vertices[v].keys()
     
     def agregar_arista(self, v, w, peso):
         if v not in self.vertices:

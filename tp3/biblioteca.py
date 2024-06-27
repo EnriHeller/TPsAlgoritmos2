@@ -79,8 +79,8 @@ def pageRank(grafo, v, pr = {}, iteracion = 0,max_iter = 100, d=0.85):
 
     N = len(grafo.obtener_vertices())
     sumatoria = 0
-
-    for w in grafo.adyacentes(v):
+    entrantes = obtener_entrantes(grafo, v)
+    for w in entrantes:
         sumatoria += pageRank(grafo, w, pr, iteracion + 1)/len(grafo.adyacentes(w))
 
     res = (1- d)/N + d*sumatoria
@@ -91,10 +91,11 @@ def pageRank(grafo, v, pr = {}, iteracion = 0,max_iter = 100, d=0.85):
 def obtenerNMasCentrales(grafo,n):
     if len(grafo.centrales) == 0:
         resultado = []
+        pr = {}
         for v in grafo.obtener_vertices():
-            pr = pageRank(grafo, v)
-            resultado.append((v, pr))
-
+            pr_v = pageRank(grafo, v, pr)
+            pr[v] = pr_v
+            resultado.append((v, pr_v))
         resultado.sort(key=lambda v:v[1])
         grafo.centrales = [tupla[0] for tupla in resultado]
         resultado = grafo.centrales
@@ -138,12 +139,8 @@ def obtener_comunidades(grafo, n):
         comunidades[numero].append(vertice)
     
     filtro_comunidades = {numero: arreglo for numero, arreglo in comunidades.items() if len(arreglo)>=int(n)}
-    resultado = []
 
-    for c in filtro_comunidades:
-        resultado.append(filtro_comunidades[c])
-
-    return resultado
+    return list(filtro_comunidades.values())
 
 
 def labelPropagation(grafo):
@@ -151,23 +148,22 @@ def labelPropagation(grafo):
     Label = {v: i for i,v in enumerate(vertices)}
 
     for v in vertices:
-        ws_con_v = obtener_ws_con_v(grafo, v)
-        LabelWs = {w: Label[w] for w in ws_con_v if w in Label}
-        Label[v] = max_freq(grafo,v,LabelWs)
-    
+        entrantes = obtener_entrantes(grafo, v)
+        if len(entrantes) != 0:
+            LabelEntrantes = {w: Label[w] for w in entrantes}
+            Label[v] = max_freq(grafo,v,LabelEntrantes)
+
     return Label
 
-def obtener_ws_con_v(grafo, v):
+def obtener_entrantes(grafo, v):
     res = []
     for w in grafo.obtener_vertices():
-        for x in grafo.adyacentes(w):
-            if x == v:
-                res.append(w)
+        if v in grafo.adyacentes(w):
+            res.append(w)
     return res
 
 def max_freq(grafo,v, LabelWs):
     frecuencias = {w:0 for w in LabelWs}
-
 
     for w in grafo.adyacentes(v):
         if w in LabelWs:

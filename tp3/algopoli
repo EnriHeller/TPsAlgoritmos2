@@ -53,7 +53,10 @@ def divulgar_ciclo(grafo, vertice):
     res = b.ciclo_mas_corto(grafo, vertice)
     return " -> ".join(res)
 
-def main(archivo_datos):
+def main():
+    #archivo que pasa en el ejecutable
+    archivo_datos = ""
+    
     grafo = construir_grafo(archivo_datos)
     entrada = input("Ingrese un comando: ")
     comando, params_arr, k = parsearComando(entrada)
@@ -98,4 +101,6 @@ def main(archivo_datos):
     if resultado:
         print(resultado)
 
-main(mensajes_minimos)
+
+
+main()
