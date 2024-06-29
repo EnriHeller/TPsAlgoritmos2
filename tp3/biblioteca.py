@@ -2,6 +2,7 @@ import heapq
 from collections import deque
 from pila import Pila
 from grafo import Grafo
+import random
 
 #NOTA: Puede haber vertices unidos consigo mismos.
 
@@ -146,30 +147,39 @@ def caminos_mas_rapidos(grafo, vertices, k):
 
 #Comunidades: 
 # Obtener comunidades de al menos n integrantes usando labelPropagation
+
 def obtener_comunidades(grafo, n):
-    Label = labelPropagation(grafo)
+
+    Label = label_propagation(grafo)
     comunidades = {}
     for vertice, numero in Label.items():
         if numero not in comunidades:
             comunidades[numero] = []
         comunidades[numero].append(vertice)
     
-    filtro_comunidades = {numero: arreglo for numero, arreglo in comunidades.items() if len(arreglo)>=int(n)}
+    # Filtrar comunidades con al menos n integrantes
+    filtro_comunidades = {numero: arreglo for numero, arreglo in comunidades.items() if len(arreglo) >= int(n)}
 
     return list(filtro_comunidades.values())
 
+def label_propagation(grafo):
+    # Inicializar etiquetas
+    label = {v: v for v in grafo.obtener_vertices()}
+    max_iter = 100
+    for _ in range(max_iter):
+        vertices = list(label.keys())
+        random.shuffle(vertices)  # Orden aleatorio
+        cambios = False
+        for v in vertices:
+            entrantes = obtener_entrantes(grafo, v)
+            nueva_etiqueta = max_freq(label, entrantes)
+            if label[v] != nueva_etiqueta:
+                label[v] = nueva_etiqueta
+                cambios = True
+        if not cambios:
+            break  # Terminar si no hay cambios en las etiquetas
 
-def labelPropagation(grafo):
-    vertices = grafo.obtener_vertices()
-    Label = {v: i for i,v in enumerate(vertices)}
-
-    for v in vertices:
-        entrantes = obtener_entrantes(grafo, v)
-        if len(entrantes) != 0:
-            LabelEntrantes = {w: Label[w] for w in entrantes}
-            Label[v] = max_freq(grafo,v,LabelEntrantes)
-
-    return Label
+    return label
 
 def obtener_entrantes(grafo, v):
     res = []
@@ -178,15 +188,12 @@ def obtener_entrantes(grafo, v):
             res.append(w)
     return res
 
-def max_freq(grafo,v, LabelWs):
-    frecuencias = {w:0 for w in LabelWs}
+def max_freq(label, LabelWs):
+    frecuencias = {}
+    for v in LabelWs:
+        frecuencias[label[v]] = frecuencias.get(label[v], 0) + 1
 
-    for w in grafo.adyacentes(v):
-        if w in LabelWs:
-            frecuencias[w] += 1
-    
-    mas_frecuente = max(frecuencias, key= frecuencias.get)
-    return LabelWs[mas_frecuente]
+    return max(frecuencias, key=frecuencias.get)
 
 #Ciclo más corto:
 #  Se pasa un vertice por parámetro y se busca el camino más corto donde se empiece y termine por este vertice. Si no hay ciclo, se envía "No se encontro recorrido".
