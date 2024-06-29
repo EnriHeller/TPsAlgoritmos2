@@ -71,60 +71,36 @@ def divulgar(grafo, v, n):
 #Delincuentes más importantes: 
 
 # Obtener los n mas importantes (centralidad) usando pageRank
-def pageRank(grafo, max_iter = 20, d = 0.85):
-    vertices = grafo.obtener_vertices()
+def pageRank(grafo, max_iter=20, d=0.85):
+    vertices = list(grafo.obtener_vertices())
     N = len(vertices)
-    pr = {v: (1-d/N) for v in vertices}
-    x_entrantes = {v: obtener_entrantes(grafo, v) for v in vertices}
-    len_adyacentes_x = {x:len(grafo.adyacentes(x)) for x in x_entrantes}
-
+    if N == 0:
+        return {}
+    pr = {v: 1 / N for v in vertices}
     for _ in range(max_iter):
+        new_pr = {v: (1 - d) / N for v in vertices}
         for v in vertices:
-            for x in x_entrantes[v]:
-                pr[v] += d*(pr[x]/len_adyacentes_x[x])
+            for x in grafo.adyacentes(v):
+                len_adyacentes_x = len(grafo.adyacentes(x))
+                if len_adyacentes_x > 0:
+                    new_pr[v] += d * pr[x] / len_adyacentes_x
+        pr = new_pr
 
     return pr
 
-def obtenerNMasCentrales(grafo,n):
+def obtenerNMasCentrales(grafo, n):
     pr = pageRank(grafo)
-    v_pr_ordenados = sorted(pr.items(), key=lambda v: v[1], reverse=True)
-    v_ordenados = [clave for clave, _ in v_pr_ordenados]
-    return v_ordenados[:n]
-    """vertices = grafo.obtener_vertices()
-    N = len(vertices)
-    d = 0.85
-    pr = {v: (1 - d) / N for v in vertices}
+    top_n = heapq.nlargest(n, pr.items(), key=lambda v: v[1])
+    return [v for v, _ in top_n]
 
-    for _ in range(10):
-        for v in vertices:
-            pr[v] = pageRank(grafo,v,pr,d)
-
-    v_pr_ordenados = sorted(pr.items(), key=lambda v: v[1], reverse=True)
-    # Extraer solo las claves de la lista ordenada
-    v_ordenados = [clave for clave, _ in v_pr_ordenados]
-    return v_ordenados[:n]
-    """
-
-    """if len(grafo.centrales) == 0:
-        resultado = []
-        pr = {}
-        for v in grafo.obtener_vertices():
-            pr_v = pageRank(grafo, v, pr)
-            pr[v] = pr_v
-            resultado.append((v, pr_v))
-        resultado.sort(key=lambda v:v[1])
-        grafo.centrales = [tupla[0] for tupla in resultado]
-        resultado = grafo.centrales
-        largoLista = len(resultado)
-        return resultado[largoLista-n:]
-    else:
-        resultado = grafo.centrales
-        largoLista = len(resultado)
-        return resultado[largoLista-n:]"""
-
+def obtener_entrantes(grafo, v):
+    res = []
+    for w in grafo.obtener_vertices():
+        if v in grafo.adyacentes(w):
+            res.append(w)
+    return res
 
 #Persecución rápida:
-
 # Dado un vertice en concreto, quiero el camino minimo entre los k vertices mas importantes. En caso de tener caminos de igual largo, priorizar los que vayan a un vertice más importante. Esto se aplica para una lista de vertices concretos
 def caminos_mas_rapidos(grafo, vertices, k):
     kMasImportantes = [v for v, _ in obtenerNMasCentrales(grafo, k)]
@@ -180,13 +156,6 @@ def label_propagation(grafo):
             break  # Terminar si no hay cambios en las etiquetas
 
     return label
-
-def obtener_entrantes(grafo, v):
-    res = []
-    for w in grafo.obtener_vertices():
-        if v in grafo.adyacentes(w):
-            res.append(w)
-    return res
 
 def max_freq(label, LabelWs):
     frecuencias = {}
@@ -262,21 +231,15 @@ def dfs_cfc(grafo, v, visitados, orden, mas_bajo, pila, apilados, cfcs, contador
         cfcs.append(nueva_cfc)
 
 
-'''def main():
-    grafo = Grafo(True, vertices=["a","b","c","d","e", "f"])
+def main():
+    grafo = Grafo(True, vertices=["1","2","3","4"])
 
-    grafo.agregar_arista("a" ,"b" ,1)
-    grafo.agregar_arista("b" ,"c" ,1)
-    grafo.agregar_arista("c" ,"d" ,1)
-    grafo.agregar_arista( "d","a" ,1)
-    grafo.agregar_arista( "d","e" ,1)
-    grafo.agregar_arista( "e","a" ,1)
-    grafo.agregar_arista( "c","a" ,1)
-    grafo.agregar_arista( "d","f" ,1)
-    grafo.agregar_arista( "f","e" ,1)
-    grafo.agregar_arista( "f","a" ,1)
-    #grafo.agregar_arista( "d","f" ,1)
+    grafo.agregar_arista("1" ,"2" ,1)
+    grafo.agregar_arista("3" ,"1" ,1)
+    grafo.agregar_arista("4" ,"2" ,1)
+    grafo.agregar_arista("4","3" ,1)
 
-    print(ciclo_mas_corto(grafo, "a"))
 
-main()'''
+    print(pageRank(grafo))
+
+#main()
