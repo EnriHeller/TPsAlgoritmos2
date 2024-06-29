@@ -39,6 +39,10 @@ def min_seguimientos(grafo, origen, destino):
     caminoArr = b.camino_minimo(grafo, origen, destino)
     return " -> ".join(caminoArr)
 
+def divulgar(grafo, vertice, n):
+    res = b.divulgar(grafo, vertice, n)
+    return ", ".join(res)
+
 def mas_imp(grafo, cantidad):
     res = b.obtenerNMasCentrales(grafo,cantidad)
     return ", ".join(res)
@@ -46,10 +50,6 @@ def mas_imp(grafo, cantidad):
 def persecucion(grafo, vertices, k):
     res = b.caminos_mas_rapidos(grafo,vertices, k)
     return " -> ".join(res)
-
-def divulgar(grafo, vertice, n):
-    res = b.divulgar(grafo, vertice, n)
-    return ", ".join(res)
 
 def divulgar_ciclo(grafo, vertice):
     res = b.ciclo_mas_corto(grafo, vertice)
@@ -71,15 +71,20 @@ def main():
         origen, destino = params_arr
         resultado = min_seguimientos(grafo, origen, destino)
     
-    elif comando == "divulgar_ciclo":
-        resultado = divulgar_ciclo(grafo,params_arr[0])
-    
     elif comando == "cfc":
         cfcs = b.cfcs_grafo(grafo)
         for i,cfc in enumerate(cfcs):
             respuesta = f"CFC {i+1}: "
             vertices = ", ".join(cfc)
             print(respuesta + vertices)
+
+            
+    elif comando == "divulgar":
+        resultado = divulgar(grafo,params_arr[0], k)
+
+    #A Reparar (muy pesados / no andan):
+    elif comando == "divulgar_ciclo":
+        resultado = divulgar_ciclo(grafo,params_arr[0])
     
     elif comando == "comunidades":
         comunidades = b.obtener_comunidades(grafo, params_arr[0])
@@ -87,11 +92,7 @@ def main():
             respuesta = f"Comunidad {i+1}: "
             vertices = ", ".join(c)
             print(respuesta + vertices)
-            
-    elif comando == "divulgar":
-        resultado = divulgar(grafo,params_arr[0], k)
 
-    #A Reparar:
     elif comando == "mas_imp":
         cantidad = int(params_arr[0])
         resultado = mas_imp(grafo, cantidad)

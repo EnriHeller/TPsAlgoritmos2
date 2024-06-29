@@ -70,26 +70,41 @@ def divulgar(grafo, v, n):
 #Delincuentes más importantes: 
 
 # Obtener los n mas importantes (centralidad) usando pageRank
-def pageRank(grafo, v, pr = {}, iteracion = 0,max_iter = 100, d=0.85):
-    if v in pr:
-        return pr[v]
-    
-    if iteracion >= max_iter:
-        return pr.get(v, (1 - d) / len(grafo.obtener_vertices()))
+def pageRank(grafo, max_iter = 20, d = 0.85):
+    vertices = grafo.obtener_vertices()
+    N = len(vertices)
+    pr = {v: (1-d/N) for v in vertices}
+    x_entrantes = {v: obtener_entrantes(grafo, v) for v in vertices}
+    len_adyacentes_x = {x:len(grafo.adyacentes(x)) for x in x_entrantes}
 
-    N = len(grafo.obtener_vertices())
-    sumatoria = 0
-    entrantes = obtener_entrantes(grafo, v)
-    for w in entrantes:
-        sumatoria += pageRank(grafo, w, pr, iteracion + 1)/len(grafo.adyacentes(w))
+    for _ in range(max_iter):
+        for v in vertices:
+            for x in x_entrantes[v]:
+                pr[v] += d*(pr[x]/len_adyacentes_x[x])
 
-    res = (1- d)/N + d*sumatoria
-    pr[v] = res
-
-    return res
+    return pr
 
 def obtenerNMasCentrales(grafo,n):
-    if len(grafo.centrales) == 0:
+    pr = pageRank(grafo)
+    v_pr_ordenados = sorted(pr.items(), key=lambda v: v[1], reverse=True)
+    v_ordenados = [clave for clave, _ in v_pr_ordenados]
+    return v_ordenados[:n]
+    """vertices = grafo.obtener_vertices()
+    N = len(vertices)
+    d = 0.85
+    pr = {v: (1 - d) / N for v in vertices}
+
+    for _ in range(10):
+        for v in vertices:
+            pr[v] = pageRank(grafo,v,pr,d)
+
+    v_pr_ordenados = sorted(pr.items(), key=lambda v: v[1], reverse=True)
+    # Extraer solo las claves de la lista ordenada
+    v_ordenados = [clave for clave, _ in v_pr_ordenados]
+    return v_ordenados[:n]
+    """
+
+    """if len(grafo.centrales) == 0:
         resultado = []
         pr = {}
         for v in grafo.obtener_vertices():
@@ -104,10 +119,11 @@ def obtenerNMasCentrales(grafo,n):
     else:
         resultado = grafo.centrales
         largoLista = len(resultado)
-        return resultado[largoLista-n:]
+        return resultado[largoLista-n:]"""
 
 
 #Persecución rápida:
+
 # Dado un vertice en concreto, quiero el camino minimo entre los k vertices mas importantes. En caso de tener caminos de igual largo, priorizar los que vayan a un vertice más importante. Esto se aplica para una lista de vertices concretos
 def caminos_mas_rapidos(grafo, vertices, k):
     kMasImportantes = [v for v, _ in obtenerNMasCentrales(grafo, k)]

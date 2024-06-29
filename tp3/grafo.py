@@ -4,7 +4,7 @@ class Grafo:
     def __init__(self, dirigido = False, vertices=[]):
         self.dirigido= dirigido
         self.vertices = {v:{} for v in vertices}
-        self.central = []
+        self.centrales = []
 
     def obtener_vertices(self):
         return self.vertices.keys()
