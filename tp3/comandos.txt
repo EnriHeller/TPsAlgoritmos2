@@ -1,7 +1,0 @@
-min_seguimientos 10,4
-divulgar 30,4
-divulgar_ciclo 74
-cfc
-comunidades 10
-mas_imp 10
-persecucion 10,14,17 5  A
