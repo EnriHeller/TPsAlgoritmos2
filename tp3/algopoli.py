@@ -50,21 +50,15 @@ def divulgar_ciclo(grafo, vertice):
     return " -> ".join(res)
 
 def main():
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 1:
         sys.exit("Error: No se pasan todos los parámetros")
 
     archivo_datos = sys.argv[1]
-    archivo_comandos = sys.argv[2] if len(sys.argv) > 2 else None
 
     grafo = construir_grafo(archivo_datos)
 
-    if archivo_comandos:
-        with open(archivo_comandos, 'r') as archivo:
-            for entrada in archivo:
-                procesar_entrada(grafo, entrada.strip())
-    else:
-        for entrada in sys.stdin:
-            procesar_entrada(grafo, entrada.strip())
+    for entrada in sys.stdin:
+        procesar_entrada(grafo, entrada.strip())
 
 def procesar_entrada(grafo, entrada):
     comando, params_arr, k = parsear_comando(entrada)
