@@ -68,50 +68,56 @@ def divulgar(grafo, v, n):
 #Delincuentes más importantes: 
 # Obtener los n mas importantes (centralidad) usando pageRank
 
-def pageRank(grafo, max_iter=100, d=0.85):
+def pageRank(grafo, max_iter=20, d=0.85):
     vertices = list(grafo.obtener_vertices())
     N = len(vertices)
     if N == 0:
         return {}
     pr = {v: 1 / N for v in vertices}
     for _ in range(max_iter):
-        new_pr = {v: (1 - d) / N for v in vertices}
+        nuevo_pr = {v: (1 - d) / N for v in vertices}
         for v in vertices:
-            for x in grafo.adyacentes(v):
+            for x in obtener_entrantes(grafo, v):
                 len_adyacentes_x = len(grafo.adyacentes(x))
                 if len_adyacentes_x > 0:
-                    new_pr[v] += d * pr[x] / len_adyacentes_x
-        pr = new_pr
+                    nuevo_pr[v] += d * pr[x] / len_adyacentes_x
+        pr = nuevo_pr
 
     return pr
 
 def obtenerNMasCentrales(grafo, n):
-    pr = pageRank(grafo)
-    top_n = heapq.nlargest(n, pr.items(), key=lambda v: v[1])
-    return [v for v, _ in top_n]
+    if not grafo.centrales:
+        pr = pageRank(grafo)
+        # Guardar todos los vértices con sus valores de PageRank ordenados
+        grafo.centrales = sorted(pr.items(), key=lambda v: v[1], reverse=True)
+    
+    return [v for v, _ in grafo.centrales[:n]]
 
 #Persecución rápida:
-
 # Dado un vertice en concreto, quiero el camino minimo entre los k vertices mas importantes. En caso de tener caminos de igual largo, priorizar los que vayan a un vertice más importante. Esto se aplica para una lista de vertices concretos
 
 def caminos_mas_rapidos(grafo, vertices, k):
     kMasImportantes = obtenerNMasCentrales(grafo, k)
-    resultado = []
 
     for v in vertices:
-        caminos_minimos = []
+        camino_minimo_actual = None
+        min_distancia_actual = float('inf')
+
         for w in kMasImportantes:
             cm = camino_minimo(grafo, v, w)
-            if cm: 
-                caminos_minimos.append((len(cm), cm))
-        
-        if caminos_minimos:
-            caminos_minimos.sort(key=lambda cm:(cm[0], cm[1]))
-            resultado.append(caminos_minimos[0][1])
-        else:
-            resultado.append([])
+            if cm:
+                distancia = len(cm)
+                if (distancia < min_distancia_actual) or (
+                    distancia == min_distancia_actual and 
+                    kMasImportantes.index(w) < kMasImportantes.index(cm[-1])
+                ):
+                    camino_minimo_actual = cm
+                    min_distancia_actual = distancia
 
-    return resultado[0]
+        if camino_minimo_actual:
+            return camino_minimo_actual
+        else:
+            return []
 
 def obtener_entrantes(grafo, v):
     res = []
