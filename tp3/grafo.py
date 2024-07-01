@@ -53,7 +53,11 @@ class Grafo:
         return random.choice(vertices)
 
     def __str__(self):
-        return str(self.vertices.keys())
+        resultado = ""
+        for v in self.vertices:
+            for w in self.vertices[v]:
+                resultado += str(v) + " -> " + str(w) + "\n"
+        return resultado
     
     def __iter__(self):
 	    return iter(self.vertices.keys())
