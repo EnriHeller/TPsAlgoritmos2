@@ -55,13 +55,16 @@ def divulgar(grafo, v, n):
 
     while cola:
         vert, dist = cola.popleft()
-        if dist > n:
-            break
-        elif dist <= n:
+        if dist == n:
+            continue
+        elif dist < n:
             for w in grafo.adyacentes(vert):
                 if w not in visitados or visitados[w] > dist + 1:
                     visitados[w] = dist + 1
                     cola.append((w, dist+1))
+
+    if v in visitados:
+        visitados.pop(v)
 
     return list(visitados.keys())
 
@@ -145,7 +148,7 @@ def obtener_comunidades(grafo, n):
 
 def label_propagation(grafo):
     label = {v: v for v in grafo.obtener_vertices()}
-    max_iter = 100
+    max_iter = 10
     for _ in range(max_iter):
         vertices = list(label.keys())
         random.shuffle(vertices)  # Orden aleatorio
