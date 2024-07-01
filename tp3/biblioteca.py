@@ -126,7 +126,7 @@ def obtener_entrantes(grafo, v):
     res = set()
     for w in grafo.obtener_vertices():
         if v in grafo.adyacentes(w):
-            res.append(w)
+            res.add(w)
     return res
 
 #Comunidades: 
@@ -136,24 +136,26 @@ def obtener_comunidades(grafo, n):
 
     Label = label_propagation(grafo)
     comunidades = {}
-    filtro_comunidades = {}
+    filtro_comunidades = []
     for vertice, numero in Label.items():
         if numero not in comunidades:
             comunidades[numero] = []
         comunidades[numero].append(vertice)
         
-        if len(comunidades[numero]) >= n:
+        if len(comunidades[numero]) >= int(n):
             filtro_comunidades.append(comunidades[numero])
 
-    return list(filtro_comunidades)
+    return filtro_comunidades
 
 def label_propagation(grafo):
-    label = {v: v for v in grafo.obtener_vertices()}
+    label = {v: v for v in grafo}
     max_iter = 10
     for _ in range(max_iter):
         cambios = False
         for v in label.keys():
             entrantes = obtener_entrantes(grafo, v)
+            if not entrantes:
+                continue
             nueva_etiqueta = max_freq(label, entrantes)
             if label[v] != nueva_etiqueta:
                 label[v] = nueva_etiqueta

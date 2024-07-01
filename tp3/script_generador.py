@@ -1,8 +1,8 @@
 import numpy as np
 import random
 
-EXP = 20
-SAMPLES = 100
+EXP = 500
+SAMPLES = 10000
 
 
 s = np.random.power(EXP, SAMPLES) * SAMPLES
