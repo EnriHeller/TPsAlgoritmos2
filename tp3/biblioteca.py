@@ -35,7 +35,7 @@ def camino_minimo(grafo, origen, destino):
                 heapq.heappush(heap, (dist_w, w))
 
     if destino not in padres:
-        return []
+        return None
 
     resultado = []
     actual = destino
@@ -63,13 +63,12 @@ def divulgar(grafo, v, n):
                     visitados[w] = dist + 1
                     cola.append((w, dist+1))
 
-    #visitados.pop(v)
     return list(visitados.keys())
 
 #Delincuentes más importantes: 
 # Obtener los n mas importantes (centralidad) usando pageRank
 
-def pageRank(grafo, max_iter=20, d=0.85):
+def pageRank(grafo, max_iter=100, d=0.85):
     vertices = list(grafo.obtener_vertices())
     N = len(vertices)
     if N == 0:
@@ -184,7 +183,7 @@ def ciclo_mas_corto(grafo, origen):
             elif w in visitados and w == origen:
                 return reconstruir_camino(padres, v, origen)
 
-    return "No se encontro recorrido"
+    return None
 
 def reconstruir_camino(padres, final, origen):
     camino = [origen]

@@ -25,6 +25,10 @@ def parsear_comando(entrada):
 
 def min_seguimientos(grafo, origen, destino):
     camino_arr = b.camino_minimo(grafo, origen, destino)
+
+    if not camino_arr:
+        return "Seguimiento imposible"
+
     return " -> ".join(camino_arr)
 
 def divulgar(grafo, vertice, n):
@@ -41,6 +45,10 @@ def persecucion(grafo, vertices, k):
 
 def divulgar_ciclo(grafo, vertice):
     res = b.ciclo_mas_corto(grafo, vertice)
+
+    if not res:
+        return"No se encontro recorrido"
+    
     return " -> ".join(res)
 
 def main():
@@ -55,36 +63,46 @@ def main():
         procesar_entrada(grafo, entrada.strip())
 
 def procesar_entrada(grafo, entrada):
+
     comando, *elementos = parsear_comando(entrada)
     resultado = ""
+
     if comando == "min_seguimientos":
         origen, destino = elementos[0], elementos[1]
         resultado = min_seguimientos(grafo, origen, destino)
+    
     elif comando == "cfc":
         cfcs = b.cfcs_grafo(grafo)
         for i, cfc in enumerate(cfcs):
             respuesta = f"CFC {i+1}: "
             vertices = ", ".join(cfc)
             print(respuesta + vertices)
+    
     elif comando == "divulgar":
         resultado = divulgar(grafo, elementos[0], elementos[1])
+    
     elif comando == "divulgar_ciclo":
         resultado = divulgar_ciclo(grafo, elementos[0])
+    
     elif comando == "comunidades":
         comunidades = b.obtener_comunidades(grafo, elementos[0])
         for i, c in enumerate(comunidades):
             respuesta = f"Comunidad {i+1}: "
             vertices = ", ".join(c)
             print(respuesta + vertices)
+    
     elif comando == "mas_imp":
         cantidad = int(elementos[0])
         resultado = mas_imp(grafo, cantidad)
+    
     elif comando == "persecucion":
         k = int(elementos.pop())
         vertices = elementos[0].split(",")
         resultado = persecucion(grafo, vertices, k)
+    
     else:
         print("Comando no valido.")
+    
     if resultado:
         print(resultado)
 
