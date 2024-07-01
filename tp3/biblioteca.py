@@ -123,7 +123,7 @@ def caminos_mas_rapidos(grafo, vertices, k):
             return []
 
 def obtener_entrantes(grafo, v):
-    res = []
+    res = set()
     for w in grafo.obtener_vertices():
         if v in grafo.adyacentes(w):
             res.append(w)
@@ -136,24 +136,23 @@ def obtener_comunidades(grafo, n):
 
     Label = label_propagation(grafo)
     comunidades = {}
+    filtro_comunidades = {}
     for vertice, numero in Label.items():
         if numero not in comunidades:
             comunidades[numero] = []
         comunidades[numero].append(vertice)
-    
-    # Filtrar comunidades con al menos n integrantes
-    filtro_comunidades = {numero: arreglo for numero, arreglo in comunidades.items() if len(arreglo) >= int(n)}
+        
+        if len(comunidades[numero]) >= n:
+            filtro_comunidades.append(comunidades[numero])
 
-    return list(filtro_comunidades.values())
+    return list(filtro_comunidades)
 
 def label_propagation(grafo):
     label = {v: v for v in grafo.obtener_vertices()}
     max_iter = 10
     for _ in range(max_iter):
-        vertices = list(label.keys())
-        random.shuffle(vertices)  # Orden aleatorio
         cambios = False
-        for v in vertices:
+        for v in label.keys():
             entrantes = obtener_entrantes(grafo, v)
             nueva_etiqueta = max_freq(label, entrantes)
             if label[v] != nueva_etiqueta:
@@ -164,9 +163,9 @@ def label_propagation(grafo):
 
     return label
 
-def max_freq(label, LabelWs):
+def max_freq(label, entrantes):
     frecuencias = {}
-    for v in LabelWs:
+    for v in entrantes:
         frecuencias[label[v]] = frecuencias.get(label[v], 0) + 1
 
     return max(frecuencias, key=frecuencias.get)
