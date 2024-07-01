@@ -21,20 +21,14 @@ def construir_grafo(archivo_datos):
 
 def parsear_comando(entrada):
     elementos = entrada.split(" ")
-    params_arr = []
-    k = 0
-    if len(elementos) > 1:
-        params_arr = elementos[1].split(",")
-    if len(elementos) > 2:
-        k = int(elementos[2])
-    return elementos[0], params_arr, k
+    return elementos
 
 def min_seguimientos(grafo, origen, destino):
     camino_arr = b.camino_minimo(grafo, origen, destino)
     return " -> ".join(camino_arr)
 
 def divulgar(grafo, vertice, n):
-    res = b.divulgar(grafo, vertice, n)
+    res = b.divulgar(grafo, vertice, int(n))
     return ", ".join(res)
 
 def mas_imp(grafo, cantidad):
@@ -50,22 +44,21 @@ def divulgar_ciclo(grafo, vertice):
     return " -> ".join(res)
 
 def main():
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 1:
         sys.exit("Error: No se pasan todos los parámetros")
 
     archivo_datos = sys.argv[1]
-    #archivo_comandos = sys.argv[2] if len(sys.argv) > 2 else None
 
     grafo = construir_grafo(archivo_datos)
 
     for entrada in sys.stdin:
-            procesar_entrada(grafo, entrada.strip())
+        procesar_entrada(grafo, entrada.strip())
 
 def procesar_entrada(grafo, entrada):
-    comando, params_arr, k = parsear_comando(entrada)
+    comando, *elementos = parsear_comando(entrada)
     resultado = ""
     if comando == "min_seguimientos":
-        origen, destino = params_arr
+        origen, destino = elementos[0], elementos[1]
         resultado = min_seguimientos(grafo, origen, destino)
     elif comando == "cfc":
         cfcs = b.cfcs_grafo(grafo)
@@ -74,20 +67,22 @@ def procesar_entrada(grafo, entrada):
             vertices = ", ".join(cfc)
             print(respuesta + vertices)
     elif comando == "divulgar":
-        resultado = divulgar(grafo, params_arr[0], k)
+        resultado = divulgar(grafo, elementos[0], elementos[1])
     elif comando == "divulgar_ciclo":
-        resultado = divulgar_ciclo(grafo, params_arr[0])
+        resultado = divulgar_ciclo(grafo, elementos[0])
     elif comando == "comunidades":
-        comunidades = b.obtener_comunidades(grafo, params_arr[0])
+        comunidades = b.obtener_comunidades(grafo, elementos[0])
         for i, c in enumerate(comunidades):
             respuesta = f"Comunidad {i+1}: "
             vertices = ", ".join(c)
             print(respuesta + vertices)
     elif comando == "mas_imp":
-        cantidad = int(params_arr[0])
+        cantidad = int(elementos[0])
         resultado = mas_imp(grafo, cantidad)
     elif comando == "persecucion":
-        resultado = persecucion(grafo, params_arr, k)
+        k = int(elementos.pop())
+        vertices = elementos[0].split(",")
+        resultado = persecucion(grafo, vertices, k)
     else:
         print("Comando no valido.")
     if resultado:

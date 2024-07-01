@@ -1,5 +1,5 @@
-min_seguimientos 10,4
-divulgar 30,4
+min_seguimientos 10 4
+divulgar 30 4
 divulgar_ciclo 74
 cfc
 comunidades 10
