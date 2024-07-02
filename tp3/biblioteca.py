@@ -74,13 +74,14 @@ def divulgar(grafo, v, n):
 def pageRank(grafo, max_iter=20, d=0.85):
     vertices = list(grafo.obtener_vertices())
     N = len(vertices)
+    
     if N == 0:
         return {}
     pr = {v: 1 / N for v in vertices}
     for _ in range(max_iter):
         nuevo_pr = {v: (1 - d) / N for v in vertices}
         for v in vertices:
-            for x in obtener_entrantes(grafo, v):
+            for x in grafo.obtener_entrantes(v):
                 len_adyacentes_x = len(grafo.adyacentes(x))
                 if len_adyacentes_x > 0:
                     nuevo_pr[v] += d * pr[x] / len_adyacentes_x
@@ -129,26 +130,26 @@ def obtener_comunidades(grafo, n):
 
     Label = label_propagation(grafo)
     comunidades = {}
-    filtro_comunidades = []
+    filtro_comunidades = {}
     for vertice, numero in Label.items():
         if numero not in comunidades:
             comunidades[numero] = []
         comunidades[numero].append(vertice)
         
         if len(comunidades[numero]) >= int(n):
-            filtro_comunidades.append(comunidades[numero])
+            filtro_comunidades[numero] = comunidades[numero]
 
-    return filtro_comunidades
+    return filtro_comunidades.values()
 
 def label_propagation(grafo, max_iters=10):
     # Inicializar etiquetas
     label = {v: v for v in grafo}
     vertices = grafo.obtener_vertices()
-    entrantes = {v: obtener_entrantes(grafo, v) for v in vertices}
-    
+    entrantes = {v: grafo.obtener_entrantes(v) for v in vertices}
+
     for _ in range(max_iters):
         cambios = 0
-
+    
         for v in vertices:
             if not entrantes[v]:
                 continue
@@ -165,13 +166,6 @@ def label_propagation(grafo, max_iters=10):
 def max_freq(label, entrantes):
     contador = Counter(label[v] for v in entrantes)
     return max(contador, key=contador.get)
-
-def obtener_entrantes(grafo, v):
-    res = set()
-    for w in grafo.obtener_vertices():
-        if v in grafo.adyacentes(w):
-            res.add(w)
-    return res
 
 #Ciclo más corto:
 
@@ -215,8 +209,8 @@ def cfcs_grafo(grafo):
     for v in grafo.obtener_vertices():
         if v not in visitados:
             dfs_cfc(grafo, v, visitados, {}, {}, pila, set(), resultados, [0])
+    
     return resultados
-
 
 def dfs_cfc(grafo, v, visitados, orden, mas_bajo, pila, apilados, cfcs, contador_global):
     orden[v] = mas_bajo[v] = contador_global[0]
@@ -233,7 +227,7 @@ def dfs_cfc(grafo, v, visitados, orden, mas_bajo, pila, apilados, cfcs, contador
 
     if orden[v] == mas_bajo[v]:
         nueva_cfc = []
-        while True: 
+        while True:
             w = pila.desapilar()
             apilados.remove(w)
             nueva_cfc.append(w)
