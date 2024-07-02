@@ -6,6 +6,7 @@ import random
 #Mínimos seguimientos:
 # Busco camino minimo entre vertice origen y destino. Imprimo lista de vertices que se recorren.
 
+
 def camino_minimo(grafo, origen, destino):
     distancias = {v: float("inf") for v in grafo.obtener_vertices()}
     distancias[origen] = 0
@@ -73,15 +74,17 @@ def divulgar(grafo, v, n):
 
 def pageRank(grafo, max_iter=20, d=0.85):
     vertices = list(grafo.obtener_vertices())
+    entrantes = {v: obtener_entrantes(grafo, v) for v in vertices}
     N = len(vertices)
-    
+
     if N == 0:
         return {}
+    
     pr = {v: 1 / N for v in vertices}
     for _ in range(max_iter):
         nuevo_pr = {v: (1 - d) / N for v in vertices}
         for v in vertices:
-            for x in grafo.obtener_entrantes(v):
+            for x in entrantes[v]:
                 len_adyacentes_x = len(grafo.adyacentes(x))
                 if len_adyacentes_x > 0:
                     nuevo_pr[v] += d * pr[x] / len_adyacentes_x
@@ -95,31 +98,31 @@ def obtenerNMasCentrales(grafo, n):
         # Guardar todos los vértices con sus valores de PageRank ordenados
         grafo.centrales = sorted(pr.items(), key=lambda v: v[1], reverse=True)
     
-    return [v for v, _ in grafo.centrales[:n]]
+    return {v: pr for v, pr in grafo.centrales[:n]}
 
 #Persecución rápida:
-# Dado un vertice en concreto, quiero el camino minimo entre los k vertices mas importantes. En caso de tener caminos de igual largo, priorizar los que vayan a un vertice más importante. Esto se aplica para una lista de vertices concretos
+#Dado un vertice en concreto, quiero el camino minimo entre los k vertices mas importantes. En caso de tener caminos de igual largo, priorizar los que vayan a un vertice más importante. Esto se aplica para una lista de vertices concretos
 
 def caminos_mas_rapidos(grafo, vertices, k):
     kMasImportantes = obtenerNMasCentrales(grafo, k)
 
     for v in vertices:
-        camino_minimo_actual = None
+        cm_actual = None
         min_distancia_actual = float('inf')
 
         for w in kMasImportantes:
-            cm = camino_minimo(grafo, v, w)
-            if cm:
-                distancia = len(cm)
+            nuevo_cm = camino_minimo(grafo, v, w)
+            if nuevo_cm:
+                distancia = len(nuevo_cm)
                 if (distancia < min_distancia_actual) or (
                     distancia == min_distancia_actual and 
-                    kMasImportantes.index(w) < kMasImportantes.index(cm[-1])
+                    kMasImportantes[w] > kMasImportantes[cm_actual[-1]]
                 ):
-                    camino_minimo_actual = cm
+                    cm_actual = nuevo_cm
                     min_distancia_actual = distancia
 
-        if camino_minimo_actual:
-            return camino_minimo_actual
+        if cm_actual:
+            return cm_actual
         else:
             return []
 
@@ -131,25 +134,26 @@ def obtener_comunidades(grafo, n):
     Label = label_propagation(grafo)
     comunidades = {}
     filtro_comunidades = {}
+
     for vertice, numero in Label.items():
         if numero not in comunidades:
             comunidades[numero] = []
         comunidades[numero].append(vertice)
         
         if len(comunidades[numero]) >= int(n):
-            filtro_comunidades[numero] = comunidades[numero]
+            filtro_comunidades[n] = comunidades[numero]
 
     return filtro_comunidades.values()
 
 def label_propagation(grafo, max_iters=10):
-    # Inicializar etiquetas
+
     label = {v: v for v in grafo}
     vertices = grafo.obtener_vertices()
-    entrantes = {v: grafo.obtener_entrantes(v) for v in vertices}
-
+    entrantes = {v: obtener_entrantes(grafo, v) for v in vertices}
+    
     for _ in range(max_iters):
         cambios = 0
-    
+
         for v in vertices:
             if not entrantes[v]:
                 continue
@@ -166,6 +170,13 @@ def label_propagation(grafo, max_iters=10):
 def max_freq(label, entrantes):
     contador = Counter(label[v] for v in entrantes)
     return max(contador, key=contador.get)
+
+def obtener_entrantes(grafo, v):
+    res = set()
+    for w in grafo.obtener_vertices():
+        if v in grafo.adyacentes(w):
+            res.add(w)
+    return res
 
 #Ciclo más corto:
 
@@ -209,8 +220,8 @@ def cfcs_grafo(grafo):
     for v in grafo.obtener_vertices():
         if v not in visitados:
             dfs_cfc(grafo, v, visitados, {}, {}, pila, set(), resultados, [0])
-    
     return resultados
+
 
 def dfs_cfc(grafo, v, visitados, orden, mas_bajo, pila, apilados, cfcs, contador_global):
     orden[v] = mas_bajo[v] = contador_global[0]
@@ -227,7 +238,7 @@ def dfs_cfc(grafo, v, visitados, orden, mas_bajo, pila, apilados, cfcs, contador
 
     if orden[v] == mas_bajo[v]:
         nueva_cfc = []
-        while True:
+        while True: 
             w = pila.desapilar()
             apilados.remove(w)
             nueva_cfc.append(w)
