@@ -1,5 +1,5 @@
 import heapq
-from collections import deque
+from collections import deque, Counter
 from pila import Pila
 import random
 
@@ -122,13 +122,6 @@ def caminos_mas_rapidos(grafo, vertices, k):
         else:
             return []
 
-def obtener_entrantes(grafo, v):
-    res = set()
-    for w in grafo.obtener_vertices():
-        if v in grafo.adyacentes(w):
-            res.add(w)
-    return res
-
 #Comunidades: 
 # Obtener comunidades de al menos n integrantes usando labelPropagation
 
@@ -147,30 +140,38 @@ def obtener_comunidades(grafo, n):
 
     return filtro_comunidades
 
-def label_propagation(grafo):
+def label_propagation(grafo, max_iters=10):
+    # Inicializar etiquetas
     label = {v: v for v in grafo}
-    max_iter = 10
-    for _ in range(max_iter):
-        cambios = False
-        for v in label.keys():
-            entrantes = obtener_entrantes(grafo, v)
-            if not entrantes:
+    vertices = grafo.obtener_vertices()
+    entrantes = {v: obtener_entrantes(grafo, v) for v in vertices}
+    
+    for _ in range(max_iters):
+        cambios = 0
+
+        for v in vertices:
+            if not entrantes[v]:
                 continue
-            nueva_etiqueta = max_freq(label, entrantes)
+            nueva_etiqueta = max_freq(label, entrantes[v])
             if label[v] != nueva_etiqueta:
                 label[v] = nueva_etiqueta
-                cambios = True
-        if not cambios:
-            break  # Terminar si no hay cambios en las etiquetas
+                cambios += 1
+        
+        if cambios == 0:
+            break
 
     return label
 
 def max_freq(label, entrantes):
-    frecuencias = {}
-    for v in entrantes:
-        frecuencias[label[v]] = frecuencias.get(label[v], 0) + 1
+    contador = Counter(label[v] for v in entrantes)
+    return max(contador, key=contador.get)
 
-    return max(frecuencias, key=frecuencias.get)
+def obtener_entrantes(grafo, v):
+    res = set()
+    for w in grafo.obtener_vertices():
+        if v in grafo.adyacentes(w):
+            res.add(w)
+    return res
 
 #Ciclo más corto:
 
